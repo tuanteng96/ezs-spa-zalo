@@ -1,0 +1,26 @@
+{
+  "app": {
+    "title": "EZS Shop",
+    "headerColor": "#fafafa",
+    "textColor": "black",
+    "statusBarColor": "#ffffff",
+    "leftButton": "back",
+    "actionBarHidden": true,
+    "hideAndroidBottomNavigationBar": false,
+    "hideIOSSafeAreaBottom": true,
+    "selfControlLoading": false,
+    "statusBar": "transparent"
+  },
+  "debug": true,
+  "listCSS": [],
+  "listSyncJS": [],
+  "listAsyncJS": [],
+  "pages": [
+    "/user",
+    "/form",
+    "/dynamic-route",
+    "/about",
+    "/404"
+  ],
+  "template": {}
+}
