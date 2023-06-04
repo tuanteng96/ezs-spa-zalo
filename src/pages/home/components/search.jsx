@@ -3,10 +3,10 @@ import { Icon, Text } from "zmp-ui";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper";
 import clsx from "clsx";
-import { useLayout } from "../../../layout/LayoutProvider";
+// import { useLayout } from "../../../layout/LayoutProvider";
 
 const Search = ({ scrollTop }) => {
-  const { setActionStocksVisible } = useLayout()
+  // const { onOpenActionStocks } = useLayout()
   return (
     <div
       className={clsx("navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3", scrollTop > 50 && "shadow-3xl")}
@@ -41,7 +41,7 @@ const Search = ({ scrollTop }) => {
             </SwiperSlide>
           </Swiper>
         </div>
-        <div className="w-10 text-center" onClick={() => setActionStocksVisible(true)}>
+        <div className="w-10 text-center">
           <Icon className="text-muted !text-lg !h-auto" icon="zi-location-solid" />
         </div>
       </div>

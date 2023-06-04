@@ -16,7 +16,7 @@
   "listSyncJS": [],
   "listAsyncJS": [],
   "pages": [
-    "/user",
+    "/home",
     "/form",
     "/dynamic-route",
     "/about",

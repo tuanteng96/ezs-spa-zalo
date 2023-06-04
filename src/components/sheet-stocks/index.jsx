@@ -1,31 +1,56 @@
-import React, { useState } from "react"
-import { Sheet } from "zmp-ui"
+import { useQuery } from "@tanstack/react-query"
+import clsx from "clsx"
+import React, { useEffect, useState } from "react"
+import { Icon, Sheet } from "zmp-ui"
+import MoreAPI from "../../api/more.api"
 import { useLayout } from "../../layout/LayoutProvider"
 
 const SheetStocks = () => {
-  const { actionStocksVisible, setActionStocksVisible } = useLayout()
+  const { CurrentStocks, onSaveStocks, actionStocksVisible, onOpenActionStocks, onHideActionStocks } = useLayout()
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['ListStocks'],
+    queryFn: async () => {
+      const { data } = await MoreAPI.getStocks()
+      return data?.data?.all ? data?.data?.all.filter(x => x.ParentID !== 0) : []
+    }
+  })
+
+  useEffect(() => {
+    if (data && !CurrentStocks) {
+      if (data.length > 1) {
+        onOpenActionStocks()
+      }
+    }
+  }, [data, CurrentStocks])
+
   return (
     <Sheet
       className="bg-white"
       mask
       autoHeight
       visible={actionStocksVisible}
-      onClose={() => setActionStocksVisible(false)}
+      onClose={onHideActionStocks}
       swipeToClose
     >
       <div className="px-4 h-12 flex items-center justify-center">Chọn cơ sở gần bạn ?</div>
       <div>
-        <div className="px-10 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize">
-          <div className="truncate">Cser Hà Nội</div>
-        </div>
-        <div className="px-10 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize">
-          <div className="truncate">Cser Đà Nẵng</div>
-        </div>
-        <div className="px-10 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize">
-          <div className="truncate">Cser Hồ Chí Minh</div>
-        </div>
+        {
+          data && data.map((item, index) => (
+            <div className={clsx('px-12 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize cursor-pointer relative', item.ID === CurrentStocks?.ID && 'text-app')} key={index} onClick={() => onSaveStocks(item)}>
+              <div className="truncate">{item.Title}</div>
+              {
+                item.ID === CurrentStocks?.ID && (
+                  <div className="absolute right-4">
+                    <Icon icon="zi-check" />
+                  </div>
+                )
+              }
+            </div>
+          ))
+        }
       </div>
-      <div className="px-4 h-12 text-center border-t border-separator flex items-center justify-center text-danger font-semibold">Đóng</div>
+      <div className="px-4 h-12 text-center border-t border-separator flex items-center justify-center text-danger font-semibold" onClick={onHideActionStocks}>Đóng</div>
     </Sheet>
   )
 }

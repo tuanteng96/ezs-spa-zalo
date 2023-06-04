@@ -1,30 +1,30 @@
 import React from "react";
-import { Route } from "react-router-dom";
-import { App, ZMPRouter, AnimationRoutes, SnackbarProvider } from "zmp-ui";
-import HomePage from "../pages/home";
+import { App, ZMPRouter, SnackbarProvider } from "zmp-ui";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { LayoutProvider } from "../layout/LayoutProvider";
-import { MasterLayout } from "../layout/MasterLayout";
+import { Layout } from "../layout";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false
+    }
+  }
+})
 
 const MyApp = () => {
   return (
-    <LayoutProvider>
-      <App>
-        <SnackbarProvider>
-          <ZMPRouter>
-            <AnimationRoutes>
-              <Route
-                path="/"
-                element={
-                  <MasterLayout>
-                    <HomePage />
-                  </MasterLayout>
-                }
-              />
-            </AnimationRoutes>
-          </ZMPRouter>
-        </SnackbarProvider>
-      </App>
-    </LayoutProvider>
+    <QueryClientProvider client={queryClient}>
+      <LayoutProvider>
+        <App>
+          <SnackbarProvider>
+            <ZMPRouter>
+              <Layout />
+            </ZMPRouter>
+          </SnackbarProvider>
+        </App>
+      </LayoutProvider>
+    </QueryClientProvider>
   );
 };
 export default MyApp;
