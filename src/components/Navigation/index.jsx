@@ -51,7 +51,7 @@ export const Navigation = () => {
         key="/catalogue"
         icon={<Icon icon="zi-more-grid" />}
         activeIcon={<Icon icon="zi-more-grid-solid" />}
-        linkTo="/catalogue"
+        linkTo="/catalogue?TypeID=hot"
       />
       <BottomNavigation.Item
         key="timeline"

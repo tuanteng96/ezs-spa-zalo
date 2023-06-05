@@ -20,5 +20,8 @@ export const formatString = {
   fixedContentDomain: (content) => {
     if (!content) return "";
     return content.replace(/src=\"\//g, 'src="' + ProcessENV.URL + "/");
+  },
+  getIdParams: (url) => {
+    return url && url.substring(url.lastIndexOf('/') + 1);
   }
 }
