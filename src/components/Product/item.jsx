@@ -1,4 +1,4 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { toAbsolutePath } from "../../utils/assetPath";
 import { ImageLazy } from "../ImagesLazy";
 import { PriceSale } from "./price-sale";
@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 
 export const ProductItem = ({ product }) => {
   return (
-    <NavLink to="/" className="bg-white">
+    <NavLink to={`/catalogue/${product.id}`} className="bg-white">
       <div>
         <ImageLazy wrapperClassName="aspect-square !block" className="aspect-square object-cover" effect="blur" src={toAbsolutePath(product.photo)} />
       </div>

@@ -1,12 +1,30 @@
-import React, { Fragment } from "react";
+import React, { lazy, Suspense } from "react";
 import { Route } from "react-router";
-import { AnimationRoutes } from "zmp-ui";
+import { AnimationRoutes, Spinner } from "zmp-ui";
 import { Navigation } from "../components/Navigation"
 
-import CataloguePage from "../pages/catalogue";
+const CataloguePage = lazy(() => import('../pages/catalogue'))
+const CatalogueDetailPage = lazy(() => import('../pages/catalogue/detail'))
+
+const CartPage = lazy(() => import('../pages/cart'))
+
 import HomePage from "../pages/home";
-import NewsPage from "../pages/news";
-import NewsDetailPage from "../pages/news/detail";
+
+const NewsPage = lazy(() => import('../pages/news'))
+const NewsDetailPage = lazy(() => import('../pages/news/detail'))
+
+const SuspensedView = ({ children }) => {
+  return (
+    <Suspense
+      fallback={
+        <div className="fixed top-0 left-0 w-full h-full z-[10001] flex justify-center items-center bg-white">
+          <Spinner visible />
+        </div>
+      }
+    >
+      {children}
+    </Suspense>)
+}
 
 const Layout = () => {
   return (
@@ -21,19 +39,41 @@ const Layout = () => {
         <Route
           path="/catalogue"
           element={
-            <CataloguePage />
+            <SuspensedView>
+              <CataloguePage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/catalogue/:id"
+          element={
+            <SuspensedView>
+              <CatalogueDetailPage />
+            </SuspensedView>
           }
         />
         <Route
           path="/news"
           element={
-            <NewsPage />
+            <SuspensedView>
+              <NewsPage />
+            </SuspensedView>
           }
         />
         <Route
           path="/news/:id"
           element={
-            <NewsDetailPage />
+            <SuspensedView>
+              <NewsDetailPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <SuspensedView>
+              <CartPage />
+            </SuspensedView>
           }
         />
       </AnimationRoutes>

@@ -11,6 +11,7 @@ module.exports = {
         app: "#ee4d2d",
         muted: "#a1a5b7",
         danger: "#ee2624",
+        success: "#00bfa5",
         gray: {
           100: '#f9f9f9',
           200: '#F4F4F4',
@@ -41,6 +42,7 @@ module.exports = {
       },
       padding: {
         'safe': 'var(--zaui-safe-area-inset-top, 0px)',
+        'safe-bottom': 'var(--zaui-safe-area-inset-bottom, 0px)',
       }
     },
   }

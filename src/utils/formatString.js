@@ -22,6 +22,6 @@ export const formatString = {
     return content.replace(/src=\"\//g, 'src="' + ProcessENV.URL + "/");
   },
   getIdParams: (url) => {
-    return url && url.substring(url.lastIndexOf('/') + 1);
+    return url && url.substring(url.lastIndexOf('/') + 1).split("?")[0];
   }
 }

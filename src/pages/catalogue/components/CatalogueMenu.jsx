@@ -67,7 +67,7 @@ const CatalogueMenu = ({ queryConfig }) => {
     queryKey: ['CatalogueMenu'],
     queryFn: async () => {
       const { data } = await AdvAPI.getAdvName("APP.MUAHANG")
-      return data?.data?.map(x => ({ ...x, Id: formatString.getIdParams(x.Link) })) || []
+      return data?.data?.map(x => ({ ...x, Id: formatString.getIdParams(x.Link) })).sort((a, b) => a.Order - b.Order) || []
     },
     onSuccess: (data) => {
       if (data && data.length > 0 && !queryConfig.TypeID) {
@@ -113,6 +113,18 @@ const CatalogueMenu = ({ queryConfig }) => {
       scrollToItem(getItemById(queryConfig.TypeID), "smooth", "center", "nearest");
     }
   }
+
+  if (isLoading) return (
+    <div className="bg-white grid grid-cols-3 gap-4 px-3 animate-pulse">
+      {
+        Array(3).fill().map((_, index) => (
+          <div className="h-12 flex items-center" key={index}>
+            <div className="w-full h-3 bg-gray-200 rounded-full"></div>
+          </div>
+        ))
+      }
+    </div>
+  )
 
   return (
     <div className="bg-white" onMouseLeave={dragStop}>

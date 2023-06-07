@@ -4,6 +4,7 @@ import { useQueryParams } from "../../hook";
 import { CatalogueCate } from "./components/CatalogueCate";
 import { CatalogueMenu } from "./components/CatalogueMenu";
 import ListProducts from "./ListProducts";
+import ListServices from "./ListServices";
 
 const CataloguePage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ const CataloguePage = () => {
       </div>
       <CatalogueMenu queryConfig={queryConfig} />
       <CatalogueCate queryConfig={queryConfig} />
-      <ListProducts queryConfig={queryConfig} />
+      {
+        queryConfig?.TypeID === "795" ? <ListServices queryConfig={queryConfig} /> : <ListProducts queryConfig={queryConfig} />
+      }
     </Page>
   )
 }

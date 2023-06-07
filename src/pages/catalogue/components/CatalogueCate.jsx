@@ -10,10 +10,8 @@ import {
 import 'react-horizontal-scrolling-menu/dist/styles.css';
 import { createSearchParams } from "react-router-dom";
 import { useNavigate } from "zmp-ui";
-import AdvAPI from "../../../api/adv.api";
 import ProdsAPI from "../../../api/prods.api";
 import { useDrag } from "../../../hook";
-import { formatString } from "../../../utils/formatString";
 
 function onWheel(
   { getItemById, items, visibleItems, scrollToItem },
@@ -109,6 +107,18 @@ const CatalogueCate = ({ queryConfig }) => {
   if (queryConfig.TypeID !== "794" && queryConfig.TypeID !== "795") {
     return <></>
   }
+
+  if (isLoading) return (
+    <div className="bg-white border-t grid grid-cols-3 gap-4 px-3 animate-pulse">
+      {
+        Array(3).fill().map((_, index) => (
+          <div className="h-12 flex items-center" key={index}>
+            <div className="w-full h-3 bg-gray-200 rounded-full"></div>
+          </div>
+        ))
+      }
+    </div>
+  )
 
   return (
     <div className="bg-white border-t" onMouseLeave={dragStop}>

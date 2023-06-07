@@ -1,5 +1,4 @@
-import React from 'react'
-import { Navigation } from '../components/Navigation'
+import React from 'react';
 
 const MasterLayout = ({ children }) => {
   return (
