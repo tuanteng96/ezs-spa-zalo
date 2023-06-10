@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap");
 
 p {
   margin-bottom: 12px;
@@ -23,12 +23,16 @@ body {
 }
 
 .mask-wave {
-  --mask: radial-gradient(2.33px at 3.20px 50%,#000 99%,#0000 101%) 0 calc(50% - 4px)/51% 8px repeat-y,
-    radial-gradient(2.33px at -1.2px 50%,#0000 99%,#000 101%) 2px 50%/calc(51% - 2px) 8px repeat-y,
-  radial-gradient(2.33px at calc(100% - 3.20px) 50%,#000 99%,#0000 101%) 100% calc(50% - 4px)/51% 8px repeat-y,
-    radial-gradient(2.33px at calc(100% + 1.20px) 50%,#0000 99%,#000 101%) calc(100% - 2px) 50%/calc(51% - 2px) 8px repeat-y;
-    -webkit-mask: var(--mask);
-    mask: var(--mask);
+  --mask: radial-gradient(2.33px at 3.2px 50%, #000 99%, #0000 101%) 0
+      calc(50% - 4px) / 51% 8px repeat-y,
+    radial-gradient(2.33px at -1.2px 50%, #0000 99%, #000 101%) 2px 50% /
+      calc(51% - 2px) 8px repeat-y,
+    radial-gradient(2.33px at calc(100% - 3.2px) 50%, #000 99%, #0000 101%) 100%
+      calc(50% - 4px) / 51% 8px repeat-y,
+    radial-gradient(2.33px at calc(100% + 1.2px) 50%, #0000 99%, #000 101%)
+      calc(100% - 2px) 50% / calc(51% - 2px) 8px repeat-y;
+  -webkit-mask: var(--mask);
+  mask: var(--mask);
 }
 
 .swiper-pagination.swiper-pagination-horizontal {

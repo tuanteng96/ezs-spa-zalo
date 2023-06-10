@@ -1,6 +1,6 @@
 import React from "react";
 import { App, ZMPRouter, SnackbarProvider } from "zmp-ui";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LayoutProvider } from "../layout/LayoutProvider";
 import { Layout } from "../layout";
 import { CartProvider } from "../layout/CartProvider";
@@ -8,10 +8,10 @@ import { CartProvider } from "../layout/CartProvider";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false
-    }
-  }
-})
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const MyApp = () => {
   return (

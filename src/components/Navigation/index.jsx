@@ -1,26 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 import { openChat } from "zmp-sdk";
-import { BottomNavigation, Box, Icon, Text } from "zmp-ui"
+import { BottomNavigation, Box, Icon, Text } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
 import { ProcessENV } from "../../utils/process";
 import { CartIcon } from "./CartIcon";
 
-export const NO_BOTTOM_NAVIGATION_PAGES = ['news', '/catalogue/', '/cart'];
+export const NO_BOTTOM_NAVIGATION_PAGES = ["news", "/catalogue/", "/cart"];
 
 export const Navigation = () => {
-  const { Orders } = useCart()
+  const { Orders } = useCart();
   const { pathname } = useLocation();
   const [active, setActive] = useState("/");
   const keyboardVisible = useVirtualKeyboardVisible();
 
   useEffect(() => {
-    setActive(pathname)
-  }, [pathname])
+    setActive(pathname);
+  }, [pathname]);
 
   const noBottomNav = useMemo(() => {
-    return NO_BOTTOM_NAVIGATION_PAGES.some(x => pathname.indexOf(x) > -1);
+    return NO_BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1);
   }, [pathname]);
 
   const OrdersCount = useMemo(() => {
@@ -29,10 +29,10 @@ export const Navigation = () => {
 
   const openChatScreen = () => {
     openChat({
-      type: 'oa',
-      id: ProcessENV.ZaloOaID
+      type: "oa",
+      id: ProcessENV.ZaloOaID,
     });
-  }
+  };
 
   if (noBottomNav || keyboardVisible) {
     return <></>;
@@ -44,8 +44,9 @@ export const Navigation = () => {
       fixed
       activeKey={active}
       onChange={(key) => {
-        if (key !== 'contact') setActive(key)
-      }}>
+        if (key !== "contact") setActive(key);
+      }}
+    >
       <BottomNavigation.Item
         key="/"
         label="Trang chủ"
@@ -82,5 +83,5 @@ export const Navigation = () => {
         linkTo="/user"
       />
     </BottomNavigation>
-  )
-}
+  );
+};

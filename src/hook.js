@@ -20,9 +20,9 @@ export function useVirtualKeyboardVisible() {
 }
 
 export function useQueryParams() {
-  const [searchParams] = useSearchParams()
-  const searchParamsObject = Object.fromEntries([...searchParams])
-  return searchParamsObject
+  const [searchParams] = useSearchParams();
+  const searchParamsObject = Object.fromEntries([...searchParams]);
+  return searchParamsObject;
 }
 
 export function useDrag() {
@@ -66,6 +66,6 @@ export function useDrag() {
     dragMove,
     dragging,
     position,
-    setDragging
+    setDragging,
   };
 }

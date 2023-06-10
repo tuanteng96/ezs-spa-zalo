@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Sheet, Text } from "zmp-ui";
 
-export const ServicePicker = ({
-  children,
-  service
-}) => {
+export const ServicePicker = ({ children, service }) => {
   const [visible, setVisible] = useState(false);
   return (
     <>
@@ -21,8 +18,13 @@ export const ServicePicker = ({
                 {service.root.Title}
               </Text.Title>
               <div>
-                <div className="leading-6" dangerouslySetInnerHTML={{ __html: service.root.Desc }} />
-                <div dangerouslySetInnerHTML={{ __html: service.root.Detail }} />
+                <div
+                  className="leading-6"
+                  dangerouslySetInnerHTML={{ __html: service.root.Desc }}
+                />
+                <div
+                  dangerouslySetInnerHTML={{ __html: service.root.Detail }}
+                />
               </div>
             </div>
           )}
@@ -30,5 +32,5 @@ export const ServicePicker = ({
         document.body
       )}
     </>
-  )
-}
+  );
+};

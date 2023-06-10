@@ -20,7 +20,7 @@ export const QuantityPicker = ({ value, onChange }) => {
         className="!m-0 !rounded-none !border-t-0 !border-b-0 text-center !h-9 !border-[#e9ebed]"
         type="text"
         placeholder="SL"
-        onChange={evt => onChange(evt.target.value)}
+        onChange={(evt) => onChange(evt.target.value)}
         value={value}
       />
       <Button

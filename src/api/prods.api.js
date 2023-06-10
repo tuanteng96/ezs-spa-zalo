@@ -1,10 +1,34 @@
 import http from "../utils/http";
 
 const ProdsAPI = {
-  search: ({ key = '', cates = '', pi = 1, ps = 10, token = '', stockid = 0, status = '' }) => http.get(`/app/index.aspx?cmd=search_prods&token=${token}&key=${key}&cates=${cates}&pi=${pi}&ps=${ps}&stockid=${stockid}&status=${status}`),
-  listServiceRoot: ({ cates = '', token = '', stockid = '', pi = 1, ps = 10 }) => http.get(`/api/v3/app2?get=sv&cid=${cates}&token=${token}&stockid=${stockid}&takes=Detail,Desc&pi=${pi}&ps=${ps}&ignorepublic=1`),
-  cateParentID: ({ id = '', token = '', stockid = '' }) => http.get(`/app/index.aspx?cmd=cate_parentid&id=${id}&stockid=${stockid}&token=${token}`),
-  prodId: ({ id, token = '' }) => http.get(`/api/v3/prod?cmd=getid&id=${id}&mid=&token=${token}`)
-}
+  search: ({
+    key = "",
+    cates = "",
+    pi = 1,
+    ps = 10,
+    token = "",
+    stockid = 0,
+    status = "",
+  }) =>
+    http.get(
+      `/app/index.aspx?cmd=search_prods&token=${token}&key=${key}&cates=${cates}&pi=${pi}&ps=${ps}&stockid=${stockid}&status=${status}`
+    ),
+  listServiceRoot: ({
+    cates = "",
+    token = "",
+    stockid = "",
+    pi = 1,
+    ps = 10,
+  }) =>
+    http.get(
+      `/api/v3/app2?get=sv&cid=${cates}&token=${token}&stockid=${stockid}&takes=Detail,Desc&pi=${pi}&ps=${ps}&ignorepublic=1`
+    ),
+  cateParentID: ({ id = "", token = "", stockid = "" }) =>
+    http.get(
+      `/app/index.aspx?cmd=cate_parentid&id=${id}&stockid=${stockid}&token=${token}`
+    ),
+  prodId: ({ id, token = "" }) =>
+    http.get(`/api/v3/prod?cmd=getid&id=${id}&mid=&token=${token}`),
+};
 
-export default ProdsAPI
+export default ProdsAPI;

@@ -16,7 +16,12 @@ const HomePage = () => {
   };
 
   return (
-    <Page className="page !pt-0" hideScrollbar onScroll={handleScroll} resetScroll={false}>
+    <Page
+      className="page !pt-0"
+      hideScrollbar
+      onScroll={handleScroll}
+      resetScroll={false}
+    >
       <Search scrollTop={scrollTop} />
       <Banner />
       <Category />

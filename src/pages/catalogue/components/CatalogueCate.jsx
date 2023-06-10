@@ -1,21 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React, { useContext, useState } from "react"
+import React, { useContext, useState } from "react";
 import {
   ScrollMenu,
   VisibilityContext,
   getItemsPos,
-  slidingWindow
+  slidingWindow,
 } from "react-horizontal-scrolling-menu";
-import 'react-horizontal-scrolling-menu/dist/styles.css';
+import "react-horizontal-scrolling-menu/dist/styles.css";
 import { createSearchParams } from "react-router-dom";
 import { useNavigate } from "zmp-ui";
 import ProdsAPI from "../../../api/prods.api";
 import { useDrag } from "../../../hook";
 
-function onWheel(
-  { getItemById, items, visibleItems, scrollToItem },
-  ev) {
+function onWheel({ getItemById, items, visibleItems, scrollToItem }, ev) {
   const isThouchpad = Math.abs(ev.deltaX) !== 0 || Math.abs(ev.deltaY) < 15;
 
   if (isThouchpad) {
@@ -41,84 +39,93 @@ function onWheel(
   }
 }
 
-const Item = ({
-  itemId,
-  selected,
-  onClick,
-  item
-}) => {
+const Item = ({ itemId, selected, onClick, item }) => {
   const visibility = useContext(VisibilityContext);
   const visible = visibility.isItemVisible(itemId);
 
   return (
-    <div
-      onClick={() => onClick(visibility)}
-      className="px-3"
-    >
-      <div className={clsx("whitespace-nowrap h-12 flex items-center", selected && "text-app")}>{item.Title}</div>
+    <div onClick={() => onClick(visibility)} className="px-3">
+      <div
+        className={clsx(
+          "whitespace-nowrap h-12 flex items-center",
+          selected && "text-app"
+        )}
+      >
+        {item.Title}
+      </div>
     </div>
-  )
-}
+  );
+};
 
 const CatalogueCate = ({ queryConfig }) => {
   const navigate = useNavigate();
   const { data, isLoading } = useQuery({
-    queryKey: ['CatalogueCate', queryConfig.TypeID],
+    queryKey: ["CatalogueCate", queryConfig.TypeID],
     queryFn: async () => {
-      const { data } = await ProdsAPI.cateParentID({ id: queryConfig.TypeID })
-      return data ? [{ Title: "Tất cả", Id: "", ID: "" }, ...data?.map(x => ({ ...x, Id: x.ID }))] : []
+      const { data } = await ProdsAPI.cateParentID({ id: queryConfig.TypeID });
+      return data
+        ? [
+            { Title: "Tất cả", Id: "", ID: "" },
+            ...data?.map((x) => ({ ...x, Id: x.ID })),
+          ]
+        : [];
     },
-    enabled: queryConfig.TypeID === "794" || queryConfig.TypeID === "795"
-  })
+    enabled: queryConfig.TypeID === "794" || queryConfig.TypeID === "795",
+  });
   const { dragStart, dragStop, dragMove, dragging } = useDrag();
 
-  const handleDrag = ({ scrollContainer }) => (
-    ev
-  ) =>
-    dragMove(ev, (posDiff) => {
-      if (scrollContainer.current) {
-        scrollContainer.current.scrollLeft += posDiff;
-      }
-    });
+  const handleDrag =
+    ({ scrollContainer }) =>
+    (ev) =>
+      dragMove(ev, (posDiff) => {
+        if (scrollContainer.current) {
+          scrollContainer.current.scrollLeft += posDiff;
+        }
+      });
 
-  const handleItemClick = (itemId) => ({
-    getItemById,
-    scrollToItem
-  }) => {
-    if (dragging) {
-      return false;
-    }
-    scrollToItem(getItemById(itemId), "smooth", "center", "nearest");
-    navigate({
-      pathname: '/catalogue',
-      search: createSearchParams({
-        TypeID: queryConfig.TypeID,
-        CateID: itemId,
-      }).toString()
-    })
-  };
+  const handleItemClick =
+    (itemId) =>
+    ({ getItemById, scrollToItem }) => {
+      if (dragging) {
+        return false;
+      }
+      scrollToItem(getItemById(itemId), "smooth", "center", "nearest");
+      navigate({
+        pathname: "/catalogue",
+        search: createSearchParams({
+          TypeID: queryConfig.TypeID,
+          CateID: itemId,
+        }).toString(),
+      });
+    };
 
   const onInit = ({ getItemById, scrollToItem }) => {
     if (queryConfig.TypeID) {
-      scrollToItem(getItemById(queryConfig.TypeID), "smooth", "center", "nearest");
+      scrollToItem(
+        getItemById(queryConfig.TypeID),
+        "smooth",
+        "center",
+        "nearest"
+      );
     }
-  }
+  };
 
   if (queryConfig.TypeID !== "794" && queryConfig.TypeID !== "795") {
-    return <></>
+    return <></>;
   }
 
-  if (isLoading) return (
-    <div className="bg-white border-t grid grid-cols-3 gap-4 px-3 animate-pulse">
-      {
-        Array(3).fill().map((_, index) => (
-          <div className="h-12 flex items-center" key={index}>
-            <div className="w-full h-3 bg-gray-200 rounded-full"></div>
-          </div>
-        ))
-      }
-    </div>
-  )
+  if (isLoading)
+    return (
+      <div className="bg-white border-t grid grid-cols-3 gap-4 px-3 animate-pulse">
+        {Array(3)
+          .fill()
+          .map((_, index) => (
+            <div className="h-12 flex items-center" key={index}>
+              <div className="w-full h-3 bg-gray-200 rounded-full"></div>
+            </div>
+          ))}
+      </div>
+    );
 
   return (
     <div className="bg-white border-t" onMouseLeave={dragStop}>
@@ -127,30 +134,33 @@ const CatalogueCate = ({ queryConfig }) => {
         onInit={onInit}
         onWheel={onWheel}
         onMouseDown={() => dragStart}
-        onMouseUp={({
-          getItemById,
-          scrollToItem,
-          visibleItems
-        }) => () => {
-          dragStop();
-          const { center } = getItemsPos(visibleItems);
-          scrollToItem(getItemById(center), "smooth", "center");
-        }}
+        onMouseUp={({ getItemById, scrollToItem, visibleItems }) =>
+          () => {
+            dragStop();
+            const { center } = getItemsPos(visibleItems);
+            scrollToItem(getItemById(center), "smooth", "center");
+          }}
         options={{ throttle: 0 }}
         onMouseMove={handleDrag}
       >
-        {data && data.map((item, index) => (
-          <Item
-            itemID={item.Id}
-            key={item.Id}
-            onClick={handleItemClick(item.Id)}
-            selected={item.Id === (queryConfig.CateID ? Number(queryConfig.CateID) : queryConfig.CateID)}
-            item={item}
-          />
-        ))}
+        {data &&
+          data.map((item, index) => (
+            <Item
+              itemID={item.Id}
+              key={item.Id}
+              onClick={handleItemClick(item.Id)}
+              selected={
+                item.Id ===
+                (queryConfig.CateID
+                  ? Number(queryConfig.CateID)
+                  : queryConfig.CateID)
+              }
+              item={item}
+            />
+          ))}
       </ScrollMenu>
     </div>
-  )
-}
+  );
+};
 
-export { CatalogueCate }
+export { CatalogueCate };

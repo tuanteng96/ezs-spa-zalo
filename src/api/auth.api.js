@@ -1,7 +1,8 @@
-import http from "../utils/http"
+import http from "../utils/http";
 
 const AuthAPI = {
-  authen: ({ ZaloID = '', token = '' }) => http.get(`/app/index.aspx?cmd=authen&token=${token}&zaloid=${ZaloID}`)
-}
+  authen: ({ ZaloID = "", token = "" }) =>
+    http.get(`/app/index.aspx?cmd=authen&token=${token}&zaloid=${ZaloID}`),
+};
 
-export default AuthAPI
+export default AuthAPI;

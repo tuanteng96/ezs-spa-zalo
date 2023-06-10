@@ -1,7 +1,7 @@
-import http from "../utils/http"
+import http from "../utils/http";
 
 const MoreAPI = {
-  getStocks: () => http.get('api/v3/web?cmd=getStock')
-}
+  getStocks: () => http.get("api/v3/web?cmd=getStock"),
+};
 
-export default MoreAPI
+export default MoreAPI;

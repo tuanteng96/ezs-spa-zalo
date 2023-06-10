@@ -12,13 +12,9 @@ import { useLayout } from "../../../layout/LayoutProvider";
 import clsx from "clsx";
 import { showToast } from "zmp-sdk";
 
-export const PickerOrder = ({
-  children,
-  item,
-  buttonText
-}) => {
+export const PickerOrder = ({ children, item, buttonText }) => {
   const navigate = useNavigate();
-  const { AccessToken, Auth } = useLayout()
+  const { AccessToken, Auth } = useLayout();
   const [visible, setVisible] = useState(false);
   const { handleSubmit, control } = useFormContext();
 
@@ -27,38 +23,39 @@ export const PickerOrder = ({
     name: "adds",
   });
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const addCartMutation = useMutation({
-    mutationFn: body => CartAPI.list(body)
-  })
+    mutationFn: (body) => CartAPI.list(body),
+  });
 
   const onSubmit = (values) => {
     if (!AccessToken && !Auth) {
       //Fech token end auth
-    }
-    else {
-      addCartMutation.mutate({ token: AccessToken, body: values }, {
-        onSuccess: () => {
-          queryClient
-            .invalidateQueries({ queryKey: ['ListsCart'] })
-            .then(() => {
-              if (buttonText === "Mua ngay") {
-                navigate("/cart")
-              }
-              else {
-                showToast({
-                  message: "Đã thêm vào giỏ",
-                  success: (data) => {
-                    navigate(-1)
-                  }
-                });
-              }
-            })
+    } else {
+      addCartMutation.mutate(
+        { token: AccessToken, body: values },
+        {
+          onSuccess: () => {
+            queryClient
+              .invalidateQueries({ queryKey: ["ListsCart"] })
+              .then(() => {
+                if (buttonText === "Mua ngay") {
+                  navigate("/cart");
+                } else {
+                  showToast({
+                    message: "Đã thêm vào giỏ",
+                    success: (data) => {
+                      navigate(-1);
+                    },
+                  });
+                }
+              });
+          },
         }
-      })
+      );
     }
-  }
+  };
 
   return (
     <>
@@ -68,49 +65,60 @@ export const PickerOrder = ({
       })}
       {createPortal(
         <Sheet visible={visible} onClose={() => setVisible(false)} autoHeight>
-          {
-            item && (
-              <div className="h-full">
-                <div className="flex items-end px-3 pt-3 pb-4 border-b">
-                  <div className="w-32">
-                    <ImageLazy wrapperClassName="aspect-square !block" className="aspect-square object-cover w-full" effect="blur" src={toAbsolutePath(item?.Thumbnail)} />
-                  </div>
-                  <div className="pl-3">
-                    <div className="font-semibold mb-2">{item?.Title}</div>
-                    <PriceSaleDetail product={item} />
-                  </div>
+          {item && (
+            <div className="h-full">
+              <div className="flex items-end px-3 pt-3 pb-4 border-b">
+                <div className="w-32">
+                  <ImageLazy
+                    wrapperClassName="aspect-square !block"
+                    className="aspect-square object-cover w-full"
+                    effect="blur"
+                    src={toAbsolutePath(item?.Thumbnail)}
+                  />
                 </div>
-                <div className="p-3 flex justify-between items-center">
-                  <div>Số lượng</div>
-                  <div className="w-36">
-                    {
-                      fields && fields.map((item, index) => (
-                        <Controller
-                          key={item.id}
-                          name={`adds[${index}].Qty`}
-                          control={control}
-                          render={({
-                            field: { ref, ...field }
-                          }) => (
-                            <QuantityPicker value={field.value} onChange={(val) => field.onChange(val)} />
-                          )}
-                        />
-                      ))
-                    }
-
-                  </div>
-                </div>
-                <div className="p-3">
-                  <Button className={clsx('!bg-app', addCartMutation.isLoading && "!bg-opacity-70")} fullWidth size="large" onClick={handleSubmit(onSubmit)} loading={addCartMutation.isLoading}>
-                    {buttonText}
-                  </Button>
+                <div className="pl-3">
+                  <div className="font-semibold mb-2">{item?.Title}</div>
+                  <PriceSaleDetail product={item} />
                 </div>
               </div>
-            )
-          }
+              <div className="p-3 flex justify-between items-center">
+                <div>Số lượng</div>
+                <div className="w-36">
+                  {fields &&
+                    fields.map((item, index) => (
+                      <Controller
+                        key={item.id}
+                        name={`adds[${index}].Qty`}
+                        control={control}
+                        render={({ field: { ref, ...field } }) => (
+                          <QuantityPicker
+                            value={field.value}
+                            onChange={(val) => field.onChange(val)}
+                          />
+                        )}
+                      />
+                    ))}
+                </div>
+              </div>
+              <div className="p-3">
+                <Button
+                  className={clsx(
+                    "!bg-app",
+                    addCartMutation.isLoading && "!bg-opacity-70"
+                  )}
+                  fullWidth
+                  size="large"
+                  onClick={handleSubmit(onSubmit)}
+                  loading={addCartMutation.isLoading}
+                >
+                  {buttonText}
+                </Button>
+              </div>
+            </div>
+          )}
         </Sheet>,
         document.body
       )}
     </>
-  )
-}
+  );
+};

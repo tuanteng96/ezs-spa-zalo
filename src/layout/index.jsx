@@ -1,17 +1,17 @@
 import React, { lazy, Suspense } from "react";
 import { Route } from "react-router";
 import { AnimationRoutes, Spinner } from "zmp-ui";
-import { Navigation } from "../components/Navigation"
+import { Navigation } from "../components/Navigation";
 
-const CataloguePage = lazy(() => import('../pages/catalogue'))
-const CatalogueDetailPage = lazy(() => import('../pages/catalogue/detail'))
+const CataloguePage = lazy(() => import("../pages/catalogue"));
+const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
 
-const CartPage = lazy(() => import('../pages/cart'))
+const CartPage = lazy(() => import("../pages/cart"));
 
 import HomePage from "../pages/home";
 
-const NewsPage = lazy(() => import('../pages/news'))
-const NewsDetailPage = lazy(() => import('../pages/news/detail'))
+const NewsPage = lazy(() => import("../pages/news"));
+const NewsDetailPage = lazy(() => import("../pages/news/detail"));
 
 const SuspensedView = ({ children }) => {
   return (
@@ -23,19 +23,15 @@ const SuspensedView = ({ children }) => {
       }
     >
       {children}
-    </Suspense>)
-}
+    </Suspense>
+  );
+};
 
 const Layout = () => {
   return (
     <>
       <AnimationRoutes>
-        <Route
-          path="/"
-          element={
-            <HomePage />
-          }
-        />
+        <Route path="/" element={<HomePage />} />
         <Route
           path="/catalogue"
           element={
@@ -79,7 +75,7 @@ const Layout = () => {
       </AnimationRoutes>
       <Navigation />
     </>
-  )
-}
+  );
+};
 
-export { Layout }
+export { Layout };
