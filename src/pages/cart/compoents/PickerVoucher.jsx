@@ -9,17 +9,100 @@ import CartAPI from "../../../api/cart.api";
 import GiftSVG from "../../../static/icons/gift.svg";
 import { useCart } from "../../../layout/CartProvider";
 import { formatString } from "../../../utils/formatString";
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
 
-export const PickerVoucher = ({ children, item }) => {
+const schemaVoucher = yup
+  .object({
+    vcode: yup
+      .string()
+      .required(' ')
+  })
+  .required()
+
+const SearchVoucher = ({ OrderID, onChange }) => {
+  const { AccessToken } = useLayout();
+  const { handleSubmit, control, setError, reset } = useForm({
+    defaultValues: {
+      vcode: ""
+    },
+    resolver: yupResolver(schemaVoucher)
+  });
+
+  const addCartMutation = useMutation({
+    mutationFn: (body) => CartAPI.preCheckVoucher(body),
+  });
+
+  const onSubmit = event => {
+    if (event) {
+      if (typeof event.preventDefault === 'function') {
+        event.preventDefault()
+      }
+      if (typeof event.stopPropagation === 'function') {
+        event.stopPropagation()
+      }
+    }
+
+    return handleSubmit(({ vcode }) => {
+      addCartMutation.mutate(
+        { token: AccessToken, orderid: OrderID, vcode: vcode ? vcode.toUpperCase() : '' },
+        {
+          onSuccess: ({ data }) => {
+            if (!data?.error) {
+              reset()
+              onChange(vcode.toUpperCase())
+            }
+            else {
+              setError('vcode', {
+                type: 'Server',
+                message: data.error
+              })
+            }
+          }
+        }
+      )
+    })(event)
+  }
+
+  return (
+    <div className="px-3 pb-3">
+      <div className="flex">
+        <Controller
+          name="vcode"
+          control={control}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <div className="flex-1">
+              <Input
+                className="!rounded-sm !m-0"
+                type="text"
+                placeholder="Nhập mã voucher của bạn"
+                value={field.value}
+                onChange={field.onChange}
+              />
+              {fieldState?.invalid && <div className="text-danger mt-1 text-sm">{fieldState?.error?.message}</div>}
+            </div>
+          )} />
+        <Button
+          className="!rounded-sm !ml-2 !bg-app disabled:!text-white disabled:opacity-60"
+          onClick={onSubmit}
+        >
+          Áp dụng
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+export const PickerVoucher = ({ children }) => {
   const { AccessToken, Auth } = useLayout();
   const { Orders } = useCart();
   const [visible, setVisible] = useState(false);
-  const { handleSubmit, control, watch } = useForm({
+  const { handleSubmit, control } = useForm({
     defaultValues: {
       order: {
         ID: 0,
         SenderID: Auth?.ID,
-        VCode: "",
+        VCode: Orders?.order?.VCode,
       },
       addProps: "ProdTitle",
       deleteds: [],
@@ -35,7 +118,9 @@ export const PickerVoucher = ({ children, item }) => {
 
   const onSubmit = (values) => {
     voucherCartMutation.mutate(
-      { token: AccessToken, body: values },
+      {
+        token: AccessToken, body: values
+      },
       {
         onSuccess: () => {
           queryClient
@@ -78,19 +163,17 @@ export const PickerVoucher = ({ children, item }) => {
                 </div>
                 <div className="font-semibold">Chọn Voucher</div>
               </div>
-              <div className="px-3 pb-3 flex">
-                <Input
-                  className="!rounded-sm !m-0"
-                  type="text"
-                  placeholder="Nhập mã voucher của bạn"
-                />
-                <Button
-                  className="!rounded-sm !ml-2 !bg-app disabled:!text-white disabled:opacity-60"
-                  disabled={true}
-                >
-                  Áp dụng
-                </Button>
-              </div>
+              <Controller
+                name="order.VCode"
+                control={control}
+                render={({ field: { ref, ...field }, fieldState }) => (
+                  <SearchVoucher
+                    OrderID={Orders?.order?.ID}
+                    onChange={(vcode) => {
+                      field.onChange(vcode)
+                      handleSubmit(onSubmit)()
+                    }} />
+                )} />
             </div>
             <div className="border-t border-4"></div>
             <div className="grow overflow-auto no-scrollbar p-3">
@@ -159,8 +242,8 @@ export const PickerVoucher = ({ children, item }) => {
                               {item.EndDate === null
                                 ? "Hạn sử dụng vĩnh viễn"
                                 : `Hạn sử dụng còn ${checkDateDiff(
-                                    item.EndDate
-                                  )} ngày`}
+                                  item.EndDate
+                                )} ngày`}
                             </div>
                           </div>
                           <div className="pr-4 flex items-center">

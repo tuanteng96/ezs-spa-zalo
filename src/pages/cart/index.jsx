@@ -24,8 +24,8 @@ const CartPage = () => {
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>
           <Text.Title className="text-app">
-            Giỏ hàng{" "}
-            {Orders?.items?.length > 0 && <>({Orders?.items?.length})</>}
+            Giỏ hàng
+            <span className="pl-1">{Orders?.items?.length > 0 && <>({Orders?.items?.length})</>}</span>
           </Text.Title>
         </div>
       </div>
@@ -131,7 +131,7 @@ const CartPage = () => {
           </div>
         )}
       </div>
-      <PickerVoucher vouchers={Orders?.vouchers}>
+      <PickerVoucher>
         {({ open }) => (
           <div className="shadow-3xl bg-white border-b px-3 h-12 flex justify-between items-center">
             <div className="flex items-center text-sm">
@@ -193,7 +193,7 @@ const CartPage = () => {
             <div onClick={open}>
               {Orders.order.VoucherCode ? (
                 <div className="flex items-center">
-                  <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave">
+                  <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave uppercase">
                     {Orders.order.VoucherCode}
                   </div>
                   <Icon className="text-muted" icon="zi-chevron-right" />
