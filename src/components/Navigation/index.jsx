@@ -11,16 +11,15 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "news",
   "/catalogue/",
   "/cart",
-  '/checkin',
-  '/user/customer-diary',
+  "/checkin",
+  "/user/customer-diary",
   "/user/customer-orders",
   "/user/customer-voucher",
-  '/user/customer-wallet-card'
+  "/user/customer-wallet-card",
+  "/user/customer-service",
 ];
 
-export const HEADER_LIGHT = [
-  '/user'
-]
+export const HEADER_LIGHT = ["/user"];
 
 export const Navigation = () => {
   const { Orders } = useCart();
@@ -40,8 +39,7 @@ export const Navigation = () => {
     configAppView({
       headerTextColor: lightHeader ? "white" : "black",
     });
-
-  }, [lightHeader])
+  }, [lightHeader]);
 
   const noBottomNav = useMemo(() => {
     return NO_BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1);

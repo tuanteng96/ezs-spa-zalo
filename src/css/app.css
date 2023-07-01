@@ -1,11 +1,16 @@
-@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Be+Vietnam+Pro:wght@100;200;300;400;500;600;700;800&display=swap");
 
-p:not(:last-child) {
-  margin-bottom: 12px;
+html,
+body {
+  font-family: "Be Vietnam Pro", sans-serif;
 }
 
 body {
   background: #f5f5fa;
+}
+
+p:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 .page {
@@ -72,7 +77,11 @@ body {
 
 .tab-scrollbar .zaui-tabs-tabbar:not(.zaui-tabs-tabbar-scrollable) {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tab-scrollbar.zaui-cols-3 .zaui-tabs-tabbar:not(.zaui-tabs-tabbar-scrollable) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .tab-scrollbar .zaui-tabs-tabbar .zaui-tabs-tabbar-item {
