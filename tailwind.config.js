@@ -12,6 +12,8 @@ module.exports = {
         muted: "#a1a5b7",
         danger: "#ee2624",
         success: "#00bfa5",
+        warning: '#FFA800',
+        primary: '#3699FF',
         gray: {
           100: "#f9f9f9",
           200: "#F4F4F4",
@@ -26,6 +28,8 @@ module.exports = {
       },
       boxShadow: {
         "3xl": "0px 10px 30px 0px rgba(82,63,105,.05)",
+        "4xl": "0 0 40px 0 rgba(82,63,105,.1)",
+        "5xl": "0 3px 20px rgba(0,0,0,.04)"
       },
       fontFamily: {
         cherry: ["Cherry Bomb One"],
@@ -42,9 +46,15 @@ module.exports = {
           "linear-gradient(-180deg,transparent 5%,rgba(0,0,0,.4) 51%,rgba(0,0,0,.6))",
       },
       padding: {
-        safe: "var(--zaui-safe-area-inset-top, 0px)",
+        "safe": "var(--zaui-safe-area-inset-top, 0px)",
         "safe-bottom": "var(--zaui-safe-area-inset-bottom, 0px)",
       },
     },
   },
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('child', '& > *');
+      addVariant('child-hover', '& > *:hover');
+    }
+  ]
 };

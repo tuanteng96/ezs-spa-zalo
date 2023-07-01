@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Button, Sheet, useNavigate } from "zmp-ui";
+import { Button, Sheet, useNavigate, useSnackbar } from "zmp-ui";
 import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 import { ImageLazy } from "../../../components/ImagesLazy";
 import { toAbsolutePath } from "../../../utils/assetPath";
@@ -10,13 +10,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CartAPI from "../../../api/cart.api";
 import { useLayout } from "../../../layout/LayoutProvider";
 import clsx from "clsx";
-import { showToast } from "zmp-sdk";
 
 export const PickerOrder = ({ children, item, buttonText }) => {
   const navigate = useNavigate();
   const { AccessToken, Auth } = useLayout();
   const [visible, setVisible] = useState(false);
   const { handleSubmit, control } = useFormContext();
+  const { openSnackbar } = useSnackbar();
 
   const { fields } = useFieldArray({
     control,
@@ -43,12 +43,12 @@ export const PickerOrder = ({ children, item, buttonText }) => {
                 if (buttonText === "Mua ngay") {
                   navigate("/cart");
                 } else {
-                  showToast({
-                    message: "Đã thêm vào giỏ",
-                    success: (data) => {
-                      navigate(-1);
-                    },
+                  openSnackbar({
+                    text: "Đã thêm vào giỏ !",
+                    type: "success",
+                    duration: 2000,
                   });
+                  navigate(-1);
                 }
               });
           },

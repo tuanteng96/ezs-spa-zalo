@@ -12,6 +12,8 @@ import "zmp-ui/zaui.css";
 
 import "./css/app.css";
 
+import 'moment/dist/locale/vi';
+
 // Import App Component
 import App from "./components/app";
 import appConfig from "../app-config.json";

@@ -7,6 +7,13 @@ class Http {
     this.accessToken = "";
     this.accessStock = "";
 
+    // getStorage({
+    //   keys: ["AccessToken"],
+    //   success: (data) => {
+    //     const { AccessToken } = data;
+    //     this.accessToken = AccessToken;
+    //   }
+    // });
     this.instance = axios.create({
       baseURL: ProcessENV.URL,
       timeout: 50000,

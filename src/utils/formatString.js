@@ -26,4 +26,8 @@ export const formatString = {
   getIdParams: (url) => {
     return url && url.substring(url.lastIndexOf("/") + 1).split("?")[0];
   },
+  getNameBank: (item) => {
+    let names = item.ngan_hang.split("-");
+    return names[names.length - 1];
+  }
 };

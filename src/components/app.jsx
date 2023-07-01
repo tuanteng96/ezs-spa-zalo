@@ -16,8 +16,8 @@ const queryClient = new QueryClient({
 const MyApp = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <LayoutProvider>
-        <App>
+      <App>
+        <LayoutProvider>
           <CartProvider>
             <SnackbarProvider>
               <ZMPRouter>
@@ -25,8 +25,8 @@ const MyApp = () => {
               </ZMPRouter>
             </SnackbarProvider>
           </CartProvider>
-        </App>
-      </LayoutProvider>
+        </LayoutProvider>
+      </App>
     </QueryClientProvider>
   );
 };

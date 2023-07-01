@@ -1,13 +1,26 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
-import { openChat } from "zmp-sdk";
+import { configAppView, openChat } from "zmp-sdk";
 import { BottomNavigation, Box, Icon, Text } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
 import { ProcessENV } from "../../utils/process";
 import { CartIcon } from "./CartIcon";
 
-export const NO_BOTTOM_NAVIGATION_PAGES = ["news", "/catalogue/", "/cart"];
+export const NO_BOTTOM_NAVIGATION_PAGES = [
+  "news",
+  "/catalogue/",
+  "/cart",
+  '/checkin',
+  '/user/customer-diary',
+  "/user/customer-orders",
+  "/user/customer-voucher",
+  '/user/customer-wallet-card'
+];
+
+export const HEADER_LIGHT = [
+  '/user'
+]
 
 export const Navigation = () => {
   const { Orders } = useCart();
@@ -18,6 +31,17 @@ export const Navigation = () => {
   useEffect(() => {
     setActive(pathname);
   }, [pathname]);
+
+  const lightHeader = useMemo(() => {
+    return HEADER_LIGHT.includes(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
+    configAppView({
+      headerTextColor: lightHeader ? "white" : "black",
+    });
+
+  }, [lightHeader])
 
   const noBottomNav = useMemo(() => {
     return NO_BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1);
@@ -76,7 +100,7 @@ export const Navigation = () => {
         onClick={openChatScreen}
       />
       <BottomNavigation.Item
-        key="me"
+        key="/user"
         label="Tài khoản"
         icon={<Icon icon="zi-user" />}
         activeIcon={<Icon icon="zi-user-solid" />}

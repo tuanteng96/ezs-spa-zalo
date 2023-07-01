@@ -1,17 +1,75 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import React from "react";
+import React, { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
-import { Button, Icon, Page, Text, useNavigate } from "zmp-ui";
+import { Button, Icon, Input, Page, Text, useNavigate, useSnackbar } from "zmp-ui";
+import CartAPI from "../../api/cart.api";
 import { useCart } from "../../layout/CartProvider";
 import { useLayout } from "../../layout/LayoutProvider";
 import { formatString } from "../../utils/formatString";
 import { ItemCart } from "./compoents/ItemCart";
+import { PickerSender } from "./compoents/PickerSender";
 import { PickerVoucher } from "./compoents/PickerVoucher";
 
 const CartPage = () => {
-  const { Auth } = useLayout();
+  const { Auth, CurrentStocks, onOpenActionStocks, AccessToken } = useLayout();
   const { Orders } = useCart();
   const navigate = useNavigate();
+  const { openSnackbar } = useSnackbar();
+
+  const queryClient = useQueryClient();
+
+  const { handleSubmit, control, setValue } = useForm({
+    defaultValues: {
+      SenderOther: "",
+      SenderAddress: ""
+    }
+  });
+
+  useEffect(() => {
+    setValue('SenderAddress', Auth?.HomeAddress || '')
+  }, [Auth])
+
+  const submitCartMutation = useMutation({
+    mutationFn: (body) => CartAPI.list(body),
+  });
+
+  const onSubmit = ({ SenderOther, SenderAddress }) => {
+    if (!CurrentStocks) {
+      onOpenActionStocks()
+    }
+    else {
+      const dataPost = {
+        "order": {
+          "ID": Orders?.order?.ID,
+          "SenderID": Auth?.ID,
+          "Status": "user_sent",
+          "SenderOther": SenderOther,
+          "SenderAddress": SenderAddress
+        },
+        "forceStockID": CurrentStocks?.ID,
+        "cmd": "GUI_DON_HANG"
+      }
+      submitCartMutation.mutate(
+        { token: AccessToken, body: dataPost },
+        {
+          onSuccess: () => {
+            queryClient
+              .invalidateQueries({ queryKey: ["ListsCart"] })
+              .then(() => {
+                openSnackbar({
+                  text: "Đặt hàng thành công !",
+                  type: "success",
+                  duration: 1000,
+                });
+                navigate("/");
+              });
+          },
+        }
+      );
+    }
+  }
 
   return (
     <Page className="page !h-full !overflow-hidden flex flex-col" hideScrollbar>
@@ -25,54 +83,83 @@ const CartPage = () => {
           </div>
           <Text.Title className="text-app">
             Giỏ hàng
-            <span className="pl-1">{Orders?.items?.length > 0 && <>({Orders?.items?.length})</>}</span>
+            <span className="pl-1">
+              {Orders?.items?.length > 0 && <>({Orders?.items?.length})</>}
+            </span>
           </Text.Title>
         </div>
       </div>
-      <div className="grow">
-        <div className="bg-white mt-1 px-3 pt-3 pb-4 flex relative">
-          <div className="text-app">
-            <svg className="w-4 h-4 fill-danger" viewBox="0 0 12 16">
-              <g stroke="none" fillRule="evenodd">
-                <path d="M7.63636364,5.86666667 C7.63636364,4.98293333 6.90327273,4.26666667 6,4.26666667 C5.09618182,4.26666667 4.36363636,4.98293333 4.36363636,5.86666667 C4.36363636,6.7504 5.09618182,7.46666667 6,7.46666667 C6.90327273,7.46666667 7.63636364,6.7504 7.63636364,5.86666667 M3.27272727,5.86666667 C3.27272727,4.39466667 4.49345455,3.2 6,3.2 C7.506,3.2 8.72727273,4.39466667 8.72727273,5.86666667 C8.72727273,7.33973333 7.506,8.53333333 6,8.53333333 C4.49345455,8.53333333 3.27272727,7.33973333 3.27272727,5.86666667 M6,1.06613333 C3.28854545,1.06613333 1.09090909,3.30453333 1.09090909,6.06666667 C1.09090909,8.8272 6,14.3989333 6,14.3989333 C6,14.3989333 10.9085455,8.8272 10.9085455,6.06666667 C10.9085455,3.30453333 8.71090909,1.06613333 6,1.06613333 M6.912,14.9328 L9.27272727,14.9328 C9.57381818,14.9328 9.81818182,15.1717333 9.81818182,15.4661333 C9.81818182,15.7610667 9.57381818,15.9994667 9.27272727,15.9994667 L2.72727273,15.9994667 C2.42563636,15.9994667 2.18181818,15.7610667 2.18181818,15.4661333 C2.18181818,15.1717333 2.42563636,14.9328 2.72727273,14.9328 L5.08745455,14.9328 C3.40909091,12.9114667 0,8.49813333 0,5.99946667 C0,2.68533333 2.68636364,0 6,0 C9.31363636,0 12,2.68533333 12,5.99946667 C12,8.49813333 8.58981818,12.9114667 6.912,14.9328" />
-              </g>
-            </svg>
-          </div>
-          <div className="flex-1 pl-3">
-            <div className="mb-1.5">Địa chỉ nhận hàng</div>
-            <div className="flex items-center">
-              {Auth?.FullName}
-              <span className="px-2 text-muted">|</span>
-              {Auth?.MobilePhone}
-            </div>
-            <div className="leading-5">
-              Số 22 ngõ 42, Phường Láng Hạ, Quận Đống Đa, Hà Nội
-            </div>
-          </div>
-          <div className="flex items-center text-muted">
-            <Icon size={30} icon="zi-chevron-right" />
-          </div>
-          <div
-            className="w-full h-1 absolute bottom-0 left-0"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(45deg,#6fa6d6,#6fa6d6 16px,transparent 0,transparent 21px,#f18d9b 0,#f18d9b 37px,transparent 0,transparent 42px)",
-            }}
-          ></div>
-        </div>
+      <div className="grow overflow-auto no-scrollbar">
+        <Controller
+          name="SenderAddress"
+          control={control}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <PickerSender value={field.value} onChange={(value) => field.onChange(value)}>
+              {({ open }) => (
+                <div className="bg-white mt-1 px-3 pt-3 pb-4 flex relative" onClick={open}>
+                  <div className="text-app">
+                    <svg className="w-4 h-4 fill-danger" viewBox="0 0 12 16">
+                      <g stroke="none" fillRule="evenodd">
+                        <path d="M7.63636364,5.86666667 C7.63636364,4.98293333 6.90327273,4.26666667 6,4.26666667 C5.09618182,4.26666667 4.36363636,4.98293333 4.36363636,5.86666667 C4.36363636,6.7504 5.09618182,7.46666667 6,7.46666667 C6.90327273,7.46666667 7.63636364,6.7504 7.63636364,5.86666667 M3.27272727,5.86666667 C3.27272727,4.39466667 4.49345455,3.2 6,3.2 C7.506,3.2 8.72727273,4.39466667 8.72727273,5.86666667 C8.72727273,7.33973333 7.506,8.53333333 6,8.53333333 C4.49345455,8.53333333 3.27272727,7.33973333 3.27272727,5.86666667 M6,1.06613333 C3.28854545,1.06613333 1.09090909,3.30453333 1.09090909,6.06666667 C1.09090909,8.8272 6,14.3989333 6,14.3989333 C6,14.3989333 10.9085455,8.8272 10.9085455,6.06666667 C10.9085455,3.30453333 8.71090909,1.06613333 6,1.06613333 M6.912,14.9328 L9.27272727,14.9328 C9.57381818,14.9328 9.81818182,15.1717333 9.81818182,15.4661333 C9.81818182,15.7610667 9.57381818,15.9994667 9.27272727,15.9994667 L2.72727273,15.9994667 C2.42563636,15.9994667 2.18181818,15.7610667 2.18181818,15.4661333 C2.18181818,15.1717333 2.42563636,14.9328 2.72727273,14.9328 L5.08745455,14.9328 C3.40909091,12.9114667 0,8.49813333 0,5.99946667 C0,2.68533333 2.68636364,0 6,0 C9.31363636,0 12,2.68533333 12,5.99946667 C12,8.49813333 8.58981818,12.9114667 6.912,14.9328" />
+                      </g>
+                    </svg>
+                  </div>
+                  <div className="flex-1 pl-3">
+                    <div className="mb-1.5">Địa chỉ nhận hàng</div>
+                    <div className="flex items-center">
+                      {Auth?.FullName}
+                      <span className="px-2 text-muted">|</span>
+                      {Auth?.MobilePhone}
+                    </div>
+                    <div className={clsx("leading-5 mt-px", !field.value && 'text-danger')}>
+                      {field.value ? field.value : 'Thêm địa chỉ của bạn'}
+                    </div>
+                  </div>
+                  <div className="flex items-center text-muted">
+                    <Icon size={30} icon="zi-chevron-right" />
+                  </div>
+                  <div
+                    className="w-full h-1 absolute bottom-0 left-0"
+                    style={{
+                      backgroundImage:
+                        "repeating-linear-gradient(45deg,#6fa6d6,#6fa6d6 16px,transparent 0,transparent 21px,#f18d9b 0,#f18d9b 37px,transparent 0,transparent 42px)",
+                    }}
+                  ></div>
+                </div>
+              )}
+            </PickerSender>
+          )}
+        />
         {Orders?.items && Orders?.items.length > 0 ? (
-          <div className="bg-white mt-2">
-            <div className="p-3 font-semibold">Thông tin đơn hàng</div>
-            {Orders?.items.map((item, index) => (
-              <ItemCart item={item} key={index} />
-            ))}
-            <div className="px-3 h-12 border-t flex justify-between items-center">
-              <div className="font-medium text-sm">Thành tiền</div>
-              <div className="font-bold text-app">
-                {formatString.formatVND(Orders?.order?.ToPay)}
+          <>
+            <div className="bg-white mt-2">
+              <div className="p-3 font-semibold">Thông tin đơn hàng</div>
+              {Orders?.items.map((item, index) => (
+                <ItemCart item={item} key={index} />
+              ))}
+              <div className="px-3 h-12 border-t flex justify-between items-center">
+                <div className="font-medium text-sm">Thành tiền</div>
+                <div className="font-bold text-app">
+                  {formatString.formatVND(Orders?.order?.ToPay)}
+                </div>
               </div>
             </div>
-          </div>
+            <div className="p-3 bg-white my-1.5">
+              <Controller
+                name="SenderOther"
+                control={control}
+                render={({ field: { ref, ...field }, fieldState }) => (
+                  <Input.TextArea
+                    label="Ghi chú đơn hàng"
+                    placeholder="Nhập ghi chú"
+                    showCount
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+          </>
         ) : (
           <div className="flex justify-center items-center flex-col py-10">
             <svg
@@ -133,7 +220,7 @@ const CartPage = () => {
       </div>
       <PickerVoucher>
         {({ open }) => (
-          <div className="shadow-3xl bg-white border-b px-3 h-12 flex justify-between items-center">
+          <div className="shadow-4xl bg-white border-b px-3 h-14 flex justify-between items-center z-10">
             <div className="flex items-center text-sm">
               <svg
                 className="fill-danger w-6 h-6 mr-1"
@@ -190,7 +277,18 @@ const CartPage = () => {
               </svg>
               Voucher
             </div>
-            <div onClick={open}>
+            <div onClick={() => {
+              if (Orders?.items && Orders?.items.length > 0) {
+                open()
+              }
+              else {
+                openSnackbar({
+                  text: `"Hổng" có gì trong giỏ hết. Mua sắm ngay!`,
+                  type: "warning",
+                  duration: 1000,
+                });
+              }
+            }}>
               {Orders.order.VoucherCode ? (
                 <div className="flex items-center">
                   <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave uppercase">
@@ -208,7 +306,7 @@ const CartPage = () => {
           </div>
         )}
       </PickerVoucher>
-      <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white">
+      <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white z-20">
         <div className="grid grid-cols-2 h-12">
           <div className="flex flex-col justify-center px-3">
             <div className="text-xs">Tổng thanh toán</div>
@@ -225,6 +323,8 @@ const CartPage = () => {
               fullWidth
               size="large"
               disabled={!Orders?.items || Orders?.items.length === 0}
+              loading={submitCartMutation.isLoading}
+              onClick={handleSubmit(onSubmit)}
             >
               Đặt mua
             </Button>

@@ -7,6 +7,12 @@ const CataloguePage = lazy(() => import("../pages/catalogue"));
 const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
 
 const CartPage = lazy(() => import("../pages/cart"));
+const CheckInPage = lazy(() => import("../pages/checkin"));
+const UserPage = lazy(() => import("../pages/user"));
+const CustomerDiary = lazy(() => import("../pages/user/CustomerDiary"));
+const CustomerOrders = lazy(() => import("../pages/user/CustomerOrders"));
+const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
+const CustomerWalletCard = lazy(() => import("../pages/user/CustomerWalletCard"));
 
 import HomePage from "../pages/home";
 
@@ -72,6 +78,56 @@ const Layout = () => {
             </SuspensedView>
           }
         />
+        <Route
+          path="/user"
+          element={
+            <SuspensedView>
+              <UserPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/user/customer-diary"
+          element={
+            <SuspensedView>
+              <CustomerDiary />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/user/customer-orders"
+          element={
+            <SuspensedView>
+              <CustomerOrders />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/user/customer-voucher"
+          element={
+            <SuspensedView>
+              <CustomerVoucher />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/user/customer-wallet-card"
+          element={
+            <SuspensedView>
+              <CustomerWalletCard />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/checkin"
+          element={
+            <SuspensedView>
+              <CheckInPage />
+            </SuspensedView>
+          }
+        />
+
+
       </AnimationRoutes>
       <Navigation />
     </>

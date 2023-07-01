@@ -4,7 +4,6 @@ import { Button, Sheet } from "zmp-ui";
 import { Controller, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
-import { showToast } from "zmp-sdk";
 import { useLayout } from "../../../layout/LayoutProvider";
 import CartAPI from "../../../api/cart.api";
 import { ImageLazy } from "../../../components/ImagesLazy";
