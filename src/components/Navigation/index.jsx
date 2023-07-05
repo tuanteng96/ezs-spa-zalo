@@ -17,6 +17,7 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-voucher",
   "/user/customer-wallet-card",
   "/user/customer-service",
+  "/booking"
 ];
 
 export const HEADER_LIGHT = ["/user"];
@@ -46,15 +47,8 @@ export const Navigation = () => {
   }, [pathname]);
 
   const OrdersCount = useMemo(() => {
-    return Orders?.items.length || 0;
+    return Orders && Orders?.items?.length || 0;
   }, [Orders]);
-
-  const openChatScreen = () => {
-    openChat({
-      type: "oa",
-      id: ProcessENV.ZaloOaID,
-    });
-  };
 
   if (noBottomNav || keyboardVisible) {
     return <></>;
@@ -84,18 +78,18 @@ export const Navigation = () => {
         linkTo="/catalogue?TypeID=hot"
       />
       <BottomNavigation.Item
+        label="Đặt lịch"
+        key="booking"
+        icon={<Icon className="animate-tada" icon="zi-calendar" />}
+        activeIcon={<Icon icon="zi-calendar-solid" />}
+        linkTo="/booking"
+      />
+      <BottomNavigation.Item
         key="/cart"
         label="Giỏ hàng"
         icon={<CartIcon OrdersCount={OrdersCount} />}
         activeIcon={<CartIcon OrdersCount={OrdersCount} />}
         linkTo="/cart"
-      />
-      <BottomNavigation.Item
-        label="Nhắn tin"
-        key="contact"
-        icon={<Icon icon="zi-chat" />}
-        activeIcon={<Icon icon="zi-chat" />}
-        onClick={openChatScreen}
       />
       <BottomNavigation.Item
         key="/user"

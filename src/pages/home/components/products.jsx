@@ -4,6 +4,7 @@ import { Icon } from "zmp-ui";
 import ProdsAPI from "../../../api/prods.api";
 import { ProductItem } from "../../../components/Product/item";
 import { useLayout } from "../../../layout/LayoutProvider";
+import { NavLink } from "react-router-dom";
 
 const Products = () => {
   const { CurrentStocks } = useLayout();
@@ -22,10 +23,10 @@ const Products = () => {
 
   return (
     <>
-      <div className="p-3 uppercase font-semibold bg-white text-app flex justify-between items-center">
+      <NavLink to="/catalogue?TypeID=794" className="p-3 uppercase font-semibold bg-white text-app flex justify-between items-center">
         Sản phẩm
         <Icon className="text-muted" icon="zi-chevron-right" />
-      </div>
+      </NavLink>
       <div className="p-1.5 grid grid-cols-2 gap-1.5">
         {isLoading &&
           Array(4)

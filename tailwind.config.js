@@ -14,6 +14,7 @@ module.exports = {
         success: "#00bfa5",
         warning: '#FFA800',
         primary: '#3699FF',
+        light: '#f5f5f9',
         gray: {
           100: "#f9f9f9",
           200: "#F4F4F4",
@@ -49,6 +50,40 @@ module.exports = {
         "safe": "var(--zaui-safe-area-inset-top, 0px)",
         "safe-bottom": "var(--zaui-safe-area-inset-bottom, 0px)",
       },
+      animation: {
+        tada: 'tada 1s ease-in-out infinite',
+        bounceRight: 'bounceRight 2s infinite'
+      },
+      keyframes: {
+        tada: {
+          '0%': {
+            transform: "scale(1)"
+          },
+          '10%,20%': {
+            transform: "scale(.9) rotate(-8deg)"
+          },
+          '30%, 50%, 70%': {
+            transform: 'scale(1.2) rotate(8deg)'
+          },
+          '40%, 60%': {
+            'transform': 'scale(1.2) rotate(-8deg)'
+          },
+          '100%, 80%': {
+            transform: 'scale(1) rotate(0)'
+          }
+        },
+        bounceRight: {
+          "0%, 20%, 50%, 80%, 100%": {
+            "transform": "translateX(0)"
+          },
+          "40%": {
+            "transform": "translateX(-10px)"
+          },
+          "60%": {
+            "transform": "translateX(-10px)"
+          }
+        }
+      }
     },
   },
   plugins: [

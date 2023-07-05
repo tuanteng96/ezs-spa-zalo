@@ -31,6 +31,7 @@ const LayoutProvider = ({ children }) => {
   const [splashScreen, setSplashScreen] = useState(true);
   const [AccessToken, setAccessToken] = useState(null);
   const [Auth, setAuth] = useState(null);
+  const [Stocks, setStocks] = useState([])
   const [CurrentStocks, setCurrentStocks] = useState(null);
   const [actionStocksVisible, setActionStocksVisible] = useState(false);
 
@@ -234,6 +235,8 @@ const LayoutProvider = ({ children }) => {
         onOpenActionStocks,
         onHideActionStocks,
         onSaveStocks,
+        Stocks,
+        setStocks
       }}
     >
       {children}

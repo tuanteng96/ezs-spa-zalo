@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React from "react";
 import { toAbsolutePath } from "../../utils/assetPath";
 import { ImageLazy } from "../ImagesLazy";
 import { PriceSale } from "./price-sale";

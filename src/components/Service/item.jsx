@@ -20,15 +20,19 @@ export const ServiceItem = ({ service }) => {
               />
             </div>
             <div className="p-3">
-              <Text.Title className="text-app mb-2">
+              <Text.Title className="text-app">
                 {service.root.Title}
               </Text.Title>
-              <div className="line-clamp-3 h-[60px] text-sm">
-                <div dangerouslySetInnerHTML={{ __html: service.root.Desc }} />
-                <div
-                  dangerouslySetInnerHTML={{ __html: service.root.Detail }}
-                />
-              </div>
+              {
+                service.root.Desc || service.root.Detail && (
+                  <div className="line-clamp-3 h-[60px] text-sm mt-2">
+                    <div dangerouslySetInnerHTML={{ __html: service.root.Desc }} />
+                    <div
+                      dangerouslySetInnerHTML={{ __html: service.root.Detail }}
+                    />
+                  </div>
+                )
+              }
             </div>
           </div>
           <div>

@@ -37,7 +37,7 @@ const CheckInPage = () => {
           <div className="flex justify-center mb-4">
             <ImageLazy
               wrapperClassName="w-24 aspect-square !block"
-              className="w-24 aspect-square object-cover w-full"
+              className="w-24 aspect-square object-cover"
               effect="blur"
               src={Avatar}
             />

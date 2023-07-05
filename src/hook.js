@@ -25,6 +25,22 @@ export function useQueryParams() {
   return searchParamsObject;
 }
 
+export const useDebounce = (value, milliSeconds) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, milliSeconds);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, milliSeconds]);
+
+  return debouncedValue;
+};
+
 export function useDrag() {
   const [clicked, setClicked] = React.useState(false);
   const [dragging, setDragging] = React.useState(false);

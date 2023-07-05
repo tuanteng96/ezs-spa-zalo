@@ -17,6 +17,8 @@ const CustomerWalletCard = lazy(() =>
 );
 const CustomerService = lazy(() => import("../pages/user/CustomerService"));
 
+const BookingPage = lazy(() => import("../pages/booking"));
+
 import HomePage from "../pages/home";
 
 const NewsPage = lazy(() => import("../pages/news"));
@@ -134,6 +136,14 @@ const Layout = () => {
           element={
             <SuspensedView>
               <CheckInPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/booking"
+          element={
+            <SuspensedView>
+              <BookingPage />
             </SuspensedView>
           }
         />

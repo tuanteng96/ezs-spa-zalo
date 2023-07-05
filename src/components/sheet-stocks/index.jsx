@@ -12,9 +12,11 @@ const SheetStocks = () => {
     actionStocksVisible,
     onOpenActionStocks,
     onHideActionStocks,
+    setStocks,
+    Stocks
   } = useLayout();
 
-  const { data, isLoading } = useQuery({
+  useQuery({
     queryKey: ["ListStocks"],
     queryFn: async () => {
       const { data } = await MoreAPI.getStocks();
@@ -22,15 +24,21 @@ const SheetStocks = () => {
         ? data?.data?.all.filter((x) => x.ParentID !== 0)
         : [];
     },
+    onSuccess: (data) => {
+      setStocks(data)
+    }
   });
 
   useEffect(() => {
-    if (data && !CurrentStocks) {
-      if (data.length > 1) {
+    if (Stocks && !CurrentStocks) {
+      if (Stocks.length > 1) {
         onOpenActionStocks();
       }
+      else {
+        onSaveStocks(Stocks[0])
+      }
     }
-  }, [data, CurrentStocks]);
+  }, [Stocks, CurrentStocks]);
 
   return (
     <Sheet
@@ -45,8 +53,8 @@ const SheetStocks = () => {
         Chọn cơ sở gần bạn ?
       </div>
       <div>
-        {data &&
-          data.map((item, index) => (
+        {Stocks &&
+          Stocks.map((item, index) => (
             <div
               className={clsx(
                 "px-12 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize cursor-pointer relative",
