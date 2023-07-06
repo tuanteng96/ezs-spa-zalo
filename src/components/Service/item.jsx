@@ -20,16 +20,14 @@ export const ServiceItem = ({ service }) => {
               />
             </div>
             <div className="p-3">
-              <Text.Title className="text-app">
+              <div className="text-app text-[16px] font-semibold leading-6">
                 {service.root.Title}
-              </Text.Title>
+              </div>
               {
-                service.root.Desc || service.root.Detail && (
+                (service.root.Desc || service.root.Detail) && (
                   <div className="line-clamp-3 h-[60px] text-sm mt-2">
                     <div dangerouslySetInnerHTML={{ __html: service.root.Desc }} />
-                    <div
-                      dangerouslySetInnerHTML={{ __html: service.root.Detail }}
-                    />
+                    <div dangerouslySetInnerHTML={{ __html: service.root.Detail }} />
                   </div>
                 )
               }

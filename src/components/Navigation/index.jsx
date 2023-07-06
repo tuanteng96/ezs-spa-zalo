@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router";
-import { configAppView, openChat } from "zmp-sdk";
-import { BottomNavigation, Box, Icon, Text } from "zmp-ui";
+import { Navigate, useLocation } from "react-router";
+import { configAppView } from "zmp-sdk";
+import { BottomNavigation, Icon, useNavigate } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
-import { ProcessENV } from "../../utils/process";
 import { CartIcon } from "./CartIcon";
 
 export const NO_BOTTOM_NAVIGATION_PAGES = [
@@ -17,16 +16,23 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-voucher",
   "/user/customer-wallet-card",
   "/user/customer-service",
+  "/user/customer-booking-manage",
   "/booking"
+];
+
+export const BOTTOM_NAVIGATION_SEARCH_PAGE = [
+  "Type=Finish"
 ];
 
 export const HEADER_LIGHT = ["/user"];
 
 export const Navigation = () => {
   const { Orders } = useCart();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [active, setActive] = useState("/");
   const keyboardVisible = useVirtualKeyboardVisible();
+
+  let navigate = useNavigate()
 
   useEffect(() => {
     setActive(pathname);
@@ -43,12 +49,21 @@ export const Navigation = () => {
   }, [lightHeader]);
 
   const noBottomNav = useMemo(() => {
-    return NO_BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1);
-  }, [pathname]);
+    return NO_BOTTOM_NAVIGATION_PAGES.some((x) => pathname.indexOf(x) > -1) && BOTTOM_NAVIGATION_SEARCH_PAGE.some((x) => search.indexOf(x) === -1);
+  }, [pathname, search]);
 
   const OrdersCount = useMemo(() => {
     return Orders && Orders?.items?.length || 0;
   }, [Orders]);
+
+  const onChangePath = ({ Key, Path }) => {
+    if (Key === pathname) {
+      navigate(0)
+    }
+    else {
+      navigate(Path ? Path : Key)
+    }
+  }
 
   if (noBottomNav || keyboardVisible) {
     return <></>;
@@ -68,35 +83,51 @@ export const Navigation = () => {
         label="Trang chủ"
         icon={<Icon icon="zi-home" />}
         activeIcon={<Icon icon="zi-home" />}
-        linkTo="/"
+        //linkTo="/"
+        onClick={() => onChangePath({
+          Key: "/",
+        })}
       />
       <BottomNavigation.Item
         label="Danh mục"
         key="/catalogue"
         icon={<Icon icon="zi-more-grid" />}
         activeIcon={<Icon icon="zi-more-grid-solid" />}
-        linkTo="/catalogue?TypeID=hot"
+        //linkTo="/catalogue?TypeID=hot"
+        onClick={() => onChangePath({
+          Key: "/catalogue",
+          Path: "/catalogue?TypeID=hot"
+        })}
       />
       <BottomNavigation.Item
         label="Đặt lịch"
-        key="booking"
+        key="/booking"
         icon={<Icon className="animate-tada" icon="zi-calendar" />}
-        activeIcon={<Icon icon="zi-calendar-solid" />}
-        linkTo="/booking"
+        activeIcon={<Icon className="animate-tada" icon="zi-calendar-solid" />}
+        onClick={() => onChangePath({
+          Key: "/booking",
+        })}
+      //linkTo="/booking"
       />
       <BottomNavigation.Item
         key="/cart"
         label="Giỏ hàng"
         icon={<CartIcon OrdersCount={OrdersCount} />}
         activeIcon={<CartIcon OrdersCount={OrdersCount} />}
-        linkTo="/cart"
+        //linkTo="/cart"
+        onClick={() => onChangePath({
+          Key: "/cart",
+        })}
       />
       <BottomNavigation.Item
         key="/user"
         label="Tài khoản"
         icon={<Icon icon="zi-user" />}
         activeIcon={<Icon icon="zi-user-solid" />}
-        linkTo="/user"
+        //linkTo="/user"
+        onClick={() => onChangePath({
+          Key: "/user",
+        })}
       />
     </BottomNavigation>
   );

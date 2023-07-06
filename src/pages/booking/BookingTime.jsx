@@ -54,7 +54,7 @@ const BookingTime = () => {
 
   const myRefDate = useRef()
 
-  const { openSnackbar, setDownloadProgress, closeSnackbar } = useSnackbar();
+  const { openSnackbar } = useSnackbar();
 
   useEffect(() => {
 
@@ -329,7 +329,7 @@ const BookingTime = () => {
       </div>
       <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white">
         <div className="h-12">
-          <button onClick={onNext} type="submit" className="w-full h-full text-white uppercase font-semibold text-sm bg-app">Chọn dịch vụ</button>
+          <button onClick={onNext} type="button" className="w-full h-full text-white uppercase font-semibold text-sm bg-app">Chọn dịch vụ</button>
         </div>
       </div>
     </div >

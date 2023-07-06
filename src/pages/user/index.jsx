@@ -39,7 +39,7 @@ const UserPage = () => {
             <Icon icon="zi-chevron-right" />
           </div>
         </NavLink>
-        <NavLink to="/" className="flex px-3 py-4 items-center border-b">
+        <NavLink to="/user/customer-booking-manage" className="flex px-3 py-4 items-center border-b">
           <div className="text-app">
             <Icon icon="zi-calendar" />
           </div>

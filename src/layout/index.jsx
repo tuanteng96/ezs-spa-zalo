@@ -16,6 +16,7 @@ const CustomerWalletCard = lazy(() =>
   import("../pages/user/CustomerWalletCard")
 );
 const CustomerService = lazy(() => import("../pages/user/CustomerService"));
+const CustomerBookingManage = lazy(() => import("../pages/user/CustomerBookingManage"));
 
 const BookingPage = lazy(() => import("../pages/booking"));
 
@@ -41,7 +42,7 @@ const SuspensedView = ({ children }) => {
 const Layout = () => {
   return (
     <>
-      <AnimationRoutes>
+      <AnimationRoutes forceRefresh>
         <Route path="/" element={<HomePage />} />
         <Route
           path="/catalogue"
@@ -128,6 +129,14 @@ const Layout = () => {
           element={
             <SuspensedView>
               <CustomerWalletCard />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/user/customer-booking-manage"
+          element={
+            <SuspensedView>
+              <CustomerBookingManage />
             </SuspensedView>
           }
         />

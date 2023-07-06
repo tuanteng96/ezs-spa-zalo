@@ -11,15 +11,15 @@ export const ServicePicker = ({ children, service }) => {
         close: () => setVisible(false),
       })}
       {createPortal(
-        <Sheet height="80%" visible={visible} onClose={() => setVisible(false)}>
+        <Sheet height="85%" visible={visible} onClose={() => setVisible(false)}>
           {service && (
             <div className="h-full flex flex-col relative overflow-auto no-scrollbar p-3">
-              <Text.Title size="large" className="flex mb-2 text-app">
+              <Text.Title className="flex mb-2 text-app !leading-7">
                 {service.root.Title}
               </Text.Title>
               <div>
                 <div
-                  className="leading-6"
+                  className="leading-6 text-justify"
                   dangerouslySetInnerHTML={{ __html: service.root.Desc }}
                 />
                 <div

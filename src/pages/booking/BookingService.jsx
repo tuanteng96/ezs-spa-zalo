@@ -72,8 +72,8 @@ const BookingServiceItem = ({ item }) => {
   )
 }
 
-const BookingService = () => {
-  const { CurrentStocks } = useLayout();
+const BookingService = ({ addBookingMutation }) => {
+  const { CurrentStocks, Auth } = useLayout();
   const [Key, setKey] = useState('')
 
   const elRoot = useRef();
@@ -86,7 +86,7 @@ const BookingService = () => {
       const newQueryParams = {
         Pi: pageParam,
         Ps: 15,
-        MemberID: '',
+        MemberID: Auth?.ID,
         stockid: CurrentStocks?.ID || 0,
         Key: searchQuery
       };
@@ -189,7 +189,7 @@ const BookingService = () => {
       </div>
       <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white">
         <div className="h-12">
-          <PickerBookingConfim>
+          <PickerBookingConfim addBookingMutation={addBookingMutation}>
             {
               ({ open }) => (
                 <button onClick={open} type="button" className="w-full h-full text-white uppercase font-semibold text-sm bg-app">Xác nhận đặt lịch</button>

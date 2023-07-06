@@ -1,6 +1,11 @@
 import { ProcessENV } from "./process";
 
 export const formatString = {
+  htmlDecode: (content = '') => {
+    let e = document.createElement('div');
+    e.innerHTML = content;
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
+  },
   formatVND: (price) => {
     if (!price || price === 0) {
       return "0";
