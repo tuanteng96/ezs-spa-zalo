@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from 'react'
-import { Page, useNavigate } from 'zmp-ui'
-import Barcode from 'react-barcode'
-import { useLayout } from '../../layout/LayoutProvider';
-import { useQuery } from '@tanstack/react-query';
-import AuthAPI from '../../api/auth.api';
-import { getUserInfo } from 'zmp-sdk';
-import { ImageLazy } from '../../components/ImagesLazy';
+import React, { useEffect, useState } from "react";
+import { Page, useNavigate } from "zmp-ui";
+import Barcode from "react-barcode";
+import { useLayout } from "../../layout/LayoutProvider";
+import { useQuery } from "@tanstack/react-query";
+import AuthAPI from "../../api/auth.api";
+import { getUserInfo } from "zmp-sdk";
+import { ImageLazy } from "../../components/ImagesLazy";
 
 const CheckInPage = () => {
   const navigate = useNavigate();
   const { Auth } = useLayout();
-  const [Avatar, setAvatar] = useState("")
+  const [Avatar, setAvatar] = useState("");
 
   useEffect(() => {
     getUserInfo({
       success: (data) => {
         const { userInfo } = data;
-        setAvatar(userInfo.avatar)
-      }
+        setAvatar(userInfo.avatar);
+      },
     });
-  }, [])
+  }, []);
 
   const { data, isLoading } = useQuery({
     queryKey: ["Barcode", Auth?.ID],
@@ -48,25 +48,22 @@ const CheckInPage = () => {
           </div>
         </div>
         <div className="flex justify-center flex-col items-center">
-          {
-            isLoading && (
-              <div className="bg-white w-[266px] mb-2 p-2 flex animate-pulse h-[142px]"></div>
-            )
-          }
-          {
-            !isLoading && (
-              <Barcode className="w-full" value={data?.code} />
-            )
-          }
+          {isLoading && (
+            <div className="bg-white w-[266px] mb-2 p-2 flex animate-pulse h-[142px]"></div>
+          )}
+          {!isLoading && <Barcode className="w-full" value={data?.code} />}
         </div>
         <div className="h-1/4 flex justify-center items-end">
-          <div className="bg-white h-12 flex items-center justify-center w-28 rounded-3xl shadow-3xl cursor-pointer font-semibold" onClick={() => navigate(-1)}>
+          <div
+            className="bg-white h-12 flex items-center justify-center w-28 rounded-3xl shadow-3xl cursor-pointer font-semibold"
+            onClick={() => navigate(-1)}
+          >
             Đóng
           </div>
         </div>
       </div>
     </Page>
-  )
-}
+  );
+};
 
 export default CheckInPage;

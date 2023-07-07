@@ -3,7 +3,15 @@ import clsx from "clsx";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
-import { Button, Icon, Input, Page, Text, useNavigate, useSnackbar } from "zmp-ui";
+import {
+  Button,
+  Icon,
+  Input,
+  Page,
+  Text,
+  useNavigate,
+  useSnackbar,
+} from "zmp-ui";
 import CartAPI from "../../api/cart.api";
 import { useCart } from "../../layout/CartProvider";
 import { useLayout } from "../../layout/LayoutProvider";
@@ -23,13 +31,13 @@ const CartPage = () => {
   const { handleSubmit, control, setValue } = useForm({
     defaultValues: {
       SenderOther: "",
-      SenderAddress: ""
-    }
+      SenderAddress: "",
+    },
   });
 
   useEffect(() => {
-    setValue('SenderAddress', Auth?.HomeAddress || '')
-  }, [Auth])
+    setValue("SenderAddress", Auth?.HomeAddress || "");
+  }, [Auth]);
 
   const submitCartMutation = useMutation({
     mutationFn: (body) => CartAPI.list(body),
@@ -37,20 +45,19 @@ const CartPage = () => {
 
   const onSubmit = ({ SenderOther, SenderAddress }) => {
     if (!CurrentStocks) {
-      onOpenActionStocks()
-    }
-    else {
+      onOpenActionStocks();
+    } else {
       const dataPost = {
-        "order": {
-          "ID": Orders?.order?.ID,
-          "SenderID": Auth?.ID,
-          "Status": "user_sent",
-          "SenderOther": SenderOther,
-          "SenderAddress": SenderAddress
+        order: {
+          ID: Orders?.order?.ID,
+          SenderID: Auth?.ID,
+          Status: "user_sent",
+          SenderOther: SenderOther,
+          SenderAddress: SenderAddress,
         },
-        "forceStockID": CurrentStocks?.ID,
-        "cmd": "GUI_DON_HANG"
-      }
+        forceStockID: CurrentStocks?.ID,
+        cmd: "GUI_DON_HANG",
+      };
       submitCartMutation.mutate(
         { token: AccessToken, body: dataPost },
         {
@@ -69,7 +76,7 @@ const CartPage = () => {
         }
       );
     }
-  }
+  };
 
   return (
     <Page className="page !h-full !overflow-hidden flex flex-col" hideScrollbar>
@@ -94,9 +101,15 @@ const CartPage = () => {
           name="SenderAddress"
           control={control}
           render={({ field: { ref, ...field }, fieldState }) => (
-            <PickerSender value={field.value} onChange={(value) => field.onChange(value)}>
+            <PickerSender
+              value={field.value}
+              onChange={(value) => field.onChange(value)}
+            >
               {({ open }) => (
-                <div className="bg-white mt-1 px-3 pt-3 pb-4 flex relative" onClick={open}>
+                <div
+                  className="bg-white mt-1 px-3 pt-3 pb-4 flex relative"
+                  onClick={open}
+                >
                   <div className="text-app">
                     <svg className="w-4 h-4 fill-danger" viewBox="0 0 12 16">
                       <g stroke="none" fillRule="evenodd">
@@ -106,13 +119,18 @@ const CartPage = () => {
                   </div>
                   <div className="flex-1 pl-3">
                     <div className="mb-1.5">Địa chỉ nhận hàng</div>
-                    <div className="flex items-center">
+                    <div className="flex items-center mb-1">
                       {Auth?.FullName}
                       <span className="px-2 text-muted">|</span>
                       {Auth?.MobilePhone}
                     </div>
-                    <div className={clsx("leading-5 mt-px", !field.value && 'text-danger')}>
-                      {field.value ? field.value : 'Thêm địa chỉ của bạn'}
+                    <div
+                      className={clsx(
+                        "leading-5 mt-px",
+                        !field.value && "text-danger"
+                      )}
+                    >
+                      {field.value ? field.value : "Thêm địa chỉ của bạn"}
                     </div>
                   </div>
                   <div className="flex items-center text-muted">
@@ -277,19 +295,20 @@ const CartPage = () => {
               </svg>
               Voucher
             </div>
-            <div onClick={() => {
-              if (Orders?.items && Orders?.items.length > 0) {
-                open()
-              }
-              else {
-                openSnackbar({
-                  text: `"Hổng" có gì trong giỏ hết. Mua sắm ngay!`,
-                  type: "warning",
-                  duration: 1000,
-                });
-              }
-            }}>
-              {Orders.order.VoucherCode ? (
+            <div
+              onClick={() => {
+                if (Orders?.items && Orders?.items.length > 0) {
+                  open();
+                } else {
+                  openSnackbar({
+                    text: `"Hổng" có gì trong giỏ hết. Mua sắm ngay!`,
+                    type: "warning",
+                    duration: 1000,
+                  });
+                }
+              }}
+            >
+              {Orders?.order?.VoucherCode ? (
                 <div className="flex items-center">
                   <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave uppercase">
                     {Orders.order.VoucherCode}

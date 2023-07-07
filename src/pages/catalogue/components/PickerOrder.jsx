@@ -10,9 +10,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CartAPI from "../../../api/cart.api";
 import { useLayout } from "../../../layout/LayoutProvider";
 import clsx from "clsx";
+import { useLocation } from "react-router";
 
 export const PickerOrder = ({ children, item, buttonText }) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { AccessToken, Auth } = useLayout();
   const [visible, setVisible] = useState(false);
   const { handleSubmit, control } = useFormContext();
@@ -31,7 +33,8 @@ export const PickerOrder = ({ children, item, buttonText }) => {
 
   const onSubmit = (values) => {
     if (!AccessToken && !Auth) {
-      //Fech token end auth
+      setVisible(false);
+      navigate(`/?fromProtected=${pathname}`);
     } else {
       addCartMutation.mutate(
         { token: AccessToken, body: values },

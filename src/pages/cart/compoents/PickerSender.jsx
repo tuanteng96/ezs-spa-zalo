@@ -8,18 +8,18 @@ export const PickerSender = ({ children, value = "", onChange }) => {
 
   const { handleSubmit, control, setValue } = useForm({
     defaultValues: {
-      SenderAddress: ""
-    }
+      SenderAddress: "",
+    },
   });
 
   useEffect(() => {
-    setValue("SenderAddress", value)
-  }, [visible])
+    setValue("SenderAddress", value);
+  }, [visible]);
 
   const onSubmit = ({ SenderAddress }) => {
-    onChange(SenderAddress)
-    setVisible(false)
-  }
+    onChange(SenderAddress);
+    setVisible(false);
+  };
 
   return (
     <>
@@ -31,7 +31,7 @@ export const PickerSender = ({ children, value = "", onChange }) => {
         <Sheet visible={visible} onClose={() => setVisible(false)} autoHeight>
           <form
             className="flex flex-col"
-          //onSubmit={handleSubmit(onSubmit)}
+            //onSubmit={handleSubmit(onSubmit)}
           >
             <div>
               <div className="flex h-12 items-center">
@@ -74,5 +74,5 @@ export const PickerSender = ({ children, value = "", onChange }) => {
         document.body
       )}
     </>
-  )
-}
+  );
+};

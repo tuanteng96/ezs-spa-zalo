@@ -143,7 +143,9 @@ const CustomerDiary = () => {
                 <div className="font-bold text-lg mb-px">
                   "Hổng" có đơn hàng nào ?
                 </div>
-                <div>Hãy bắt đầu mua mặt hàng bạn đang tìm ngay ...</div>
+                <div className="text-center">
+                  Hãy bắt đầu mua mặt hàng bạn đang tìm ngay ...
+                </div>
               </div>
             )}
             {data &&

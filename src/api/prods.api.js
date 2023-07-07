@@ -29,7 +29,10 @@ const ProdsAPI = {
     ),
   prodId: ({ id, token = "" }) =>
     http.get(`/api/v3/prod?cmd=getid&id=${id}&mid=&token=${token}`),
-  roots: ({ MemberID = '', Pi = 1, Ps = 15, StockID = '', Key = '' }) => http.get(`/api/v3/mbook?cmd=getroot&memberid=${MemberID}&ps=${Ps}&pi=${Pi}&key=${Key}&stockid=${StockID}`)
+  roots: ({ MemberID = "", Pi = 1, Ps = 15, StockID = "", Key = "" }) =>
+    http.get(
+      `/api/v3/mbook?cmd=getroot&memberid=${MemberID}&ps=${Ps}&pi=${Pi}&key=${Key}&stockid=${StockID}`
+    ),
 };
 
 export default ProdsAPI;

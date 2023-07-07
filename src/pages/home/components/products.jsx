@@ -23,7 +23,10 @@ const Products = () => {
 
   return (
     <>
-      <NavLink to="/catalogue?TypeID=794" className="p-3 uppercase font-semibold bg-white text-app flex justify-between items-center">
+      <NavLink
+        to="/catalogue?TypeID=794"
+        className="p-3 uppercase font-semibold bg-white text-app flex justify-between items-center"
+      >
         Sản phẩm
         <Icon className="text-muted" icon="zi-chevron-right" />
       </NavLink>

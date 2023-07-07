@@ -77,5 +77,5 @@ export const formatArray = {
       .sort(function (left, right) {
         return moment.utc(right.dayFull).diff(moment.utc(left.dayFull));
       });
-  }
+  },
 };

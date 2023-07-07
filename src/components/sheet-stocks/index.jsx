@@ -13,7 +13,7 @@ const SheetStocks = () => {
     onOpenActionStocks,
     onHideActionStocks,
     setStocks,
-    Stocks
+    Stocks,
   } = useLayout();
 
   useQuery({
@@ -25,17 +25,16 @@ const SheetStocks = () => {
         : [];
     },
     onSuccess: (data) => {
-      setStocks(data)
-    }
+      setStocks(data);
+    },
   });
 
   useEffect(() => {
     if (Stocks && !CurrentStocks) {
       if (Stocks.length > 1) {
         onOpenActionStocks();
-      }
-      else {
-        onSaveStocks(Stocks[0])
+      } else {
+        onSaveStocks(Stocks[0]);
       }
     }
   }, [Stocks, CurrentStocks]);

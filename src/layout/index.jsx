@@ -2,6 +2,8 @@ import React, { lazy, Suspense } from "react";
 import { Route } from "react-router";
 import { AnimationRoutes, Spinner } from "zmp-ui";
 import { Navigation } from "../components/Navigation";
+import { MasterLayout } from "./MasterLayout";
+import ProtectedRoute from "./_core/ProtectedRoute";
 
 const CataloguePage = lazy(() => import("../pages/catalogue"));
 const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
@@ -16,7 +18,10 @@ const CustomerWalletCard = lazy(() =>
   import("../pages/user/CustomerWalletCard")
 );
 const CustomerService = lazy(() => import("../pages/user/CustomerService"));
-const CustomerBookingManage = lazy(() => import("../pages/user/CustomerBookingManage"));
+const CustomerBookingManage = lazy(() =>
+  import("../pages/user/CustomerBookingManage")
+);
+const CustomerProfile = lazy(() => import("../pages/user/CustomerProfile"));
 
 const BookingPage = lazy(() => import("../pages/booking"));
 
@@ -41,7 +46,7 @@ const SuspensedView = ({ children }) => {
 
 const Layout = () => {
   return (
-    <>
+    <MasterLayout>
       <AnimationRoutes forceRefresh>
         <Route path="/" element={<HomePage />} />
         <Route
@@ -79,86 +84,116 @@ const Layout = () => {
         <Route
           path="/cart"
           element={
-            <SuspensedView>
-              <CartPage />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CartPage />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user"
           element={
-            <SuspensedView>
-              <UserPage />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <UserPage />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/profile"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerProfile />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-diary"
           element={
-            <SuspensedView>
-              <CustomerDiary />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerDiary />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-service"
           element={
-            <SuspensedView>
-              <CustomerService />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerService />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-orders"
           element={
-            <SuspensedView>
-              <CustomerOrders />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerOrders />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-voucher"
           element={
-            <SuspensedView>
-              <CustomerVoucher />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerVoucher />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-wallet-card"
           element={
-            <SuspensedView>
-              <CustomerWalletCard />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerWalletCard />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/user/customer-booking-manage"
           element={
-            <SuspensedView>
-              <CustomerBookingManage />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerBookingManage />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/checkin"
           element={
-            <SuspensedView>
-              <CheckInPage />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <CheckInPage />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/booking"
           element={
-            <SuspensedView>
-              <BookingPage />
-            </SuspensedView>
+            <ProtectedRoute>
+              <SuspensedView>
+                <BookingPage />
+              </SuspensedView>
+            </ProtectedRoute>
           }
         />
       </AnimationRoutes>
       <Navigation />
-    </>
+    </MasterLayout>
   );
 };
 

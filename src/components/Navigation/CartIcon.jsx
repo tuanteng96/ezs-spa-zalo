@@ -19,7 +19,7 @@ const CartIcon = ({ OrdersCount }) => {
       </svg>
       {OrdersCount > 0 && (
         <Box className="absolute -right-2 -top-[2px] p-[2px] bg-background rounded-full">
-          <div className="bg-red-500 px-1 rounded-full text-white text-[11px] leading-4 font-semibold">
+          <div className="bg-red-500 px-1 rounded-full text-white text-[11px] leading-4 font-semibold min-w-[16px]">
             {OrdersCount}
           </div>
         </Box>

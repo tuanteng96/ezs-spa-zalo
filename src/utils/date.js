@@ -6,4 +6,4 @@ const checkDateDiff = (dateEnd) => {
   return diffDays;
 };
 
-export { checkDateDiff }
+export { checkDateDiff };

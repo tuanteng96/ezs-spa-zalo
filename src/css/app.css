@@ -9,6 +9,17 @@ body {
   background: #f5f5fa;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
 p:not(:last-child) {
   margin-bottom: 12px;
 }
@@ -41,7 +52,16 @@ p:not(:last-child) {
 }
 
 .bg-stripes {
-  background-image: linear-gradient(45deg, #ddd 25%, transparent 0, transparent 50%, #ddd 0, #ddd 75%, transparent 0, transparent);
+  background-image: linear-gradient(
+    45deg,
+    #ddd 25%,
+    transparent 0,
+    transparent 50%,
+    #ddd 0,
+    #ddd 75%,
+    transparent 0,
+    transparent
+  );
   background-size: 4px 4px;
   cursor: not-allowed;
 }
@@ -90,7 +110,8 @@ p:not(:last-child) {
   @apply grid grid-cols-2;
 }
 
-.tab-scrollbar.zaui-cols-3 > .zaui-tabs-tabbar:not(.zaui-tabs-tabbar-scrollable) {
+.tab-scrollbar.zaui-cols-3
+  > .zaui-tabs-tabbar:not(.zaui-tabs-tabbar-scrollable) {
   @apply grid-cols-3;
 }
 
@@ -123,31 +144,37 @@ p:not(:last-child) {
 }
 
 .tab-booking .zaui-tabs-tabbar-active-line {
-  @apply hidden
+  @apply hidden;
 }
 
 .tab-booking > .zaui-tabs-tabbar {
-  @apply gap-5
+  @apply gap-5;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
-  @apply relative overflow-visible capitalize font-medium
+  @apply relative overflow-visible capitalize font-medium;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
-  @apply text-app
+  @apply text-app;
 }
 
-.tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active ~ .zaui-tabs-tabbar-item{
+.tab-booking
+  > .zaui-tabs-tabbar
+  > .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active
+  ~ .zaui-tabs-tabbar-item {
   color: #767a7f;
 }
 
-.tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active ~ .zaui-tabs-tabbar-item::after {
+.tab-booking
+  > .zaui-tabs-tabbar
+  > .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active
+  ~ .zaui-tabs-tabbar-item::after {
   background: #8e8e93;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
-  @apply bg-white relative
+  @apply bg-white relative;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item::after {
@@ -155,7 +182,7 @@ p:not(:last-child) {
   height: 1px;
   position: absolute;
 
-  @apply top-2/4 -translate-y-2/4 w-5 -right-5 bg-app
+  @apply top-2/4 -translate-y-2/4 w-5 -right-5 bg-app;
 }
 
 .tabs-time-booking .zaui-tabs-tabbar {
@@ -170,7 +197,9 @@ p:not(:last-child) {
   @apply rounded-sm cursor-pointer text-center transition;
 }
 
-.tabs-time-booking .zaui-tabs-tabbar .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active {
+.tabs-time-booking
+  .zaui-tabs-tabbar
+  .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active {
   @apply bg-app text-white;
 }
 

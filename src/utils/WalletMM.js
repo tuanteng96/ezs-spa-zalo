@@ -138,4 +138,4 @@ class WalletMM {
   }
 }
 
-export default WalletMM
+export default WalletMM;

@@ -36,7 +36,7 @@ export const NavigationOrder = ({ item }) => {
         <PickerOrder item={item} buttonText="Thêm vào giỏ hàng">
           {({ open }) => (
             <div
-              className="bg-success text-white flex items-center justify-center"
+              className="bg-success text-white flex items-center justify-center cursor-pointer"
               onClick={open}
             >
               <svg
@@ -73,7 +73,7 @@ export const NavigationOrder = ({ item }) => {
         <PickerOrder item={item} buttonText="Mua ngay">
           {({ open }) => (
             <div
-              className="col-span-2 bg-app flex items-center justify-center text-white"
+              className="col-span-2 bg-app flex items-center justify-center text-white cursor-pointer"
               onClick={open}
             >
               Mua ngay

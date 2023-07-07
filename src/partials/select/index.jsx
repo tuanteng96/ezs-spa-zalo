@@ -1,3 +1,3 @@
-import { EzsSelectUserDV } from "./EzsSelectUserDV"
+import { EzsSelectUserDV } from "./EzsSelectUserDV";
 
-export { EzsSelectUserDV }
+export { EzsSelectUserDV };

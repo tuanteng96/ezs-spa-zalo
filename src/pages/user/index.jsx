@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { Icon, Page, Text } from "zmp-ui";
+import { useLayout } from "../../layout/LayoutProvider";
+import { useConfigs } from "../../layout/MasterLayout";
+import { toAbsolutePath } from "../../utils/assetPath";
+import { formatString } from "../../utils/formatString";
 
 const UserPage = () => {
+  const { Auth } = useLayout();
+  const { ZaloInfo } = useConfigs();
+
   return (
     <Page className="page" hideScrollbar>
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3 bg-app">
@@ -12,18 +19,24 @@ const UserPage = () => {
           </Text.Title>
         </div>
       </div>
-      <NavLink to="/" className="bg-white p-3 flex items-center">
+      <NavLink to="/user/profile" className="bg-white p-3 flex items-center">
         <div className="w-12">
           <img
             className="shadow-3xl rounded-full w-full"
-            src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+            src={
+              Auth?.Photo || Auth?.Avatar
+                ? toAbsolutePath(Auth?.Photo || Auth?.Avatar)
+                : ZaloInfo?.avatar
+            }
           />
         </div>
         <div className="pl-3 flex-1">
           <div className="text-[16px] font-medium leading-6">
-            Nguyễn Tài Tuấn
+            {Auth?.FullName}
           </div>
-          <div className="text-gray-700 text-[14px]">Thông tin cá nhân</div>
+          <div className="text-gray-700 text-[14px]">
+            {formatString.getGroupsName(Auth)}
+          </div>
         </div>
         <div className="w-12 h-12 flex items-center justify-center text-app">
           <Icon icon="zi-edit-text" />
@@ -39,7 +52,10 @@ const UserPage = () => {
             <Icon icon="zi-chevron-right" />
           </div>
         </NavLink>
-        <NavLink to="/user/customer-booking-manage" className="flex px-3 py-4 items-center border-b">
+        <NavLink
+          to="/user/customer-booking-manage"
+          className="flex px-3 py-4 items-center border-b"
+        >
           <div className="text-app">
             <Icon icon="zi-calendar" />
           </div>

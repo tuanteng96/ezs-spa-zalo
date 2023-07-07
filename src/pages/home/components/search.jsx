@@ -3,10 +3,10 @@ import { Icon, Text } from "zmp-ui";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper";
 import clsx from "clsx";
-// import { useLayout } from "../../../layout/LayoutProvider";
+import { useLayout } from "../../../layout/LayoutProvider";
 
 const Search = ({ scrollTop }) => {
-  // const { onOpenActionStocks } = useLayout()
+  const { onOpenActionStocks } = useLayout();
   return (
     <div
       className={clsx(
@@ -45,7 +45,7 @@ const Search = ({ scrollTop }) => {
             </SwiperSlide>
           </Swiper>
         </div>
-        <div className="w-10 text-center">
+        <div className="w-10 text-center" onClick={onOpenActionStocks}>
           <Icon
             className="text-muted !text-lg !h-auto"
             icon="zi-location-solid"
