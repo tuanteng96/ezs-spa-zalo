@@ -3,6 +3,7 @@ import clsx from "clsx";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { NavLink } from "react-router-dom";
+import PullToRefresh from "react-simple-pull-to-refresh";
 import {
   Button,
   Icon,
@@ -22,7 +23,7 @@ import { PickerVoucher } from "./compoents/PickerVoucher";
 
 const CartPage = () => {
   const { Auth, CurrentStocks, onOpenActionStocks, AccessToken } = useLayout();
-  const { Orders } = useCart();
+  const { Orders, isLoading } = useCart();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
@@ -61,22 +62,25 @@ const CartPage = () => {
       submitCartMutation.mutate(
         { token: AccessToken, body: dataPost },
         {
-          onSuccess: () => {
+          onSuccess: ({ data }) => {
             queryClient
               .invalidateQueries({ queryKey: ["ListsCart"] })
               .then(() => {
-                openSnackbar({
-                  text: "Đặt hàng thành công !",
-                  type: "success",
-                  duration: 1000,
+                navigate("/cart/finish", {
+                  state: {
+                    formState: data?.data?.order
+                  }
                 });
-                navigate("/");
               });
           },
         }
       );
     }
   };
+
+  const handleRefresh = () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["ListsCart"] })
+  ])
 
   return (
     <Page className="page !h-full !overflow-hidden flex flex-col" hideScrollbar>
@@ -96,145 +100,197 @@ const CartPage = () => {
           </Text.Title>
         </div>
       </div>
-      <div className="grow overflow-auto no-scrollbar">
-        <Controller
-          name="SenderAddress"
-          control={control}
-          render={({ field: { ref, ...field }, fieldState }) => (
-            <PickerSender
-              value={field.value}
-              onChange={(value) => field.onChange(value)}
-            >
-              {({ open }) => (
-                <div
-                  className="bg-white mt-1 px-3 pt-3 pb-4 flex relative"
-                  onClick={open}
+      <div className="h-[calc(100%-56px)]">
+        <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={handleRefresh}>
+          <div className="h-full overflow-auto no-scrollbar">
+            <Controller
+              name="SenderAddress"
+              control={control}
+              render={({ field: { ref, ...field }, fieldState }) => (
+                <PickerSender
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
                 >
-                  <div className="text-app">
-                    <svg className="w-4 h-4 fill-danger" viewBox="0 0 12 16">
-                      <g stroke="none" fillRule="evenodd">
-                        <path d="M7.63636364,5.86666667 C7.63636364,4.98293333 6.90327273,4.26666667 6,4.26666667 C5.09618182,4.26666667 4.36363636,4.98293333 4.36363636,5.86666667 C4.36363636,6.7504 5.09618182,7.46666667 6,7.46666667 C6.90327273,7.46666667 7.63636364,6.7504 7.63636364,5.86666667 M3.27272727,5.86666667 C3.27272727,4.39466667 4.49345455,3.2 6,3.2 C7.506,3.2 8.72727273,4.39466667 8.72727273,5.86666667 C8.72727273,7.33973333 7.506,8.53333333 6,8.53333333 C4.49345455,8.53333333 3.27272727,7.33973333 3.27272727,5.86666667 M6,1.06613333 C3.28854545,1.06613333 1.09090909,3.30453333 1.09090909,6.06666667 C1.09090909,8.8272 6,14.3989333 6,14.3989333 C6,14.3989333 10.9085455,8.8272 10.9085455,6.06666667 C10.9085455,3.30453333 8.71090909,1.06613333 6,1.06613333 M6.912,14.9328 L9.27272727,14.9328 C9.57381818,14.9328 9.81818182,15.1717333 9.81818182,15.4661333 C9.81818182,15.7610667 9.57381818,15.9994667 9.27272727,15.9994667 L2.72727273,15.9994667 C2.42563636,15.9994667 2.18181818,15.7610667 2.18181818,15.4661333 C2.18181818,15.1717333 2.42563636,14.9328 2.72727273,14.9328 L5.08745455,14.9328 C3.40909091,12.9114667 0,8.49813333 0,5.99946667 C0,2.68533333 2.68636364,0 6,0 C9.31363636,0 12,2.68533333 12,5.99946667 C12,8.49813333 8.58981818,12.9114667 6.912,14.9328" />
-                      </g>
-                    </svg>
-                  </div>
-                  <div className="flex-1 pl-3">
-                    <div className="mb-1.5">Địa chỉ nhận hàng</div>
-                    <div className="flex items-center mb-1">
-                      {Auth?.FullName}
-                      <span className="px-2 text-muted">|</span>
-                      {Auth?.MobilePhone}
-                    </div>
+                  {({ open }) => (
                     <div
-                      className={clsx(
-                        "leading-5 mt-px",
-                        !field.value && "text-danger"
-                      )}
+                      className="bg-white mt-1 px-3 pt-3 pb-4 flex relative"
+                      onClick={open}
                     >
-                      {field.value ? field.value : "Thêm địa chỉ của bạn"}
+                      <div className="text-app">
+                        <svg className="w-4 h-4 fill-danger" viewBox="0 0 12 16">
+                          <g stroke="none" fillRule="evenodd">
+                            <path d="M7.63636364,5.86666667 C7.63636364,4.98293333 6.90327273,4.26666667 6,4.26666667 C5.09618182,4.26666667 4.36363636,4.98293333 4.36363636,5.86666667 C4.36363636,6.7504 5.09618182,7.46666667 6,7.46666667 C6.90327273,7.46666667 7.63636364,6.7504 7.63636364,5.86666667 M3.27272727,5.86666667 C3.27272727,4.39466667 4.49345455,3.2 6,3.2 C7.506,3.2 8.72727273,4.39466667 8.72727273,5.86666667 C8.72727273,7.33973333 7.506,8.53333333 6,8.53333333 C4.49345455,8.53333333 3.27272727,7.33973333 3.27272727,5.86666667 M6,1.06613333 C3.28854545,1.06613333 1.09090909,3.30453333 1.09090909,6.06666667 C1.09090909,8.8272 6,14.3989333 6,14.3989333 C6,14.3989333 10.9085455,8.8272 10.9085455,6.06666667 C10.9085455,3.30453333 8.71090909,1.06613333 6,1.06613333 M6.912,14.9328 L9.27272727,14.9328 C9.57381818,14.9328 9.81818182,15.1717333 9.81818182,15.4661333 C9.81818182,15.7610667 9.57381818,15.9994667 9.27272727,15.9994667 L2.72727273,15.9994667 C2.42563636,15.9994667 2.18181818,15.7610667 2.18181818,15.4661333 C2.18181818,15.1717333 2.42563636,14.9328 2.72727273,14.9328 L5.08745455,14.9328 C3.40909091,12.9114667 0,8.49813333 0,5.99946667 C0,2.68533333 2.68636364,0 6,0 C9.31363636,0 12,2.68533333 12,5.99946667 C12,8.49813333 8.58981818,12.9114667 6.912,14.9328" />
+                          </g>
+                        </svg>
+                      </div>
+                      <div className="flex-1 pl-3">
+                        <div className="mb-1.5">Địa chỉ nhận hàng</div>
+                        <div className="flex items-center mb-1">
+                          {Auth?.FullName}
+                          <span className="px-2 text-muted">|</span>
+                          {Auth?.MobilePhone}
+                        </div>
+                        <div
+                          className={clsx(
+                            "leading-5 mt-px",
+                            !field.value && "text-danger"
+                          )}
+                        >
+                          {field.value ? field.value : "Thêm địa chỉ của bạn"}
+                        </div>
+                      </div>
+                      <div className="flex items-center text-muted">
+                        <Icon size={30} icon="zi-chevron-right" />
+                      </div>
+                      <div
+                        className="w-full h-1 absolute bottom-0 left-0"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(45deg,#6fa6d6,#6fa6d6 16px,transparent 0,transparent 21px,#f18d9b 0,#f18d9b 37px,transparent 0,transparent 42px)",
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                </PickerSender>
+              )}
+            />
+            {
+              isLoading && (
+                <div className="bg-white mt-2">
+                  <div className="p-3 font-semibold">Thông tin đơn hàng</div>
+                  {
+                    Array(2).fill().map((_, index) => (
+                      <div className="p-3 flex bg-[#f6f6f6]" key={index}>
+                        <div className="w-16 aspect-square">
+                          <div className="flex items-center justify-center w-full bg-gray-300 aspect-square rounded-sm animate-pulse">
+                            <svg
+                              className="w-7 text-gray-200 dark:text-gray-600"
+                              aria-hidden="true"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="currentColor"
+                              viewBox="0 0 20 18"
+                            >
+                              <path d="M18 0H2a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2Zm-5.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm4.376 10.481A1 1 0 0 1 16 15H4a1 1 0 0 1-.895-1.447l3.5-7A1 1 0 0 1 7.468 6a.965.965 0 0 1 .9.5l2.775 4.757 1.546-1.887a1 1 0 0 1 1.618.1l2.541 4a1 1 0 0 1 .028 1.011Z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="flex-1 pl-3">
+                          <div className="line-clamp-2 text-gray-700 text-xs">
+                            <div className="mt-2 h-2.5 bg-gray-300 rounded-full w-8/12 animate-pulse"></div>
+                          </div>
+                          <div className="flex justify-between mt-1 text-gray-700 items-end">
+                            <div className="text-sm">
+                              <div className="mt-px h-2.5 bg-gray-300 rounded-full w-[80px] animate-pulse"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  }
+                  <div className="px-3 h-12 border-t flex justify-between items-center">
+                    <div className="font-medium text-sm">Thành tiền</div>
+                    <div className="font-bold text-app">
+                      <div className="mt-px h-3.5 bg-gray-200 rounded-full w-[80px] animate-pulse"></div>
                     </div>
                   </div>
-                  <div className="flex items-center text-muted">
-                    <Icon size={30} icon="zi-chevron-right" />
-                  </div>
-                  <div
-                    className="w-full h-1 absolute bottom-0 left-0"
-                    style={{
-                      backgroundImage:
-                        "repeating-linear-gradient(45deg,#6fa6d6,#6fa6d6 16px,transparent 0,transparent 21px,#f18d9b 0,#f18d9b 37px,transparent 0,transparent 42px)",
-                    }}
-                  ></div>
                 </div>
-              )}
-            </PickerSender>
-          )}
-        />
-        {Orders?.items && Orders?.items.length > 0 ? (
-          <>
-            <div className="bg-white mt-2">
-              <div className="p-3 font-semibold">Thông tin đơn hàng</div>
-              {Orders?.items.map((item, index) => (
-                <ItemCart item={item} key={index} />
-              ))}
-              <div className="px-3 h-12 border-t flex justify-between items-center">
-                <div className="font-medium text-sm">Thành tiền</div>
-                <div className="font-bold text-app">
-                  {formatString.formatVND(Orders?.order?.ToPay)}
-                </div>
-              </div>
-            </div>
-            <div className="p-3 bg-white my-1.5">
-              <Controller
-                name="SenderOther"
-                control={control}
-                render={({ field: { ref, ...field }, fieldState }) => (
-                  <Input.TextArea
-                    label="Ghi chú đơn hàng"
-                    placeholder="Nhập ghi chú"
-                    showCount
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="flex justify-center items-center flex-col py-10">
-            <svg
-              width={120}
-              height={120}
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g clipPath="url(#clip0)">
-                <path
-                  d="M18.4 56.6l12.3-.9c.8 0 1.1.2 1.5.9l16 27.9 5.4 9.4c.5 1 1 1 2 .6L92.3 79c2-1 3.3-.8 3.8.5.6 1.4 0 2.3-2.1 3.2L65.2 95c-3.7 1.6-7.4 3-11 4.7-1.2.6-1.8.6-2.5-.7L32.4 65l-2.2-3.9c-.5-1-1.3-1.5-2.4-1.3-3.2.6-6.5.4-9.8.9-2 .2-3.2-.4-3.3-1.8 0-1.3.8-2.1 2.8-2.4h.9z"
-                  fill="#F79420"
-                />
-                <path
-                  d="M66.6 102.7c5-.1 10.2.3 15.3.7 3.1.2 6.3.5 9.3 1.6.6.2 1.6.3 1.6 1 0 .8-1 1-1.5 1.1-2.1.8-4.3 1-6.5 1.3-9.1 1-18.3 1.3-27.4 1-6.2-.3-12.4-.5-18.5-2-.6 0-1.2-.3-1.8-.5-.4-.2-1-.3-1-.9 0-.5.7-.6 1.1-.8 2.1-1 4.5-1.2 6.8-1.5l13.6-1h9z"
-                  fill="#E8E7E7"
-                />
-                <path
-                  d="M88.8 85.8a5 5 0 015.5 4.1 5 5 0 01-4 5.5 5 5 0 01-5.6-4 5 5 0 014.1-5.6zM64.3 103c-.5 2.8-2.4 4.6-4.8 4.6s-4.4-1.7-4.9-4.4c-.4-2.5 2.4-5.2 4.8-5.3 2.3 0 5.3 2.5 5 5.2z"
-                  fill="#EF4F2C"
-                />
-                <path
-                  d="M77.9 28.7c1-3.7 2-7.3 2.8-11 .3-1.4.7-2.2 2.5-2 2.1.3 4.3.2 7 .2L78.3 29.2l-.4-.5zM67 29.6l-5.3-8.3c-.5-.8-.4-1.3.2-1.8l4.5-4.5 1 14.5a7 7 0 01-.4 0zM99.4 30.4l-12.8 4.1-.2-.3 7.2-6.6c.6-.6 1-.4 1.5 0l4.3 2.8z"
-                  fill="#F79420"
-                />
-                <path
-                  d="M77 76.6c1.8.3 3.6-1 4-2.7l.1-.3 6-25.9c.1-.5-.2-.9-.6-1l-8.3-1.4c.7-5.5-2.4-10.5-7.2-11.3-4.7-.9-9.4 2.7-10.6 8l-8.3-1.4c-.4 0-.8.2-1 .6l-3.4 26.4v.3c-.2 1.8.9 3.5 2.7 4l26.5 4.7h.1zm-6.4-40.3c3.5.6 5.7 4.4 5.1 8.5l-12.9-2.3c1-4 4.3-6.8 7.8-6.2zm1.7"
-                  fill="#EF4F2C"
-                />
-                <path
-                  d="M87 79L55.7 91.3l-14-26.2 42.9-5.3L87 79zM45.7 72.6l39.6-4.9M57.2 90.7L54 63.5M67.7 86.5l-3-24.3M77 82.7L74.1 61M50.2 80.5L86.3 76"
-                  stroke="#F7941D"
-                  strokeMiterlimit={10}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M23.3 90.8L5.5 97.3c-.5.2-1-.1-1.2-.6L4 96a1 1 0 01.5-1.3l17.8-6.4c.6-.2 1.1 0 1.3.6l.2.6c.2.5 0 1-.6 1.2zM31.4 94.2l-14.9 5.4a1 1 0 01-1.3-.7l-.2-.4a1 1 0 01.6-1.3l15-5.5a1 1 0 011.3.7l.1.4a1 1 0 01-.6 1.4zM34.9 100.3l-21.4 7.8c-.4.2-1-.1-1.2-.6l-.2-.6a1 1 0 01.6-1.2L34 97.9c.5-.1 1 .1 1.2.6l.2.6c.2.5 0 1-.5 1.3z"
-                  fill="#E6E7E8"
-                />
-              </g>
-              <defs>
-                <clipPath id="clip0">
-                  <path fill="#fff" d="M4 15h95.4v94.5H4z" />
-                </clipPath>
-              </defs>
-            </svg>
-            <div className="mt-4 font-bold">"Hổng" có gì trong giỏ hết</div>
-            <div className="mt-2">Lướt danh mục, lựa hàng ngay đi!</div>
-            <NavLink
-              to="/catalogue"
-              className="border border-app mt-4 py-3 px-4 rounded-sm text-app font-semibold"
-            >
-              Mua sắm ngay!
-            </NavLink>
+              )
+            }
+            {
+              !isLoading && (
+                <>
+                  {Orders?.items && Orders?.items.length > 0 ? (
+                    <>
+                      <div className="bg-white mt-2">
+                        <div className="p-3 font-semibold">Thông tin đơn hàng</div>
+                        {Orders?.items.map((item, index) => (
+                          <ItemCart item={item} key={index} />
+                        ))}
+                        <div className="px-3 h-12 border-t flex justify-between items-center">
+                          <div className="font-medium text-sm">Thành tiền</div>
+                          <div className="font-bold text-app">
+                            {formatString.formatVND(Orders?.order?.ToPay)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-white my-1.5">
+                        <Controller
+                          name="SenderOther"
+                          control={control}
+                          render={({ field: { ref, ...field }, fieldState }) => (
+                            <Input.TextArea
+                              label="Ghi chú đơn hàng"
+                              placeholder="Nhập ghi chú"
+                              showCount
+                              value={field.value}
+                              onChange={field.onChange}
+                            />
+                          )}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex justify-center items-center flex-col py-10">
+                      <svg
+                        width={120}
+                        height={120}
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <g clipPath="url(#clip0)">
+                          <path
+                            d="M18.4 56.6l12.3-.9c.8 0 1.1.2 1.5.9l16 27.9 5.4 9.4c.5 1 1 1 2 .6L92.3 79c2-1 3.3-.8 3.8.5.6 1.4 0 2.3-2.1 3.2L65.2 95c-3.7 1.6-7.4 3-11 4.7-1.2.6-1.8.6-2.5-.7L32.4 65l-2.2-3.9c-.5-1-1.3-1.5-2.4-1.3-3.2.6-6.5.4-9.8.9-2 .2-3.2-.4-3.3-1.8 0-1.3.8-2.1 2.8-2.4h.9z"
+                            fill="#F79420"
+                          />
+                          <path
+                            d="M66.6 102.7c5-.1 10.2.3 15.3.7 3.1.2 6.3.5 9.3 1.6.6.2 1.6.3 1.6 1 0 .8-1 1-1.5 1.1-2.1.8-4.3 1-6.5 1.3-9.1 1-18.3 1.3-27.4 1-6.2-.3-12.4-.5-18.5-2-.6 0-1.2-.3-1.8-.5-.4-.2-1-.3-1-.9 0-.5.7-.6 1.1-.8 2.1-1 4.5-1.2 6.8-1.5l13.6-1h9z"
+                            fill="#E8E7E7"
+                          />
+                          <path
+                            d="M88.8 85.8a5 5 0 015.5 4.1 5 5 0 01-4 5.5 5 5 0 01-5.6-4 5 5 0 014.1-5.6zM64.3 103c-.5 2.8-2.4 4.6-4.8 4.6s-4.4-1.7-4.9-4.4c-.4-2.5 2.4-5.2 4.8-5.3 2.3 0 5.3 2.5 5 5.2z"
+                            fill="#EF4F2C"
+                          />
+                          <path
+                            d="M77.9 28.7c1-3.7 2-7.3 2.8-11 .3-1.4.7-2.2 2.5-2 2.1.3 4.3.2 7 .2L78.3 29.2l-.4-.5zM67 29.6l-5.3-8.3c-.5-.8-.4-1.3.2-1.8l4.5-4.5 1 14.5a7 7 0 01-.4 0zM99.4 30.4l-12.8 4.1-.2-.3 7.2-6.6c.6-.6 1-.4 1.5 0l4.3 2.8z"
+                            fill="#F79420"
+                          />
+                          <path
+                            d="M77 76.6c1.8.3 3.6-1 4-2.7l.1-.3 6-25.9c.1-.5-.2-.9-.6-1l-8.3-1.4c.7-5.5-2.4-10.5-7.2-11.3-4.7-.9-9.4 2.7-10.6 8l-8.3-1.4c-.4 0-.8.2-1 .6l-3.4 26.4v.3c-.2 1.8.9 3.5 2.7 4l26.5 4.7h.1zm-6.4-40.3c3.5.6 5.7 4.4 5.1 8.5l-12.9-2.3c1-4 4.3-6.8 7.8-6.2zm1.7"
+                            fill="#EF4F2C"
+                          />
+                          <path
+                            d="M87 79L55.7 91.3l-14-26.2 42.9-5.3L87 79zM45.7 72.6l39.6-4.9M57.2 90.7L54 63.5M67.7 86.5l-3-24.3M77 82.7L74.1 61M50.2 80.5L86.3 76"
+                            stroke="#F7941D"
+                            strokeMiterlimit={10}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M23.3 90.8L5.5 97.3c-.5.2-1-.1-1.2-.6L4 96a1 1 0 01.5-1.3l17.8-6.4c.6-.2 1.1 0 1.3.6l.2.6c.2.5 0 1-.6 1.2zM31.4 94.2l-14.9 5.4a1 1 0 01-1.3-.7l-.2-.4a1 1 0 01.6-1.3l15-5.5a1 1 0 011.3.7l.1.4a1 1 0 01-.6 1.4zM34.9 100.3l-21.4 7.8c-.4.2-1-.1-1.2-.6l-.2-.6a1 1 0 01.6-1.2L34 97.9c.5-.1 1 .1 1.2.6l.2.6c.2.5 0 1-.5 1.3z"
+                            fill="#E6E7E8"
+                          />
+                        </g>
+                        <defs>
+                          <clipPath id="clip0">
+                            <path fill="#fff" d="M4 15h95.4v94.5H4z" />
+                          </clipPath>
+                        </defs>
+                      </svg>
+                      <div className="mt-4 font-bold">"Hổng" có gì trong giỏ hết</div>
+                      <div className="mt-2">Lướt danh mục, lựa hàng ngay đi!</div>
+                      <NavLink
+                        to="/catalogue"
+                        className="border border-app mt-4 py-3 px-4 rounded-sm text-app font-semibold"
+                      >
+                        Mua sắm ngay!
+                      </NavLink>
+                    </div>
+                  )}
+                </>
+              )
+            }
           </div>
-        )}
+        </PullToRefresh>
       </div>
       <PickerVoucher>
         {({ open }) => (

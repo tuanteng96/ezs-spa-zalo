@@ -9,8 +9,12 @@ const CataloguePage = lazy(() => import("../pages/catalogue"));
 const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
 
 const CartPage = lazy(() => import("../pages/cart"));
+const CartFinish = lazy(() => import("../pages/cart/CartFinish"));
+
 const CheckInPage = lazy(() => import("../pages/checkin"));
+
 const UserPage = lazy(() => import("../pages/user"));
+
 const CustomerDiary = lazy(() => import("../pages/user/CustomerDiary"));
 const CustomerOrders = lazy(() => import("../pages/user/CustomerOrders"));
 const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
@@ -25,10 +29,16 @@ const CustomerProfile = lazy(() => import("../pages/user/CustomerProfile"));
 
 const BookingPage = lazy(() => import("../pages/booking"));
 
+const SearchPage = lazy(() => import("../pages/search"));
+
+const ContactPage = lazy(() => import("../pages/contact"));
+
 import HomePage from "../pages/home";
 
 const NewsPage = lazy(() => import("../pages/news"));
 const NewsDetailPage = lazy(() => import("../pages/news/detail"));
+
+const AdvDetailPage = lazy(() => import("../pages/news/detail-adv"));
 
 const SuspensedView = ({ children }) => {
   return (
@@ -82,11 +92,29 @@ const Layout = () => {
           }
         />
         <Route
+          path="/adv/:id"
+          element={
+            <SuspensedView>
+              <AdvDetailPage />
+            </SuspensedView>
+          }
+        />
+        <Route
           path="/cart"
           element={
             <ProtectedRoute>
               <SuspensedView>
                 <CartPage />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cart/finish"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CartFinish />
               </SuspensedView>
             </ProtectedRoute>
           }
@@ -189,6 +217,22 @@ const Layout = () => {
                 <BookingPage />
               </SuspensedView>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/search"
+          element={
+            <SuspensedView>
+              <SearchPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/contact"
+          element={
+            <SuspensedView>
+              <ContactPage />
+            </SuspensedView>
           }
         />
       </AnimationRoutes>

@@ -5,6 +5,10 @@ body {
   font-family: "Be Vietnam Pro", sans-serif;
 }
 
+.content-full a {
+  @apply text-primary;
+}
+
 body {
   background: #f5f5fa;
 }
@@ -37,6 +41,12 @@ p:not(:last-child) {
   height: calc(var(--zaui-safe-area-inset-top, 0px) + 48px);
   padding-top: calc(var(--zaui-safe-area-inset-top, 0px));
 }
+
+/* /navigation/ */
+.zaui-bottom-navigation-item .zaui-bottom-navigation-item-label {
+  font-size: 10px;
+}
+/* // */
 
 .mask-wave {
   --mask: radial-gradient(2.33px at 3.2px 50%, #000 99%, #0000 101%) 0
@@ -205,4 +215,21 @@ p:not(:last-child) {
 
 .tabs-time-booking .zaui-tabs-tabbar .zaui-tabs-tabbar-active-line {
   display: none;
+}
+
+/* / Pull To Refresh / */
+.ezs-ptr .lds-ellipsis div {
+  @apply !bg-app;
+}
+
+.ezs-ptr.ezs-ptr-safe.ptr--pull-down-treshold-breached .ptr__pull-down--loading {
+  @apply p-safe;
+}
+
+.ezs-ptr.ezs-ptr-safe.ptr--pull-down-treshold-breached .ptr__children {
+  @apply !translate-y-ptr
+}
+
+.ezs-ptr .ptr__pull-down--pull-more {
+  display: none !important;
 }

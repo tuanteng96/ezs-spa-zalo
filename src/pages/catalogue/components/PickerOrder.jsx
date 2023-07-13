@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, Sheet, useNavigate, useSnackbar } from "zmp-ui";
 import { useFieldArray, useFormContext, Controller } from "react-hook-form";
@@ -12,18 +12,37 @@ import { useLayout } from "../../../layout/LayoutProvider";
 import clsx from "clsx";
 import { useLocation } from "react-router";
 
-export const PickerOrder = ({ children, item, buttonText }) => {
+export const PickerOrder = ({ children, item, options, buttonText }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { AccessToken, Auth } = useLayout();
-  const [visible, setVisible] = useState(false);
-  const { handleSubmit, control } = useFormContext();
+  const { handleSubmit, control, watch } = useFormContext();
   const { openSnackbar } = useSnackbar();
+
+  let watchForm = watch()
+
+  const [visible, setVisible] = useState(false);
+  const [CrProduct, setCrProduct] = useState(item)
 
   const { fields } = useFieldArray({
     control,
     name: "adds",
   });
+
+  useEffect(() => {
+    if (options && options.length > 0) {
+      let watchAdds = watchForm.adds
+      let index = options.findIndex(x => x.ID === Number(watchAdds[0].ProdID))
+      if (index > -1) {
+        setCrProduct(options[index])
+      } else {
+        setCrProduct(item)
+      }
+    }
+    else {
+      setCrProduct(item)
+    }
+  }, [watchForm, options])
 
   const queryClient = useQueryClient();
 
@@ -68,7 +87,7 @@ export const PickerOrder = ({ children, item, buttonText }) => {
       })}
       {createPortal(
         <Sheet visible={visible} onClose={() => setVisible(false)} autoHeight>
-          {item && (
+          {CrProduct && (
             <div className="h-full">
               <div className="flex items-end px-3 pt-3 pb-4 border-b">
                 <div className="w-32">
@@ -76,13 +95,62 @@ export const PickerOrder = ({ children, item, buttonText }) => {
                     wrapperClassName="aspect-square !block"
                     className="aspect-square object-cover w-full"
                     effect="blur"
-                    src={toAbsolutePath(item?.Thumbnail)}
+                    src={toAbsolutePath(CrProduct?.Thumbnail)}
                   />
                 </div>
                 <div className="pl-3">
-                  <div className="font-semibold mb-2">{item?.Title}</div>
-                  <PriceSaleDetail product={item} />
+                  <div className="font-semibold mb-2">{CrProduct?.Title}</div>
+                  <PriceSaleDetail product={CrProduct} />
                 </div>
+              </div>
+              {
+                options && options.length > 0 && (
+                  <>
+                    <div className="border-b p-3">
+                      <div className="mb-2">Loại</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {fields &&
+                          fields.map((item, index) => (
+                            <Controller
+                              key={item.id}
+                              name={`adds[${index}].ProdID`}
+                              control={control}
+                              render={({ field: { ref, ...field } }) => (
+                                <>
+                                  {
+                                    options.map((otp, i) => (
+                                      <div
+                                        className={
+                                          clsx('flex items-center px-3 py-2 rounded-sm cursor-pointer border', Number(field.value) === otp.ID ? 'border-app bg-white' : 'border-light bg-light')
+                                        }
+                                        onClick={() => {
+                                          field.onChange(otp.ID)
+                                        }}
+                                        key={i}
+                                      >
+                                        <div className="w-8">
+                                          <ImageLazy
+                                            wrapperClassName="aspect-square !block border border-white"
+                                            className="aspect-square object-cover w-full rounded-sm"
+                                            effect="blur"
+                                            src={toAbsolutePath(otp?.Thumbnail)}
+                                          />
+                                        </div>
+                                        <div className="flex-1 pl-3 truncate">{otp.Opt1}</div>
+                                      </div>
+                                    ))
+                                  }
+                                </>
+                              )}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  </>
+                )
+              }
+              <div>
+
               </div>
               <div className="p-3 flex justify-between items-center">
                 <div>Số lượng</div>

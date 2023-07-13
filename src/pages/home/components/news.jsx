@@ -72,16 +72,16 @@ const News = () => {
               ))}
           {!isLoading &&
             data.slice(0, 6).map((item, index) => (
-              <SwiperSlide style={{ width: "40%" }} key={index}>
+              <SwiperSlide style={{ width: "80%" }} key={index}>
                 <NavLink
                   to={"/news/" + item.id}
                   state={{ dataProps: item }}
-                  className="bg-white block aspect-0/7"
+                  className="bg-white block aspect-[9/4]"
                 >
                   <div>
                     <ImageLazy
-                      wrapperClassName="aspect-0/7 !block"
-                      className="aspect-0/7 object-cover h-full"
+                      wrapperClassName="aspect-[9/4] !block"
+                      className="aspect-[9/4] object-cover h-full"
                       effect="blur"
                       src={toAbsolutePath(item.source.Thumbnail)}
                     />

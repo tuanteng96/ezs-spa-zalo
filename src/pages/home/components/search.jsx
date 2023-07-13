@@ -4,6 +4,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper";
 import clsx from "clsx";
 import { useLayout } from "../../../layout/LayoutProvider";
+import { NavLink } from "react-router-dom";
 
 const Search = ({ scrollTop }) => {
   const { onOpenActionStocks } = useLayout();
@@ -20,10 +21,13 @@ const Search = ({ scrollTop }) => {
       }}
     >
       <div className="bg-separator h-10 rounded-sm w-2/3 relative flex items-center">
-        <div className="w-10 text-center">
+        <NavLink
+          to="/search"
+          className="w-10 h-full flex items-center justify-center cursor-pointer"
+        >
           <Icon className="text-muted" icon="zi-search" />
-        </div>
-        <div className="h-full pl-1 flex-1">
+        </NavLink>
+        <NavLink to="/search" className="h-full pl-1 flex-1">
           <Swiper
             className="h-full"
             direction="vertical"
@@ -44,7 +48,7 @@ const Search = ({ scrollTop }) => {
               </Text>
             </SwiperSlide>
           </Swiper>
-        </div>
+        </NavLink>
         <div className="w-10 text-center" onClick={onOpenActionStocks}>
           <Icon
             className="text-muted !text-lg !h-auto"

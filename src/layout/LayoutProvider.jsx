@@ -14,7 +14,7 @@ import { SheetStocks } from "../components/sheet-stocks";
 if (getSystemInfo().platform === "android") {
   const androidSafeTop = Math.round(
     window.ZaloJavaScriptInterface.getStatusBarHeight() /
-      window.devicePixelRatio
+    window.devicePixelRatio
   );
   document.body.style.setProperty(
     "--zaui-safe-area-inset-top",

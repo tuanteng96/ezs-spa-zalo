@@ -8,6 +8,7 @@ import { useLayout } from "../../layout/LayoutProvider";
 import Carousel from "nuka-carousel";
 import clsx from "clsx";
 import { createSearchParams } from "react-router-dom";
+import { useConfigs } from "../../layout/MasterLayout";
 
 const GroupByCount = (List, Count) => {
   return List.reduce((acc, x, i) => {
@@ -41,6 +42,7 @@ const settings = {
 const BookingTime = () => {
   const navigate = useNavigate();
   const { Stocks } = useLayout();
+  const { GlobalConfig } = useConfigs();
 
   const [key, setKey] = useState("0");
   const [ListChoose, setListChoose] = useState([]);
@@ -88,13 +90,23 @@ const BookingTime = () => {
   useEffect(() => {
     getListChoose(DateChoose);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [DateChoose, ListLock, StockID]);
+  }, [DateChoose, ListLock, StockID, GlobalConfig]);
+
+  useEffect(() => {}, []);
 
   const getListChoose = (DateChoose) => {
     const { TimeOpen, TimeClose, TimeNext } = {
-      TimeOpen: { hour: "10", minute: "00", second: "00" },
-      TimeClose: { hour: "21", minute: "00", second: "00" },
-      TimeNext: 15,
+      TimeOpen: GlobalConfig?.APP?.Booking?.TimeOpen || {
+        hour: "10",
+        minute: "00",
+        second: "00",
+      },
+      TimeClose: GlobalConfig?.APP?.Booking?.TimeClose || {
+        hour: "21",
+        minute: "00",
+        second: "00",
+      },
+      TimeNext: GlobalConfig?.APP?.Booking?.TimeNext || 15,
       AtHome: true,
       hideNoteTime: true,
     };
@@ -203,6 +215,11 @@ const BookingTime = () => {
     }
   };
 
+  let StocksBooking = GlobalConfig?.StocksNotBook
+    ? Stocks &&
+      Stocks.filter((o) => !GlobalConfig?.StocksNotBook?.includes(o.ID))
+    : Stocks;
+
   return (
     <div className="overflow-auto h-full no-scrollbar">
       <div className="bg-white p-3 mt-1.5">
@@ -215,8 +232,8 @@ const BookingTime = () => {
             control={control}
             render={({ field: { ref, ...field }, fieldState }) => (
               <>
-                {Stocks &&
-                  Stocks.map((stock, index) => (
+                {StocksBooking &&
+                  StocksBooking.map((stock, index) => (
                     <div
                       className={clsx(
                         "flex items-center justify-center p-3 rounded-sm cursor-pointer transition",

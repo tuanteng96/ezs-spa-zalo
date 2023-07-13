@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getUserInfo } from "zmp-sdk";
+import ConfigsAPI from "../api/configs.api";
 import { SheetRegistration } from "../components/SheetRegistration";
 
 const ConfigContext = createContext();
@@ -10,6 +12,15 @@ const useConfigs = () => {
 
 const MasterLayout = ({ children }) => {
   const [ZaloInfo, setZaloInfo] = useState(null);
+  const [GlobalConfig, setGlobalConfig] = useState(null);
+
+  useQuery({
+    queryKey: ["GlobalConfig"],
+    queryFn: () => ConfigsAPI.global(),
+    onSuccess: ({ data }) => {
+      setGlobalConfig(data);
+    },
+  });
 
   useEffect(() => {
     getUserInfo({
@@ -28,6 +39,7 @@ const MasterLayout = ({ children }) => {
     <ConfigContext.Provider
       value={{
         ZaloInfo,
+        GlobalConfig,
       }}
     >
       {children}

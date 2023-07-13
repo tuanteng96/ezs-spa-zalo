@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useState } from "react";
-import { useParams } from "react-router";
-import { Icon, Page, useNavigate, Text } from "zmp-ui";
+import { useParams, useLocation } from "react-router";
+import { Icon, Page, useNavigate, Text, ImageViewer } from "zmp-ui";
 import { useForm, FormProvider } from "react-hook-form";
 import ProdsAPI from "../../api/prods.api";
 import { ImageLazy } from "../../components/ImagesLazy";
@@ -10,12 +10,20 @@ import { toAbsolutePath } from "../../utils/assetPath";
 import { NavigationOrder } from "./components/NavigationOrder";
 import { PriceSaleDetail } from "./components/PriceSaleDetail";
 import { useLayout } from "../../layout/LayoutProvider";
+import { HtmlParser } from "../../components/HtmlParser";
+import { Swiper, SwiperSlide } from "swiper/react";
+import PullToRefresh from "react-simple-pull-to-refresh";
+import { NavLink } from "react-router-dom";
 
 const CatalogueDetailPage = () => {
   const { Auth, CurrentStocks } = useLayout();
-  const [scrollTop, setScrollTop] = useState(0);
   const navigate = useNavigate();
   let { id } = useParams();
+  let { pathname, search, state } = useLocation();
+  const [scrollTop, setScrollTop] = useState(0);
+  const [images, setImages] = useState(null);
+  const [visible, setVisible] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const methods = useForm({
     defaultValues: {
@@ -32,15 +40,27 @@ const CatalogueDetailPage = () => {
           Qty: 1,
         },
       ],
-      forceStockID: CurrentStocks?.ID,
+      forceStockID: CurrentStocks?.ID || '',
     },
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["CatalogueDetail", { id }],
     queryFn: async () => {
       const { data } = await ProdsAPI.prodId({ id });
       return data?.data;
+    },
+    onSuccess: (data) => {
+      if (data?.images && data?.images?.length > 0) {
+        setImages(
+          data?.images.map((x, index) => ({
+            ...x,
+            src: toAbsolutePath(x.Value),
+            alt: "",
+            key: index,
+          }))
+        );
+      }
     },
     enabled: Number(id) > -1,
   });
@@ -86,74 +106,149 @@ const CatalogueDetailPage = () => {
   if (!data) return <></>;
 
   return (
-    <Page className="page !pt-0" hideScrollbar onScroll={handleScroll}>
+    <Page className="page !pt-0" hideScrollbar>
       <FormProvider {...methods}>
-        <form>
-          <div
-            className={clsx(
-              "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
-              scrollTop > 50 && "shadow-3xl"
-            )}
-            style={{
-              background: `rgba(255,255,255,${
-                scrollTop <= 100 ? scrollTop / 100 : scrollTop
-              })`,
-            }}
-          >
-            <div className="w-2/3 relative flex items-center h-full pl-12">
-              <div
-                className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
-                onClick={() => navigate(-1)}
-              >
-                <Icon icon="zi-chevron-left-header" className="text-app" />
-              </div>
-              <Text.Title
-                className={clsx(
-                  "text-app truncate transition",
-                  scrollTop > 100 ? "opacity-100" : "opacity-0"
-                )}
-              >
-                {data?.product?.Title}
-              </Text.Title>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="bg-white mb-2">
-              <ImageLazy
-                wrapperClassName="aspect-square !block"
-                className="aspect-square object-cover w-full"
-                effect="blur"
-                src={toAbsolutePath(data?.product?.Thumbnail)}
-              />
-            </div>
-            <div className="bg-white mb-2 p-3">
-              <div className="text-[17px] leading-5 mb-3 font-semibold">
-                {data?.product?.Title}
-              </div>
-              <PriceSaleDetail product={data?.product} />
-            </div>
-            {data?.product?.Desc && (
-              <div className="bg-white mb-2">
-                <div className="border-b p-3 font-semibold">Mô tả</div>
+        <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={refetch}>
+          <form className="h-full overflow-auto no-scrollbar" onScroll={handleScroll}>
+            <div
+              className={clsx(
+                "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
+                scrollTop > 50 && "shadow-3xl"
+              )}
+              style={{
+                background: `rgba(255,255,255,${scrollTop <= 100 ? scrollTop / 100 : scrollTop
+                  })`,
+              }}
+            >
+              <div className="w-2/3 relative flex items-center h-full pl-12">
                 <div
-                  className="p-3"
-                  dangerouslySetInnerHTML={{ __html: data?.product?.Desc }}
-                ></div>
+                  className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
+                  onClick={() => navigate(state?.prevState || '/catalogue?TypeID=795')}
+                >
+                  <Icon icon="zi-chevron-left-header" className="text-app" />
+                </div>
+                <Text.Title
+                  className={clsx(
+                    "text-app truncate transition",
+                    scrollTop > 100 ? "opacity-100" : "opacity-0"
+                  )}
+                >
+                  {data?.product?.Title}
+                </Text.Title>
               </div>
-            )}
-            {data?.product?.Detail && (
+            </div>
+            <div className="relative">
               <div className="bg-white mb-2">
-                <div className="border-b p-3 font-semibold">Chi tiết</div>
-                <div
-                  className="p-3"
-                  dangerouslySetInnerHTML={{ __html: data?.product?.Detail }}
-                ></div>
+                <ImageLazy
+                  wrapperClassName="aspect-square !block"
+                  className="aspect-square object-cover w-full"
+                  effect="blur"
+                  src={
+                    images && images.length > 0
+                      ? images[activeIndex].src
+                      : toAbsolutePath(data?.product?.Thumbnail)
+                  }
+                  onClick={() => setVisible(true)}
+                />
+                <div className="p-3">
+                  {images && images.length > 0 && (
+                    <Swiper
+                      spaceBetween={10}
+                      autoplay={{
+                        delay: 5000,
+                        disableOnInteraction: false,
+                      }}
+                      slidesPerView="auto"
+                    >
+                      {images.map((item, index) => (
+                        <SwiperSlide className="w-1/5 cursor-pointer" key={index}>
+                          <div
+                            className={clsx(
+                              "border rounded-sm",
+                              Number(activeIndex) === index && "border-app"
+                            )}
+                            onClick={() => setActiveIndex(index)}
+                          >
+                            <ImageLazy
+                              wrapperClassName="aspect-square !block"
+                              className="aspect-square object-cover w-full rounded-sm"
+                              effect="blur"
+                              src={item.src}
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-          <NavigationOrder item={data?.product} />
-        </form>
+              <div className="bg-white mb-2 p-3">
+                <div className="text-[17px] leading-5 mb-3 font-semibold">
+                  {data?.product?.Title}
+                </div>
+                <PriceSaleDetail product={data?.product} />
+              </div>
+              {
+                data.combos && data.combos.length > 1 && (
+                  <div className="bg-white mb-2 p-3">
+                    <div className="mb-2 font-semibold">Combo</div>
+                    <div className="grid grid-cols-4 gap-3">
+                      {
+                        data.combos.map((combo, i) => (
+                          <NavLink
+                            to={`/catalogue/${combo.Product.ID}`}
+                            state={{
+                              prevState: pathname + search
+                            }}
+                            className="block"
+                            key={i}
+
+                          >
+                            <div className="relative">
+                              <ImageLazy
+                                wrapperClassName="aspect-square !block"
+                                className="aspect-square object-cover w-full rounded-sm"
+                                effect="blur"
+                                src={toAbsolutePath(combo.Product.Thumbnail)}
+                              />
+                              <span className="absolute w-5 h-5 top-1 right-1 bg-primary text-white text-xs text-center rounded-full flex items-center justify-center">{combo.qty}</span>
+                            </div>
+                            <div className="text-xs mt-1.5 truncate">{combo.Product.Title}</div>
+                          </NavLink>
+                        ))
+                      }
+                    </div>
+                  </div>
+                )
+              }
+              <div></div>
+              {(data?.product?.Desc || data.combos && data.combos.length > 0 && data.combos[0].Product?.Desc) && (
+                <div className="bg-white mb-2">
+                  <div className="border-b p-3 font-semibold">Mô tả</div>
+                  <div className="p-3">
+                    <HtmlParser>{data?.product?.Desc || data.combos[0].Product?.Desc}</HtmlParser>
+                  </div>
+                </div>
+              )}
+              {(data?.product?.Detail || data.combos && data.combos.length > 0 && data.combos[0].Product?.Detail) && (
+                <div className="bg-white mb-2">
+                  <div className="border-b p-3 font-semibold">Chi tiết</div>
+                  <div className="p-3">
+                    <HtmlParser>{data?.product?.Detail || data.combos[0].Product?.Detail}</HtmlParser>
+                  </div>
+                </div>
+              )}
+            </div>
+          </form>
+        </PullToRefresh>
+        <NavigationOrder item={data?.product} options={data?.options} />
       </FormProvider>
+      <ImageViewer
+        onClose={() => setVisible(false)}
+        activeIndex={activeIndex}
+        images={images}
+        visible={visible}
+      />
     </Page>
   );
 };

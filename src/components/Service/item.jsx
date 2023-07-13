@@ -1,8 +1,8 @@
 import React from "react";
-import { Text } from "zmp-ui";
 import { toAbsolutePath } from "../../utils/assetPath";
+import { HtmlParser } from "../HtmlParser";
 import { ImageLazy } from "../ImagesLazy";
-import { Card } from "./card";
+import { CardWrap } from "./card-wrap";
 import { ServicePicker } from "./picker";
 
 export const ServiceItem = ({ service }) => {
@@ -13,8 +13,8 @@ export const ServiceItem = ({ service }) => {
           <div onClick={open}>
             <div>
               <ImageLazy
-                wrapperClassName="aspect-square !block"
-                className="aspect-square h-full object-cover"
+                wrapperClassName="aspect-[5/3] !block"
+                className="aspect-[5/3] h-full object-cover"
                 effect="blur"
                 src={toAbsolutePath(service.root.Thumbnail)}
               />
@@ -25,22 +25,15 @@ export const ServiceItem = ({ service }) => {
               </div>
               {(service.root.Desc || service.root.Detail) && (
                 <div className="line-clamp-3 h-[60px] text-sm mt-2">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: service.root.Desc }}
-                  />
-                  <div
-                    dangerouslySetInnerHTML={{ __html: service.root.Detail }}
-                  />
+                  <HtmlParser>
+                    {service.root.Desc}
+                    {service.root.Detail}
+                  </HtmlParser>
                 </div>
               )}
             </div>
           </div>
-          <div>
-            {service.items &&
-              service.items.map((item, index) => (
-                <Card key={index} item={item} />
-              ))}
-          </div>
+          <CardWrap service={service} />
         </div>
       )}
     </ServicePicker>

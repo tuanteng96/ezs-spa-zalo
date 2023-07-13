@@ -65,8 +65,8 @@ const BookingServiceItem = ({ item }) => {
             className={clsx(
               "border-2 w-6 h-6 rounded-full flex items-center justify-center",
               field.value &&
-                field.value.includes(item.ID) &&
-                "bg-app text-white"
+              field.value.includes(item.ID) &&
+              "bg-app text-white"
             )}
           >
             <Icon
@@ -93,7 +93,7 @@ const BookingService = ({ addBookingMutation }) => {
 
   const searchQuery = useDebounce(Key, 500);
 
-  const { data, fetchNextPage, isLoading, hasNextPage, isFetching } =
+  const { data, fetchNextPage, isLoading, hasNextPage, isFetching, refetch } =
     useInfiniteQuery({
       queryKey: ["ProdProductsNew", { CurrentStocks, searchQuery }],
       queryFn: async ({ pageParam = 1 }) => {
@@ -164,6 +164,29 @@ const BookingService = ({ addBookingMutation }) => {
                     </div>
                   }
                   scrollableTarget="scrollableProducts"
+                  refreshFunction={refetch}
+                  releaseToRefreshContent={
+                    <div className="flex items-center justify-center">
+                      <div className="lds-ellipsis">
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                      </div>
+                    </div>
+                  }
+                  pullDownToRefresh
+                  pullDownToRefreshThreshold={70}
+                  pullDownToRefreshContent={
+                    <div className="flex items-center justify-center">
+                      <div className="lds-ellipsis">
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                      </div>
+                    </div>
+                  }
                 >
                   <div className="grid grid-cols-1">
                     {List.map((item, index) => (

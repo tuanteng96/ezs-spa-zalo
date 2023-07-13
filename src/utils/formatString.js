@@ -26,7 +26,9 @@ export const formatString = {
   },
   fixedContentDomain: (content) => {
     if (!content) return "";
-    return content.replace(/src=\"\//g, 'src="' + ProcessENV.URL + "/");
+    return Array.isArray(content)
+      ? content.join("").replace(/src=\"\//g, 'src="' + ProcessENV.URL + "/")
+      : content.replace(/src=\"\//g, 'src="' + ProcessENV.URL + "/");
   },
   getIdParams: (url) => {
     return url && url.substring(url.lastIndexOf("/") + 1).split("?")[0];
@@ -54,5 +56,42 @@ export const formatString = {
       return Stocks[index].Title;
     }
     return "Không xác định";
+  },
+  getParameter: ({ key = "", url = "" }) => {
+    key = key.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regexS = "[\\?&]" + key + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(url);
+    return results == null ? null : results[1];
+  },
+  removeParameter: (key, sourceURL) => {
+    var rtn = sourceURL.split("?")[0],
+      param,
+      params_arr = [],
+      queryString =
+        sourceURL.indexOf("?") !== -1 ? sourceURL.split("?")[1] : "";
+    if (queryString !== "") {
+      params_arr = queryString.split("&");
+      for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+        param = params_arr[i].split("=")[0];
+        if (param === key) {
+          params_arr.splice(i, 1);
+        }
+      }
+      if (params_arr.length) rtn = rtn + "?" + params_arr.join("&");
+    }
+    return rtn;
+  },
+  validURL: (url) => {
+    var pattern = new RegExp(
+      "^(https?:\\/\\/)?" + // protocol
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+        "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+        "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    ); // fragment locator
+    return !!pattern.test(url);
   },
 };

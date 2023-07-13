@@ -5,6 +5,7 @@ import AdvAPI from "../../../api/adv.api";
 import { ImageLazy } from "../../../components/ImagesLazy";
 import { toAbsolutePath } from "../../../utils/assetPath";
 import { clsx } from "clsx";
+import { NavLinkAdv } from "../../../components/NavLinkAdv";
 
 const SalesTop = () => {
   const { data, isLoading } = useQuery({
@@ -19,7 +20,7 @@ const SalesTop = () => {
 
   return (
     <>
-      <div className="px-2 bg-white mb-3 py-2 flex">
+      <div className="px-2 bg-white pb-2 flex">
         {isLoading &&
           Array(3)
             .fill()
@@ -45,10 +46,11 @@ const SalesTop = () => {
             ))}
         {!isLoading &&
           data.slice(0, 3).map((item, index) => (
-            <NavLink
-              to="/"
+            <NavLinkAdv
+              data={item}
+              to={item.Link}
               className={clsx(
-                "px-1",
+                "px-1 cursor-pointer",
                 index === 1 ? "aspect-5/3 w-[43%]" : "flex-1"
               )}
               key={index}
@@ -58,7 +60,7 @@ const SalesTop = () => {
                 effect="blur"
                 src={toAbsolutePath(item.FileName)}
               />
-            </NavLink>
+            </NavLinkAdv>
           ))}
       </div>
     </>

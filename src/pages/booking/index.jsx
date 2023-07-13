@@ -43,13 +43,13 @@ const BookingPage = () => {
           BookDate: state?.formState?.BookDate
             ? moment(state?.formState?.BookDate, "YYYY-MM-DD HH:mm:ss").toDate()
             : "",
-          ID: state?.formState?.ID,
-          AtHome: state?.formState?.AtHome,
+          ID: state?.formState?.ID || 0,
+          AtHome: state?.formState?.AtHome || false,
           MemberID: state?.formState?.MemberID || Auth?.ID,
           RootIdS: state?.formState?.Roots
             ? state?.formState?.Roots.map((x) => x.ID)
             : [],
-          Desc: state?.formState?.Desc,
+          Desc: state?.formState?.Desc || "",
           StockID: state?.formState?.StockID || "",
           FullName: state?.formState?.Member?.FullName || "",
           Phone: state?.formState?.Member?.MobilePhone || "",
@@ -89,6 +89,10 @@ const BookingPage = () => {
       ],
     };
 
+    if (values?.ID) {
+      dataSubmit.deletes = [{ ID: values?.ID }];
+    }
+
     addBookingMutation.mutate(dataSubmit, {
       onSuccess: () => {
         reset();
@@ -120,7 +124,7 @@ const BookingPage = () => {
           <div
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
             onClick={() => {
-              if (queryKey === "Time") {
+              if (queryKey === "Time" || queryKey === "Finish") {
                 navigate(state?.prevState || "/");
               } else {
                 navigate(-1);

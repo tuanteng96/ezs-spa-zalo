@@ -47,8 +47,11 @@ module.exports = {
           "linear-gradient(-180deg,transparent 5%,rgba(0,0,0,.4) 51%,rgba(0,0,0,.6))",
       },
       padding: {
-        safe: "var(--zaui-safe-area-inset-top, 0px)",
+        "safe": "var(--zaui-safe-area-inset-top, 0px)",
         "safe-bottom": "var(--zaui-safe-area-inset-bottom, 0px)",
+      },
+      translate: {
+        "ptr": "calc(var(--zaui-safe-area-inset-top, 0px)  + 67px)"
       },
       animation: {
         tada: "tada 1s ease-in-out infinite",

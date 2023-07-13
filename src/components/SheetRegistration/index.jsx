@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import { getAccessToken, getPhoneNumber } from "zmp-sdk";
-import { Button, Modal, useNavigate, useSnackbar } from "zmp-ui";
+import { Button, Modal, useSnackbar, useNavigate } from "zmp-ui";
 import MemberAPI from "../../api/member.api";
 import ZaloAPI from "../../api/zalo.api";
 import { useQueryParams } from "../../hook";
@@ -16,17 +16,20 @@ const SheetRegistration = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [sheetVisible, setSheetVisible] = useState(false);
   const { ZaloInfo } = useConfigs();
-  const { onSaveAuth, accessToken } = useLayout();
+  const { onSaveAuth, AccessToken, CurrentStocks, onOpenActionStocks } =
+    useLayout();
+
+  const [loading, setLoading] = useState(false);
 
   const { openSnackbar } = useSnackbar();
 
   const queryParams = useQueryParams();
 
   useEffect(() => {
-    if (queryParams?.fromProtected && !accessToken) {
+    if (queryParams?.fromProtected && !AccessToken) {
       setSheetVisible(true);
     }
-  }, [queryParams?.fromProtected, accessToken]);
+  }, [queryParams?.fromProtected, AccessToken]);
 
   const onHide = () => {
     const param = searchParams.get("fromProtected");
@@ -49,6 +52,7 @@ const SheetRegistration = () => {
             ZaloID: ZaloInfo.id,
             FullName: ZaloInfo.name,
             MobilePhone: data?.data?.number?.replace(/^.{2}/g, "0"),
+            ByStockID: CurrentStocks?.ID || 0,
           },
         };
         result = await MemberAPI.addZalo(addMember);
@@ -62,54 +66,58 @@ const SheetRegistration = () => {
   });
 
   const onChangeReg = () => {
-    getAccessToken({
-      success: (accessToken) => {
-        getPhoneNumber({
-          success: async (data) => {
-            let { token } = data;
-            addMutation.mutate(
-              {
-                access_token: accessToken,
-                SecretKey: ProcessENV.SecretKey,
-                Code: token,
-              },
-              {
-                onSuccess: (data) => {
-                  if (data?.data?.data?.Member) {
-                    openSnackbar({
-                      text: "Kích hoạt thành viên thành công.",
-                      type: "success",
-                    });
-                    console.log(data?.data?.Member);
-                    onSaveAuth(data?.data?.Member);
-                    console.log(queryParams?.fromProtected);
-                    navigate(queryParams?.fromProtected);
-                    onHide();
-                  } else {
-                    openSnackbar({
-                      text:
-                        data?.data?.error ||
-                        data?.error ||
-                        "Lỗi không xác định",
-                      type: "error",
-                    });
-                  }
+    if (!CurrentStocks) {
+      onOpenActionStocks();
+    } else {
+      setLoading(true);
+      getAccessToken({
+        success: (accessToken) => {
+          getPhoneNumber({
+            success: async (data) => {
+              let { token } = data;
+              addMutation.mutate(
+                {
+                  access_token: accessToken,
+                  SecretKey: ProcessENV.SecretKey,
+                  Code: token,
                 },
-              }
-            );
-          },
-          fail: (error) => {
-            console.log(error);
-          },
-        });
-      },
-      fail: (error) => {
-        console.log(error);
-      },
-    });
+                {
+                  onSuccess: (data) => {
+                    if (data?.data?.data?.Member) {
+                      openSnackbar({
+                        text: "Kích hoạt thành viên thành công.",
+                        type: "success",
+                      });
+                      onSaveAuth(data?.data?.data?.Member);
+                      setSheetVisible(false);
+                      navigate(queryParams?.fromProtected);
+                    } else {
+                      openSnackbar({
+                        text:
+                          data?.data?.error ||
+                          data?.error ||
+                          "Lỗi không xác định",
+                        type: "error",
+                      });
+                    }
+                    setLoading(false);
+                  },
+                }
+              );
+            },
+            fail: (error) => {
+              setLoading(false);
+              console.log(error);
+            },
+          });
+        },
+        fail: (error) => {
+          setLoading(false);
+          console.log(error);
+        },
+      });
+    }
   };
-
-  //if (!sheetVisible) return <></>
 
   return (
     <>
@@ -144,7 +152,7 @@ const SheetRegistration = () => {
                   </div>
                   <div className="inline-block relative" onClick={onChangeReg}>
                     <Button
-                      loading={addMutation.isLoading}
+                      loading={loading || addMutation.isLoading}
                       htmlType="button"
                       className="!text-warning !border-solid !border-2 !border-warning !px-5 !py-3 !h-auto !rounded-3xl !font-bold !bg-transparent"
                     >

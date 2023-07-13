@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import {
   ScrollMenu,
   VisibilityContext,
@@ -8,7 +8,7 @@ import {
   slidingWindow,
 } from "react-horizontal-scrolling-menu";
 import "react-horizontal-scrolling-menu/dist/styles.css";
-import { createSearchParams } from "react-router-dom";
+import { createSearchParams, useLocation } from "react-router-dom";
 import { useNavigate } from "zmp-ui";
 import AdvAPI from "../../../api/adv.api";
 import { useDrag } from "../../../hook";
@@ -45,7 +45,7 @@ const Item = ({ itemId, selected, onClick, item }) => {
   const visible = visibility.isItemVisible(itemId);
 
   return (
-    <div onClick={() => onClick(visibility)} className="px-3">
+    <div onClick={() => onClick(visibility)} className="px-3 cursor-pointer">
       <div
         className={clsx(
           "whitespace-nowrap h-12 flex items-center font-semibold",
@@ -60,6 +60,8 @@ const Item = ({ itemId, selected, onClick, item }) => {
 
 const CatalogueMenu = ({ queryConfig }) => {
   const navigate = useNavigate();
+  let { state } = useLocation();
+
   const { data, isLoading } = useQuery({
     queryKey: ["CatalogueMenu"],
     queryFn: async () => {
@@ -100,12 +102,20 @@ const CatalogueMenu = ({ queryConfig }) => {
         return false;
       }
       scrollToItem(getItemById(itemId), "smooth", "center", "nearest");
-      navigate({
-        pathname: "/catalogue",
-        search: createSearchParams({
-          TypeID: itemId,
-        }).toString(),
-      });
+
+      navigate(
+        {
+          pathname: "/catalogue",
+          search: createSearchParams({
+            TypeID: itemId,
+          }).toString(),
+        },
+        {
+          state: {
+            prevState: state?.prevState || "",
+          },
+        }
+      );
     };
 
   const onInit = ({ getItemById, scrollToItem }) => {

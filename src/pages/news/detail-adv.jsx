@@ -4,21 +4,21 @@ import React, { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { Icon, Page, Text, useNavigate } from "zmp-ui";
-import NewsAPI from "../../api/news.api";
+import AdvAPI from "../../api/adv.api";
 import { HtmlParser } from "../../components/HtmlParser";
 import { ImageLazy } from "../../components/ImagesLazy";
 import { toAbsolutePath } from "../../utils/assetPath";
 
-const NewsDetailPage = () => {
+const AdvDetailPage = () => {
   const [scrollTop, setScrollTop] = useState(0);
   const navigate = useNavigate();
   const { state } = useLocation();
   let { id } = useParams();
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["NewsDetail"],
+    queryKey: ["AdvDetail"],
     queryFn: async () => {
-      const { data } = await NewsAPI.getDetailID(id);
+      const { data } = await AdvAPI.getAdvId(id);
       return data?.data[0] || [];
     },
     initialData: state?.dataProps,
@@ -119,14 +119,14 @@ const NewsDetailPage = () => {
                 wrapperClassName="aspect-square !block"
                 className="w-full aspect-square object-cover"
                 effect="blur"
-                src={toAbsolutePath(data?.Thumbnail || data?.source?.Thumbnail)}
+                src={toAbsolutePath(data?.Thumbnail || data?.source?.Thumbnail || data?.FileName)}
               />
               <div className="absolute left-0 bottom-0 w-full h-3/6 bg-pattern"></div>
               <div className="absolute bottom-5 p-5 text-white text-lg font-bold uppercase">
                 {data?.source?.Title || data?.Title}
               </div>
             </div>
-            <div className="-mt-5 relative bg-white rounded-t-3xl p-5 leading-6 content-full">
+            <div className="-mt-5 relative bg-white rounded-t-3xl p-5 leading-6">
               <HtmlParser>
                 {data?.source?.Desc || data?.Desc}
                 {data?.source?.Content || data?.Content}
@@ -139,4 +139,4 @@ const NewsDetailPage = () => {
   );
 };
 
-export default NewsDetailPage;
+export default AdvDetailPage;

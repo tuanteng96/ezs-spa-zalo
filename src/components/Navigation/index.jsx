@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Navigate, useLocation } from "react-router";
-import { configAppView } from "zmp-sdk";
+import { useLocation } from "react-router";
+import { configAppView, openChat } from "zmp-sdk";
 import { BottomNavigation, Icon, useNavigate } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
+import { useConfigs } from "../../layout/MasterLayout";
+import { ProcessENV } from "../../utils/process";
 import { CartIcon } from "./CartIcon";
 
 export const NO_BOTTOM_NAVIGATION_PAGES = [
@@ -19,6 +21,8 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-service",
   "/user/customer-booking-manage",
   "/booking",
+  "/search",
+  "/contact",
 ];
 
 export const BOTTOM_NAVIGATION_SEARCH_PAGE = ["Type=Finish"];
@@ -30,6 +34,7 @@ export const Navigation = () => {
   const { pathname, search } = useLocation();
   const [active, setActive] = useState("/");
   const keyboardVisible = useVirtualKeyboardVisible();
+  let { GlobalConfig } = useConfigs();
 
   let navigate = useNavigate();
 
@@ -62,8 +67,20 @@ export const Navigation = () => {
     if (Key === pathname) {
       navigate(0);
     } else {
-      navigate(Path ? Path : Key);
+      navigate(Path ? Path : Key, {
+        state: {
+          prevState: pathname + search,
+        },
+      });
     }
+  };
+
+  const openChatScreen = () => {
+    openChat({
+      type: GlobalConfig?.ZALO?.type,
+      id: GlobalConfig?.ZALO?.ID,
+      message: "Xin chào? Mình cần tư vấn ?",
+    });
   };
 
   if (noBottomNav || keyboardVisible) {
@@ -96,25 +113,25 @@ export const Navigation = () => {
         key="/catalogue"
         icon={<Icon icon="zi-more-grid" />}
         activeIcon={<Icon icon="zi-more-grid-solid" />}
-        //linkTo="/catalogue?TypeID=hot"
+        //linkTo="/catalogue?TypeID=795"
         onClick={() =>
           onChangePath({
             Key: "/catalogue",
-            Path: "/catalogue?TypeID=hot",
+            Path: "/catalogue?TypeID=795",
           })
         }
       />
       <BottomNavigation.Item
         label="Đặt lịch"
         key="/booking"
-        icon={<Icon className="animate-tada" icon="zi-calendar" />}
-        activeIcon={<Icon className="animate-tada" icon="zi-calendar-solid" />}
+        icon={<Icon icon="zi-calendar" />}
+        activeIcon={<Icon icon="zi-calendar-solid" />}
         onClick={() =>
           onChangePath({
             Key: "/booking",
           })
         }
-        //linkTo="/booking"
+      //linkTo="/booking"
       />
       <BottomNavigation.Item
         key="/cart"
@@ -127,6 +144,14 @@ export const Navigation = () => {
             Key: "/cart",
           })
         }
+      />
+      <BottomNavigation.Item
+        key="/chat"
+        label="Nhắn tin"
+        icon={<Icon className="animate-tada" icon="zi-chat" />}
+        activeIcon={<Icon className="animate-tada" icon="zi-chat" />}
+        //linkTo="/cart"
+        onClick={openChatScreen}
       />
       <BottomNavigation.Item
         key="/user"

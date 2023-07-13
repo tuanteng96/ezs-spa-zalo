@@ -1,4 +1,5 @@
 import React from "react";
+import { useLocation } from "react-router";
 import { Icon, Page, useNavigate, Text } from "zmp-ui";
 import { useQueryParams } from "../../hook";
 import { CatalogueCate } from "./components/CatalogueCate";
@@ -9,6 +10,7 @@ import ListServices from "./ListServices";
 const CataloguePage = () => {
   const navigate = useNavigate();
   const queryParams = useQueryParams();
+  let { state } = useLocation();
 
   const queryConfig = {
     TypeID: queryParams?.TypeID || "",
@@ -21,7 +23,9 @@ const CataloguePage = () => {
         <div className="w-2/3 relative flex items-center h-full pl-10">
           <div
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
-            onClick={() => navigate(-1)}
+            onClick={() =>
+              state?.prevState ? navigate(state?.prevState) : navigate("/")
+            }
           >
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>

@@ -1,23 +1,26 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import { NavLink } from "react-router-dom";
 import AdvAPI from "../../../api/adv.api";
 import { ImageLazy } from "../../../components/ImagesLazy";
+import { NavLinkAdv } from "../../../components/NavLinkAdv";
+import { useLayout } from "../../../layout/LayoutProvider";
 import { toAbsolutePath } from "../../../utils/assetPath";
 
-const Category = () => {
+const Category = ({ ID, QueryKey, isRequired }) => {
+  const { Auth } = useLayout();
   const { data, isLoading } = useQuery({
-    queryKey: ["AdvBannerZalo"],
+    queryKey: [QueryKey],
     queryFn: async () => {
-      const { data } = await AdvAPI.getAdvName("APP.ZALO.DICHVU");
+      const { data } = await AdvAPI.getAdvName(ID);
       return data?.data || [];
     },
+    enabled: isRequired ? Auth?.ID > 0 : true,
   });
 
   if (!data || data.length === 0) return "";
 
   return (
-    <div className="grid grid-cols-4 gap-y-4 bg-white px-3 pt-5 pb-3">
+    <>
       {isLoading &&
         Array(8)
           .fill()
@@ -47,7 +50,12 @@ const Category = () => {
           ))}
       {!isLoading &&
         data.map((item, index) => (
-          <NavLink to="/" className="flex flex-col items-center" key={index}>
+          <NavLinkAdv
+            data={item}
+            to={item.Link}
+            className="flex flex-col items-center cursor-pointer"
+            key={index}
+          >
             <ImageLazy
               wrapperClassName="aspect-square w-16 !block"
               className="rounded-full w-16 shadow-[2px_0px_0px_2px_#e4ad2f] aspect-square object-cover"
@@ -60,9 +68,9 @@ const Category = () => {
             >
               {item.Title}
             </div>
-          </NavLink>
+          </NavLinkAdv>
         ))}
-    </div>
+    </>
   );
 };
 

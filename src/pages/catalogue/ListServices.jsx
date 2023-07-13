@@ -63,7 +63,7 @@ const ListServices = ({ queryConfig }) => {
     }
   }, [queryConfig.TypeID, queryConfig.CateID]);
 
-  const { data, fetchNextPage, isLoading, hasNextPage } = useInfiniteQuery({
+  const { data, fetchNextPage, isLoading, hasNextPage, refetch } = useInfiniteQuery({
     queryKey: ["ProdProductsNew", { CurrentStocks, ...queryConfig }],
     queryFn: async ({ pageParam = 1 }) => {
       const newQueryParams = {
@@ -101,6 +101,29 @@ const ListServices = ({ queryConfig }) => {
           hasMore={hasNextPage}
           loader={<SkeletonServices total={1} />}
           scrollableTarget="scrollableProducts"
+          refreshFunction={refetch}
+          releaseToRefreshContent={
+            <div className="flex items-center justify-center">
+              <div className="lds-ellipsis">
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+              </div>
+            </div>
+          }
+          pullDownToRefresh
+          pullDownToRefreshThreshold={70}
+          pullDownToRefreshContent={
+            <div className="flex items-center justify-center">
+              <div className="lds-ellipsis">
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+                <div className="!bg-app"></div>
+              </div>
+            </div>
+          }
         >
           <div className="p-3 grid grid-cols-1 gap-3">
             {List &&

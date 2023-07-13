@@ -90,8 +90,8 @@ export const PickerOrderPayted = ({ children, item }) => {
   const [visible, setVisible] = useState(false);
   const [Banks, setBanks] = useState(null);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["MoneyCardDetail"],
+  const { data } = useQuery({
+    queryKey: ["InfoQrCode"],
     queryFn: async () => {
       const { data } = await ConfigsAPI.getNames(
         "App.thanhtoan,MA_QRCODE_NGAN_HANG"
@@ -121,12 +121,12 @@ export const PickerOrderPayted = ({ children, item }) => {
                 __html:
                   data &&
                   data.length > 1 &&
-                  data[0].ValueLines.replaceAll("ID_ĐH", `#${item.ID}`)
+                  data[0].ValueLines.replaceAll("ID_ĐH", `<b class="text-app">#${item.ID}</b>`)
                     .replaceAll(
                       "MONEY",
-                      formatString.formatVND(Math.abs(item.ToPay))
+                      `<b class="text-app">${formatString.formatVND(Math.abs(item.ToPay))}</b>`
                     )
-                    .replaceAll("ID_DH", `${item.ID}`),
+                    .replaceAll("ID_DH", `<b class="text-app">${item.ID}</b>`),
               }}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">

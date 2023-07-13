@@ -1,13 +1,15 @@
 import React from "react";
 import { openChat } from "zmp-sdk";
-import { ProcessENV } from "../../../utils/process";
+import { useConfigs } from "../../../layout/MasterLayout";
 import { PickerOrder } from "./PickerOrder";
 
-export const NavigationOrder = ({ item }) => {
+export const NavigationOrder = ({ item, options }) => {
+  let { GlobalConfig } = useConfigs();
+
   const openChatScreen = () => {
     openChat({
-      type: "oa",
-      id: ProcessENV.ZaloOaID,
+      type: GlobalConfig?.ZALO?.type,
+      id: GlobalConfig?.ZALO?.ID,
       message: item.Title,
     });
   };
@@ -33,7 +35,7 @@ export const NavigationOrder = ({ item }) => {
           </svg>
           <div className="absolute h-7 w-[1px] bg-white right-0 opacity-50"></div>
         </div>
-        <PickerOrder item={item} buttonText="Thêm vào giỏ hàng">
+        <PickerOrder item={item} options={options} buttonText="Thêm vào giỏ hàng">
           {({ open }) => (
             <div
               className="bg-success text-white flex items-center justify-center cursor-pointer"
@@ -70,7 +72,7 @@ export const NavigationOrder = ({ item }) => {
             </div>
           )}
         </PickerOrder>
-        <PickerOrder item={item} buttonText="Mua ngay">
+        <PickerOrder item={item} options={options} buttonText="Mua ngay">
           {({ open }) => (
             <div
               className="col-span-2 bg-app flex items-center justify-center text-white cursor-pointer"

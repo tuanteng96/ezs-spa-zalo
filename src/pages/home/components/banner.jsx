@@ -6,7 +6,7 @@ import { ImageLazy } from "../../../components/ImagesLazy";
 import { useQuery } from "@tanstack/react-query";
 import AdvAPI from "../../../api/adv.api";
 import { toAbsolutePath } from "../../../utils/assetPath";
-import { NavLink } from "react-router-dom";
+import { NavLinkAdv } from "../../../components/NavLinkAdv";
 
 const Banner = () => {
   const { data, isLoading } = useQuery({
@@ -50,14 +50,18 @@ const Banner = () => {
         {data &&
           data.map((item, index) => (
             <SwiperSlide key={index}>
-              <NavLink className="block" to={item.Link}>
+              <NavLinkAdv
+                className="block cursor-pointer"
+                data={item}
+                to={item.Link}
+              >
                 <ImageLazy
-                  wrapperClassName="aspect-4/5 !block"
-                  className="aspect-4/5 object-cover"
+                  wrapperClassName="aspect-[5/7] !block"
+                  className="aspect-[5/7] object-cover"
                   effect="blur"
                   src={toAbsolutePath(item.FileName)}
                 />
-              </NavLink>
+              </NavLinkAdv>
             </SwiperSlide>
           ))}
       </Swiper>
