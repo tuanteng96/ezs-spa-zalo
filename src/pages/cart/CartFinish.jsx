@@ -1,13 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
-import React, { useEffect, useState } from 'react'
-import { Icon, Page, Text, useNavigate } from 'zmp-ui'
-import ConfigsAPI from '../../api/configs.api';
-import { formatString } from '../../utils/formatString';
-import { PickerBanks } from "../../pages/user/components/PickerOrderPayted"
-import { useLocation } from 'react-router';
+import { useQuery } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { Icon, Page, Text, useNavigate } from "zmp-ui";
+import ConfigsAPI from "../../api/configs.api";
+import { formatString } from "../../utils/formatString";
+import { PickerBanks } from "../../pages/user/components/PickerOrderPayted";
+import { useLocation } from "react-router";
 
 const CartFinish = () => {
-
   const { state } = useLocation();
   const navigate = useNavigate();
   const [Banks, setBanks] = useState(null);
@@ -29,7 +28,10 @@ const CartFinish = () => {
   }, [data]);
 
   return (
-    <Page className="page !h-full !overflow-hidden flex flex-col bg-white !pb-safe" hideScrollbar>
+    <Page
+      className="page !h-full !overflow-hidden flex flex-col bg-white !pb-safe"
+      hideScrollbar
+    >
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white shadow-3xl">
         <div className="w-2/3 relative flex items-center h-full pl-10">
           <div
@@ -38,9 +40,7 @@ const CartFinish = () => {
           >
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>
-          <Text.Title className="text-app">
-            Đặt hàng thành công
-          </Text.Title>
+          <Text.Title className="text-app">Đặt hàng thành công</Text.Title>
         </div>
       </div>
       <div className="h-full border-top overflow-auto no-scrollbar flex flex-col justify-center">
@@ -82,12 +82,20 @@ const CartFinish = () => {
               __html:
                 data &&
                 data.length > 1 &&
-                data[0].ValueLines.replaceAll("ID_ĐH", `<b class="text-app">#${state?.formState?.ID}</b>`)
+                data[0].ValueLines.replaceAll(
+                  "ID_ĐH",
+                  `<b class="text-app">#${state?.formState?.ID}</b>`
+                )
                   .replaceAll(
                     "MONEY",
-                    `<b class="text-app">${formatString.formatVND(Math.abs(state?.formState?.ToPay))}</b>`
+                    `<b class="text-app">${formatString.formatVND(
+                      Math.abs(state?.formState?.ToPay)
+                    )}</b>`
                   )
-                  .replaceAll("ID_DH", `<b class="text-app">${state?.formState?.ID}</b>`),
+                  .replaceAll(
+                    "ID_DH",
+                    `<b class="text-app">${state?.formState?.ID}</b>`
+                  ),
             }}
           />
         </div>
@@ -98,9 +106,9 @@ const CartFinish = () => {
                 key={index}
                 Bank={bank}
                 item={{
-                  ToPay: 200000,
-                  ID: 234444
+                  ID: state?.formState?.ID,
                 }}
+                TotalDebt={state?.formState?.ToPay}
                 Banks={Banks}
               >
                 {({ open }) => (
@@ -115,8 +123,8 @@ const CartFinish = () => {
             ))}
         </div>
       </div>
-    </Page >
-  )
-}
+    </Page>
+  );
+};
 
-export default CartFinish
+export default CartFinish;

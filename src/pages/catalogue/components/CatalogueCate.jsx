@@ -68,7 +68,9 @@ const CatalogueCate = ({ queryConfig }) => {
       return data
         ? [
             { Title: "Tất cả", Id: "", ID: "" },
-            ...data?.map((x) => ({ ...x, Id: x.ID })),
+            ...data
+              ?.map((x) => ({ ...x, Id: x.ID }))
+              .filter((x) => x.IsPublic !== 0),
           ]
         : [];
     },
