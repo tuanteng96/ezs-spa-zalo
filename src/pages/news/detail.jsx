@@ -43,7 +43,10 @@ const NewsDetailPage = () => {
           )}
         >
           <div className="w-2/3 relative flex items-center h-full pl-12">
-            <div className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white">
+            <div
+              className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
+              onClick={() => navigate(-1)}
+            >
               <Icon icon="zi-chevron-left-header" className="text-app" />
             </div>
           </div>
@@ -90,8 +93,9 @@ const NewsDetailPage = () => {
           scrollTop > 50 && "shadow-3xl"
         )}
         style={{
-          background: `rgba(255,255,255,${scrollTop <= 100 ? scrollTop / 100 : scrollTop
-            })`,
+          background: `rgba(255,255,255,${
+            scrollTop <= 100 ? scrollTop / 100 : scrollTop
+          })`,
         }}
       >
         <div className="w-2/3 relative flex items-center h-full pl-12">
@@ -113,7 +117,10 @@ const NewsDetailPage = () => {
       </div>
       <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={refetch}>
         <div className="pb-safe h-full">
-          <div className="h-full overflow-auto no-scrollbar" onScroll={handleScroll}>
+          <div
+            className="h-full overflow-auto no-scrollbar"
+            onScroll={handleScroll}
+          >
             <div className="relative">
               <ImageLazy
                 wrapperClassName="aspect-square !block"

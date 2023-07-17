@@ -60,14 +60,18 @@ const BookingPage = () => {
               : "",
         },
   });
-  const { handleSubmit, setValue, reset } = methods;
+  const { handleSubmit, setValue, reset, watch } = methods;
+
+  let watchForm = watch();
 
   useEffect(() => {
-    if (!state?.formState) setValue("StockID", CurrentStocks?.ID || "");
+    if (!state?.formState && !watchForm.ID)
+      setValue("StockID", CurrentStocks?.ID || "");
   }, [CurrentStocks, state?.formState]);
 
   useEffect(() => {
-    if (!state?.formState) setValue("MemberID", Auth?.ID || "");
+    if (!state?.formState && !watchForm.ID)
+      setValue("MemberID", Auth?.ID || "");
   }, [Auth, state?.formState]);
 
   const addBookingMutation = useMutation({

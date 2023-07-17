@@ -36,12 +36,12 @@ const initialValues = {
 const ContactPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { Auth } = useLayout();
+  const { Auth, CurrentStocks, onOpenActionStocks } = useLayout();
   const { ZaloInfo } = useConfigs();
 
   const { openSnackbar } = useSnackbar();
 
-  const { control, handleSubmit, reset, setError } = useForm({
+  const { control, handleSubmit } = useForm({
     defaultValues: {
       ...initialValues,
       Fullname: Auth ? Auth?.FullName : ZaloInfo?.name,
@@ -58,18 +58,26 @@ const ContactPage = () => {
   });
 
   const onSubmit = (values) => {
-    let dataPost = {
-      contact: { ...values },
-    };
-    postMutation.mutate(dataPost, {
-      onSuccess: (data) => {
-        openSnackbar({
-          text: "Quân tâm chương trình thành công!",
-          type: "success",
-        });
-        navigate("/");
-      },
-    });
+    if (!CurrentStocks?.ID) {
+      onOpenActionStocks()
+    }
+    else {
+      let dataPost = {
+        contact: {
+          ...values,
+          StockID: CurrentStocks?.ID
+        },
+      };
+      postMutation.mutate(dataPost, {
+        onSuccess: (data) => {
+          openSnackbar({
+            text: "Quân tâm chương trình thành công!",
+            type: "success",
+          });
+          navigate("/");
+        },
+      });
+    }
   };
 
   return (

@@ -6,6 +6,9 @@ import { MasterLayout } from "./MasterLayout";
 import ProtectedRoute from "./_core/ProtectedRoute";
 
 const CataloguePage = lazy(() => import("../pages/catalogue"));
+const CatalogueServicePage = lazy(() =>
+  import("../pages/catalogue/CatalogueService")
+);
 const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
 
 const CartPage = lazy(() => import("../pages/cart"));
@@ -26,6 +29,7 @@ const CustomerBookingManage = lazy(() =>
   import("../pages/user/CustomerBookingManage")
 );
 const CustomerProfile = lazy(() => import("../pages/user/CustomerProfile"));
+const CustomerBranch = lazy(() => import("../pages/user/CustomerBranch"));
 
 const BookingPage = lazy(() => import("../pages/booking"));
 
@@ -72,6 +76,14 @@ const Layout = () => {
           element={
             <SuspensedView>
               <CatalogueDetailPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/catalogue/service/:id"
+          element={
+            <SuspensedView>
+              <CatalogueServicePage />
             </SuspensedView>
           }
         />
@@ -135,6 +147,16 @@ const Layout = () => {
             <ProtectedRoute>
               <SuspensedView>
                 <CustomerProfile />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-branch"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerBranch />
               </SuspensedView>
             </ProtectedRoute>
           }

@@ -20,7 +20,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import MemberAPI from "../../api/member.api";
 import { useMutation } from "@tanstack/react-query";
 import clsx from "clsx";
-import { chooseImage } from "zmp-sdk";
 
 const schemaUsers = yup
   .object({
@@ -100,6 +99,8 @@ const CustomerProfile = () => {
       Birth: Auth?.BirthDate
         ? moment(Auth?.BirthDate, "YYYY-MM-DD").toDate()
         : "",
+      Email:
+        Auth.Email && !Auth.Email.includes("@nomail.com") ? Auth.Email : "",
     });
   }, [Auth]);
 
@@ -246,6 +247,8 @@ const CustomerProfile = () => {
                   placeholder="Chọn giới tính"
                   onChange={field.onChange}
                   value={field.value ? Number(field.value) : ""}
+                  disabled={Auth?.Gender !== -1}
+                  className="disabled:text-[#141415]"
                 >
                   <Option value={1} title="Nam" />
                   <Option value={0} title="Nữ" />
@@ -254,22 +257,29 @@ const CustomerProfile = () => {
             />
           </div>
           <div className="mb-3">
-            <Controller
-              name="Birth"
-              control={control}
-              render={({ field: { ref, ...field }, fieldState }) => (
-                <DatePicker
-                  label="Ngày sinh"
-                  mask
-                  maskClosable
-                  dateFormat="dd/mm/yyyy"
-                  title="Chọn ngày sinh"
-                  placeholder="Chọn ngày sinh"
-                  onChange={field.onChange}
-                  value={field.value}
-                />
+            <div className="relative">
+              <Controller
+                name="Birth"
+                control={control}
+                render={({ field: { ref, ...field }, fieldState }) => (
+                  <DatePicker
+                    label="Ngày sinh"
+                    mask
+                    maskClosable
+                    dateFormat="dd/mm/yyyy"
+                    title="Chọn ngày sinh"
+                    placeholder="Chọn ngày sinh"
+                    onChange={field.onChange}
+                    value={field.value}
+                    disabled={Auth?.BirthDate}
+                    inputClass="disabled:text-[#141415]"
+                  />
+                )}
+              />
+              {Auth?.BirthDate && (
+                <div className="absolute w-full h-full top-0 left-0" />
               )}
-            />
+            </div>
           </div>
           <div className="mb-3">
             <Controller

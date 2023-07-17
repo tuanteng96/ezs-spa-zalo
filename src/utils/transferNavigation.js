@@ -27,7 +27,15 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
             },
           }
         );
-      } else {
+      }
+      else if (to.includes("/shop/selected/")) {
+        navigate(`/catalogue/service/${splitUrl[3]}`, {
+          state: {
+            prevState: pathname + search,
+          },
+        });
+      }
+      else {
         navigate(`/catalogue?TypeID=${splitUrl[2]}`, {
           state: {
             prevState: pathname + search,

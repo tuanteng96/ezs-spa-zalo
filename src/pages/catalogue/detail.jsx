@@ -40,7 +40,7 @@ const CatalogueDetailPage = () => {
           Qty: 1,
         },
       ],
-      forceStockID: CurrentStocks?.ID || '',
+      forceStockID: CurrentStocks?.ID || "",
     },
   });
 
@@ -109,21 +109,27 @@ const CatalogueDetailPage = () => {
     <Page className="page !pt-0" hideScrollbar>
       <FormProvider {...methods}>
         <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={refetch}>
-          <form className="h-full overflow-auto no-scrollbar" onScroll={handleScroll}>
+          <form
+            className="h-full overflow-auto no-scrollbar"
+            onScroll={handleScroll}
+          >
             <div
               className={clsx(
                 "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
                 scrollTop > 50 && "shadow-3xl"
               )}
               style={{
-                background: `rgba(255,255,255,${scrollTop <= 100 ? scrollTop / 100 : scrollTop
-                  })`,
+                background: `rgba(255,255,255,${
+                  scrollTop <= 100 ? scrollTop / 100 : scrollTop
+                })`,
               }}
             >
               <div className="w-2/3 relative flex items-center h-full pl-12">
                 <div
                   className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
-                  onClick={() => navigate(state?.prevState || '/catalogue?TypeID=795')}
+                  onClick={() =>
+                    navigate(state?.prevState || "/catalogue?TypeID=795")
+                  }
                 >
                   <Icon icon="zi-chevron-left-header" className="text-app" />
                 </div>
@@ -140,8 +146,8 @@ const CatalogueDetailPage = () => {
             <div className="relative">
               <div className="bg-white mb-2">
                 <ImageLazy
-                  wrapperClassName="aspect-square !block"
-                  className="aspect-square object-cover w-full"
+                  wrapperClassName="aspect-[5/3] !block"
+                  className="aspect-[5/3] object-cover w-full"
                   effect="blur"
                   src={
                     images && images.length > 0
@@ -161,7 +167,10 @@ const CatalogueDetailPage = () => {
                       slidesPerView="auto"
                     >
                       {images.map((item, index) => (
-                        <SwiperSlide className="w-1/5 cursor-pointer" key={index}>
+                        <SwiperSlide
+                          className="w-1/5 cursor-pointer"
+                          key={index}
+                        >
                           <div
                             className={clsx(
                               "border rounded-sm",
@@ -188,53 +197,62 @@ const CatalogueDetailPage = () => {
                 </div>
                 <PriceSaleDetail product={data?.product} />
               </div>
-              {
-                data.combos && data.combos.length > 1 && (
-                  <div className="bg-white mb-2 p-3">
-                    <div className="mb-2 font-semibold">Combo</div>
-                    <div className="grid grid-cols-4 gap-3">
-                      {
-                        data.combos.map((combo, i) => (
-                          <NavLink
-                            to={`/catalogue/${combo.Product.ID}`}
-                            state={{
-                              prevState: pathname + search
-                            }}
-                            className="block"
-                            key={i}
-
-                          >
-                            <div className="relative">
-                              <ImageLazy
-                                wrapperClassName="aspect-square !block"
-                                className="aspect-square object-cover w-full rounded-sm"
-                                effect="blur"
-                                src={toAbsolutePath(combo.Product.Thumbnail)}
-                              />
-                              <span className="absolute w-5 h-5 top-1 right-1 bg-primary text-white text-xs text-center rounded-full flex items-center justify-center">{combo.qty}</span>
-                            </div>
-                            <div className="text-xs mt-1.5 truncate">{combo.Product.Title}</div>
-                          </NavLink>
-                        ))
-                      }
-                    </div>
-                  </div>
-                )
-              }
-              <div></div>
-              {(data?.product?.Desc || data.combos && data.combos.length > 0 && data.combos[0].Product?.Desc) && (
-                <div className="bg-white mb-2">
-                  <div className="border-b p-3 font-semibold">Mô tả</div>
-                  <div className="p-3">
-                    <HtmlParser>{data?.product?.Desc || data.combos[0].Product?.Desc}</HtmlParser>
+              {data.combos && data.combos.length > 1 && (
+                <div className="bg-white mb-2 p-3">
+                  <div className="mb-2 font-semibold">Combo</div>
+                  <div className="grid grid-cols-4 gap-3">
+                    {data.combos.map((combo, i) => (
+                      <NavLink
+                        to={`/catalogue/${combo.Product.ID}`}
+                        state={{
+                          prevState: pathname + search,
+                        }}
+                        className="block"
+                        key={i}
+                      >
+                        <div className="relative">
+                          <ImageLazy
+                            wrapperClassName="aspect-square !block"
+                            className="aspect-square object-cover w-full rounded-sm"
+                            effect="blur"
+                            src={toAbsolutePath(combo.Product.Thumbnail)}
+                          />
+                          <span className="absolute w-5 h-5 top-1 right-1 bg-primary text-white text-xs text-center rounded-full flex items-center justify-center">
+                            {combo.qty}
+                          </span>
+                        </div>
+                        <div className="text-xs mt-1.5 truncate">
+                          {combo.Product.Title}
+                        </div>
+                      </NavLink>
+                    ))}
                   </div>
                 </div>
               )}
-              {(data?.product?.Detail || data.combos && data.combos.length > 0 && data.combos[0].Product?.Detail) && (
+              <div></div>
+              {(data?.product?.Desc ||
+                (data.combos &&
+                  data.combos.length > 0 &&
+                  data.combos[0].Product?.Desc)) && (
+                <div className="bg-white mb-2">
+                  <div className="border-b p-3 font-semibold">Mô tả</div>
+                  <div className="p-3">
+                    <HtmlParser>
+                      {data?.product?.Desc || data.combos[0].Product?.Desc}
+                    </HtmlParser>
+                  </div>
+                </div>
+              )}
+              {(data?.product?.Detail ||
+                (data.combos &&
+                  data.combos.length > 0 &&
+                  data.combos[0].Product?.Detail)) && (
                 <div className="bg-white mb-2">
                   <div className="border-b p-3 font-semibold">Chi tiết</div>
                   <div className="p-3">
-                    <HtmlParser>{data?.product?.Detail || data.combos[0].Product?.Detail}</HtmlParser>
+                    <HtmlParser>
+                      {data?.product?.Detail || data.combos[0].Product?.Detail}
+                    </HtmlParser>
                   </div>
                 </div>
               )}

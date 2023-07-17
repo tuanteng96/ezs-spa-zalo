@@ -8,7 +8,7 @@ import { ImageLazy } from "../../../components/ImagesLazy";
 import { QRCodeSVG } from "qrcode.react";
 import LogoEZS from "../../../static/images/logo-ezs.jpg";
 
-const QrCodeRender = ({ item, Banks, Bank }) => {
+const QrCodeRender = ({ item, Banks, Bank, TotalDebt }) => {
   if (Bank.ma_nh === "MoMoPay" || Bank.ma_nh === "ZaloPay") {
     return (
       <div className="relative overflow-hidden p-10 pb-6">
@@ -17,8 +17,8 @@ const QrCodeRender = ({ item, Banks, Bank }) => {
             className="w-full h-full"
             value={
               Banks.ngan_hang === "MoMoPay"
-                ? `2|99|${Bank.stk}|||0|0|${item.ToPay}|${Banks.ma_nhan_dien}${item.ID}|transfer_myqr`
-                : `https://social.zalopay.vn/mt-gateway/v1/private-qr?amount=${item.ToPay}&note=${Banks.ma_nhan_dien}${item.ID}&receiver_id=${Bank.stk}`
+                ? `2|99|${Bank.stk}|||0|0|${TotalDebt}|${Banks.ma_nhan_dien}${item.ID}|transfer_myqr`
+                : `https://social.zalopay.vn/mt-gateway/v1/private-qr?amount=${TotalDebt}&note=${Banks.ma_nhan_dien}${item.ID}&receiver_id=${Bank.stk}`
             }
             size={220}
             bgColor={"#ffffff"}
@@ -39,8 +39,7 @@ const QrCodeRender = ({ item, Banks, Bank }) => {
           <div className="uppercase text-sm font-bold mb-1">{Bank.ten}</div>
           <div className="text-xs mb-px font-medium opacity-75">{Bank.stk}</div>
           <div className="text-xs font-medium opacity-75">
-            {formatString.formatVND(item.ToPay)} - {Banks.ma_nhan_dien}#
-            {item.ID}
+            {formatString.formatVND(TotalDebt)} - {Banks.ma_nhan_dien}#{item.ID}
           </div>
         </div>
       </div>
@@ -53,14 +52,14 @@ const QrCodeRender = ({ item, Banks, Bank }) => {
         wrapperClassName="aspect-[27/32] !block"
         className="aspect-[27/32] object-cover w-full"
         effect="blur"
-        src={`https://img.vietqr.io/image/${Bank.ma_nh}-${Bank.stk}-compact2.jpg?amount=${item.ToPay}&addInfo=${Banks.ma_nhan_dien}${item.ID}&accountName=${Bank.ten}`}
+        src={`https://img.vietqr.io/image/${Bank.ma_nh}-${Bank.stk}-compact2.jpg?amount=${TotalDebt}&addInfo=${Banks.ma_nhan_dien}${item.ID}&accountName=${Bank.ten}`}
         alt="Mã QR Thanh toán"
       />
     </div>
   );
 };
 
-export const PickerBanks = ({ children, Banks, Bank, item }) => {
+export const PickerBanks = ({ children, Banks, Bank, item, TotalDebt }) => {
   const [visible, setVisible] = useState(false);
 
   return (
@@ -78,7 +77,12 @@ export const PickerBanks = ({ children, Banks, Bank, item }) => {
           }}
           verticalActions
         >
-          <QrCodeRender Banks={Banks} Bank={Bank} item={item} />
+          <QrCodeRender
+            Banks={Banks}
+            Bank={Bank}
+            item={item}
+            TotalDebt={TotalDebt}
+          />
         </Modal>,
         document.body
       )}
@@ -86,7 +90,7 @@ export const PickerBanks = ({ children, Banks, Bank, item }) => {
   );
 };
 
-export const PickerOrderPayted = ({ children, item }) => {
+export const PickerOrderPayted = ({ children, item, TotalDebt }) => {
   const [visible, setVisible] = useState(false);
   const [Banks, setBanks] = useState(null);
 
@@ -121,10 +125,15 @@ export const PickerOrderPayted = ({ children, item }) => {
                 __html:
                   data &&
                   data.length > 1 &&
-                  data[0].ValueLines.replaceAll("ID_ĐH", `<b class="text-app">#${item.ID}</b>`)
+                  data[0].ValueLines.replaceAll(
+                    "ID_ĐH",
+                    `<b class="text-app">#${item.ID}</b>`
+                  )
                     .replaceAll(
                       "MONEY",
-                      `<b class="text-app">${formatString.formatVND(Math.abs(item.ToPay))}</b>`
+                      `<b class="text-app">${formatString.formatVND(
+                        Math.abs(item.ToPay)
+                      )}</b>`
                     )
                     .replaceAll("ID_DH", `<b class="text-app">${item.ID}</b>`),
               }}
@@ -137,6 +146,7 @@ export const PickerOrderPayted = ({ children, item }) => {
                     Bank={bank}
                     item={item}
                     Banks={Banks}
+                    TotalDebt={TotalDebt}
                   >
                     {({ open }) => (
                       <div

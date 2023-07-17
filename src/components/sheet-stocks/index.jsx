@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Icon, Sheet } from "zmp-ui";
 import MoreAPI from "../../api/more.api";
 import { useLayout } from "../../layout/LayoutProvider";
@@ -39,7 +40,7 @@ const SheetStocks = () => {
     }
   }, [Stocks, CurrentStocks]);
 
-  return (
+  return createPortal(
     <Sheet
       className="bg-white"
       mask
@@ -77,7 +78,8 @@ const SheetStocks = () => {
       >
         Đóng
       </div>
-    </Sheet>
+    </Sheet>,
+    document.body
   );
 };
 

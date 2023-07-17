@@ -17,11 +17,12 @@ const ProdsAPI = {
     cates = "",
     token = "",
     stockid = "",
+    rootIds = "",
     pi = 1,
     ps = 10,
   }) =>
     http.get(
-      `/api/v3/app2?get=sv&cid=${cates}&token=${token}&stockid=${stockid}&takes=Detail,Desc&pi=${pi}&ps=${ps}&ignorepublic=1`
+      `/api/v3/app2?get=sv&cid=${cates}&token=${token}&stockid=${stockid}&takes=Detail,Desc&pi=${pi}&ps=${ps}&ignorepublic=1&rootIds=${rootIds}`
     ),
   cateParentID: ({ id = "", token = "", stockid = "" }) =>
     http.get(

@@ -77,7 +77,7 @@ const UserPage = () => {
           </div>
         </NavLink>
       </div>
-      <div className="bg-white mt-2">
+      <div className="bg-white mt-2 mb-2">
         <NavLink
           to="/user/customer-wallet-card"
           className="px-3 py-4 flex items-center"
@@ -161,11 +161,35 @@ const UserPage = () => {
             />
           </div>
           <div className="flex-1 pl-3">
-            <div className="flex items-center justify-between relative">
+            <div className="flex items-center justify-between relative before:content-[''] before:absolute before:w-full before:h-[1px] before:bg-[#f5f5fa] before:-bottom-4">
               <div>
                 <div className="font-medium">Mã giảm giá</div>
                 <div className="text-muted text-[14px]">
                   Kho mã giảm giá bạn đang có
+                </div>
+              </div>
+              <div className="text-muted">
+                <Icon icon="zi-chevron-right" />
+              </div>
+            </div>
+          </div>
+        </NavLink>
+        <NavLink
+          to="/user/customer-branch"
+          className="px-3 py-4 flex items-center"
+        >
+          <div className="w-7">
+            <img
+              className="w-7"
+              src="data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDEyOCAxMjgiIHdpZHRoPSI1MTIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGc+PHBhdGggZD0ibTEwNy40MjcgODQuMjg5aC0zMC4xNTVhMTgyLjkyOSAxODIuOTI5IDAgMCAxIC0xMy4yNzIgMTguMzcxIDE4Mi45MjkgMTgyLjkyOSAwIDAgMSAtMTMuMjcyLTE4LjM3MWgtMzAuMTU1bC0xNC4yNjcgMzcuNDA1aDExNS4zODh6IiBmaWxsPSIjZGZlZWY0Ii8+PHBhdGggZD0ibTY0IDYuMzFhMzAuNzExIDMwLjcxMSAwIDAgMCAtMzAuNzEgMzAuNzFjLS4xOCAyOS4zIDMwLjcxIDY1LjY0IDMwLjcxIDY1LjY0czMwLjg5LTM2LjM0IDMwLjcxLTY1LjY0YTMwLjcxMSAzMC43MTEgMCAwIDAgLTMwLjcxLTMwLjcxem0wIDQzLjc0YTEzLjAzIDEzLjAzIDAgMSAxIDEzLjAzLTEzLjAzIDEzLjAyNSAxMy4wMjUgMCAwIDEgLTEzLjAzIDEzLjAzeiIgZmlsbD0iI2Y0NTg1OCIvPjxwYXRoIGQ9Im0xMTAuNzQgOTIuOTYtNTcuNTggMjAuNDgtMjIuNDQtMjkuMTVoMjAuMDFhMTgyLjc1MiAxODIuNzUyIDAgMCAwIDEzLjI3IDE4LjM3IDE4Mi43NTIgMTgyLjc1MiAwIDAgMCAxMy4yNy0xOC4zN2gzMC4xNnoiIGZpbGw9IiNmMmRhMzAiLz48cGF0aCBkPSJtMjkuOTYgMTIxLjY5NCA1Ni45OTYtMjAuMjc0IDE1LjYwNCAyMC4yNzR6IiBmaWxsPSIjM2VhMmU1Ii8+PC9nPjwvc3ZnPg=="
+            />
+          </div>
+          <div className="flex-1 pl-3">
+            <div className="flex items-center justify-between relative">
+              <div>
+                <div className="font-medium">Hệ thống chi nhánh</div>
+                <div className="text-muted text-[14px]">
+                  Danh sách các chi nhánh SPA
                 </div>
               </div>
               <div className="text-muted">

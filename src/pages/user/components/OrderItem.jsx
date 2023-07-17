@@ -25,9 +25,9 @@ export const OrderItem = ({ item }) => {
 
   let TotalDebt = Math.abs(
     item.thanhtoan?.tong_gia_tri_dh -
-    item.thanhtoan?.thanh_toan_tien -
-    item.thanhtoan?.thanh_toan_vi -
-    item.thanhtoan?.thanh_toan_ao
+      item.thanhtoan?.thanh_toan_tien -
+      item.thanhtoan?.thanh_toan_vi -
+      item.thanhtoan?.thanh_toan_ao
   );
 
   let TotalProd =
@@ -106,7 +106,7 @@ export const OrderItem = ({ item }) => {
             <span className="text-muted">Thanh toán thành công</span>
           )}
         </div>
-        <PickerOrderPayted item={item}>
+        <PickerOrderPayted item={item} TotalDebt={TotalDebt}>
           {({ open }) => (
             <button
               onClick={open}

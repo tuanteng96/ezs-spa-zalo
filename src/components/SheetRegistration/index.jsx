@@ -53,6 +53,7 @@ const SheetRegistration = () => {
             FullName: ZaloInfo.name,
             MobilePhone: data?.data?.number?.replace(/^.{2}/g, "0"),
             ByStockID: CurrentStocks?.ID || 0,
+            Gender: -1
           },
         };
         result = await MemberAPI.addZalo(addMember);

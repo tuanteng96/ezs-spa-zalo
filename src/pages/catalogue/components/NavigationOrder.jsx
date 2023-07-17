@@ -2,9 +2,11 @@ import React from "react";
 import { openChat } from "zmp-sdk";
 import { useConfigs } from "../../../layout/MasterLayout";
 import { PickerOrder } from "./PickerOrder";
+import { useSnackbar } from "zmp-ui";
 
 export const NavigationOrder = ({ item, options }) => {
   let { GlobalConfig } = useConfigs();
+  const { openSnackbar } = useSnackbar();
 
   const openChatScreen = () => {
     openChat({
@@ -35,11 +37,24 @@ export const NavigationOrder = ({ item, options }) => {
           </svg>
           <div className="absolute h-7 w-[1px] bg-white right-0 opacity-50"></div>
         </div>
-        <PickerOrder item={item} options={options} buttonText="Thêm vào giỏ hàng">
+        <PickerOrder
+          item={item}
+          options={options}
+          buttonText="Thêm vào giỏ hàng"
+        >
           {({ open }) => (
             <div
               className="bg-success text-white flex items-center justify-center cursor-pointer"
-              onClick={open}
+              onClick={() => {
+                if (item.IsDisplayPrice !== 0) open();
+                else {
+                  openSnackbar({
+                    text: "Liên hệ để mua mặt hàng.",
+                    type: "warning",
+                    duration: 10000,
+                  });
+                }
+              }}
             >
               <svg
                 enableBackground="new 0 0 15 15"
@@ -76,7 +91,16 @@ export const NavigationOrder = ({ item, options }) => {
           {({ open }) => (
             <div
               className="col-span-2 bg-app flex items-center justify-center text-white cursor-pointer"
-              onClick={open}
+              onClick={() => {
+                if (item.IsDisplayPrice !== 0) open();
+                else {
+                  openSnackbar({
+                    text: "Liên hệ để được mua mặt hàng.",
+                    type: "warning",
+                    duration: 10000,
+                  });
+                }
+              }}
             >
               Mua ngay
             </div>

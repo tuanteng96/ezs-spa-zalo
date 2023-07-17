@@ -5,7 +5,6 @@ import { BottomNavigation, Icon, useNavigate } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
 import { useConfigs } from "../../layout/MasterLayout";
-import { ProcessENV } from "../../utils/process";
 import { CartIcon } from "./CartIcon";
 
 export const NO_BOTTOM_NAVIGATION_PAGES = [
@@ -20,6 +19,7 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-wallet-card",
   "/user/customer-service",
   "/user/customer-booking-manage",
+  "/user/customer-branch",
   "/booking",
   "/search",
   "/contact",

@@ -14,7 +14,7 @@ import { SheetStocks } from "../components/sheet-stocks";
 if (getSystemInfo().platform === "android") {
   const androidSafeTop = Math.round(
     window.ZaloJavaScriptInterface.getStatusBarHeight() /
-    window.devicePixelRatio
+      window.devicePixelRatio
   );
   document.body.style.setProperty(
     "--zaui-safe-area-inset-top",
@@ -48,12 +48,10 @@ const LayoutProvider = ({ children }) => {
           // Lấy Lại Info Token
           AuthAPI.authen({ token: AccessToken })
             .then(({ data }) => {
-              if (!data?.error) {
+              if (!data?.error && data.ZaloID) {
                 onSaveAuth(data);
               } else {
-                setAccessToken(null);
-                setAuth(null);
-                removeStorage({ keys: ["AccessToken", "Auth"] });
+                onLogout();
               }
             })
             .catch((error) => console.log(error));
@@ -66,6 +64,8 @@ const LayoutProvider = ({ children }) => {
                 .then(({ data }) => {
                   if (!data?.error) {
                     onSaveAuth(data);
+                  } else {
+                    onLogout();
                   }
                 })
                 .catch((error) => console.log(error));
@@ -129,6 +129,14 @@ const LayoutProvider = ({ children }) => {
   };
 
   const onSaveAuth = (value) => {
+    setCurrentStocks(
+      value?.ByStockID
+        ? {
+            ID: value?.ByStockID,
+            Title: value?.StockName,
+          }
+        : null
+    );
     setAccessToken(value?.token);
     setAuth(value);
     setStorage({
@@ -137,6 +145,14 @@ const LayoutProvider = ({ children }) => {
         Auth: value,
       },
     });
+  };
+
+  const onLogout = (callback) => {
+    setAccessToken(null);
+    setAuth(null);
+    removeStorage({ keys: ["AccessToken", "Auth"] }).then(
+      () => callback && callback()
+    );
   };
 
   return (
@@ -152,6 +168,7 @@ const LayoutProvider = ({ children }) => {
         onSaveStocks,
         Stocks,
         setStocks,
+        onLogout,
       }}
     >
       {children}

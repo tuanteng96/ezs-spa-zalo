@@ -4,26 +4,34 @@ import React, { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { Icon, Page, Text, useNavigate } from "zmp-ui";
-import AdvAPI from "../../api/adv.api";
-import { HtmlParser } from "../../components/HtmlParser";
+import ProdsAPI from "../../api/prods.api";
 import { ImageLazy } from "../../components/ImagesLazy";
 import { toAbsolutePath } from "../../utils/assetPath";
+import { HtmlParser } from "../../components/HtmlParser";
+import { NavLink } from "react-router-dom";
+import { CardWrap } from "../../components/Service/card-wrap";
 
-const AdvDetailPage = () => {
-  const [scrollTop, setScrollTop] = useState(0);
-  const navigate = useNavigate();
+const CatalogueServicePage = () => {
   const { state } = useLocation();
+  const navigate = useNavigate();
   let { id } = useParams();
 
+  const [scrollTop, setScrollTop] = useState(0);
+
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["AdvDetail"],
+    queryKey: ["CatalogueSerivce", { id }],
     queryFn: async () => {
-      const { data } = await AdvAPI.getAdvId(id);
-      return data?.data[0] || [];
+      const newQueryParams = {
+        pi: 1,
+        ps: 1,
+        stockid: 0,
+        cates: "795",
+        rootIds: id,
+      };
+      const { data } = await ProdsAPI.listServiceRoot(newQueryParams);
+      return data && data?.lst && data?.lst.length > 0 ? data.lst[0] : null;
     },
-    initialData: state?.dataProps,
-    enabled: !state?.dataProps && Number(id) > -1,
-    cacheTime: state?.dataProps ? 0 : 5 * 60 * 1000,
+    enabled: Number(id) > -1,
   });
 
   const handleScroll = (event) => {
@@ -32,27 +40,9 @@ const AdvDetailPage = () => {
 
   if (isLoading) {
     return (
-      <Page
-        className="page !py-0 bg-white animate-pulse"
-        hideScrollbar
-        onScroll={handleScroll}
-      >
-        <div
-          className={clsx(
-            "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3"
-          )}
-        >
-          <div className="w-2/3 relative flex items-center h-full pl-12">
-            <div
-              className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
-              onClick={() => navigate(-1)}
-            >
-              <Icon icon="zi-chevron-left-header" className="text-app" />
-            </div>
-          </div>
-        </div>
-        <div className="pb-safe">
-          <div className="relative">
+      <>
+        <Page className="page !pt-0 animate-pulse bg-white" hideScrollbar>
+          <div>
             <div className="aspect-square">
               <div className="flex items-center justify-center w-full h-full bg-gray-300">
                 <svg
@@ -66,27 +56,26 @@ const AdvDetailPage = () => {
                 </svg>
               </div>
             </div>
-            <div className="absolute left-0 bottom-0 w-full h-3/6 bg-pattern"></div>
+            <div className="px-3">
+              <div className="h-3.5 bg-gray-200 rounded-full w-full mt-4"></div>
+              <div className="h-3.5 bg-gray-200 rounded-full w-2/4 mt-2"></div>
+            </div>
+            <div className="p-3">
+              <div className="h-3 bg-gray-200 rounded-full w-9/12 mt-2"></div>
+              <div className="h-3 bg-gray-200 rounded-full w-full mt-2"></div>
+              <div className="h-3 bg-gray-200 rounded-full w-10/12 mt-2"></div>
+              <div className="h-3 bg-gray-200 rounded-full w-full mt-2"></div>
+            </div>
           </div>
-          <div className="-mt-5 relative bg-white rounded-t-3xl p-5 leading-6">
-            <div className="h-2.5 bg-gray-200 rounded-full w-full mb-2"></div>
-            <div className="h-2.5 bg-gray-200 rounded-full w-2/4 mb-5"></div>
-            {Array(5)
-              .fill()
-              .map((_, index) => (
-                <div
-                  className="h-2.5 bg-gray-200 rounded-full w-full mb-2"
-                  key={index}
-                ></div>
-              ))}
-          </div>
-        </div>
-      </Page>
+        </Page>
+      </>
     );
   }
 
+  if (!data) return <></>;
+
   return (
-    <Page className="page !py-0 bg-white" hideScrollbar>
+    <Page className="page !pt-0 !pb-safe-bottom bg-white" hideScrollbar>
       <div
         className={clsx(
           "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
@@ -101,7 +90,7 @@ const AdvDetailPage = () => {
         <div className="w-2/3 relative flex items-center h-full pl-12">
           <div
             className="absolute left-0 w-11 rounded-full h-11 flex justify-center items-center cursor-pointer bg-white"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
           >
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>
@@ -111,36 +100,43 @@ const AdvDetailPage = () => {
               scrollTop > 100 ? "opacity-100" : "opacity-0"
             )}
           >
-            {data?.source?.Title || data?.Title}
+            {data?.root?.Title}
           </Text.Title>
         </div>
       </div>
       <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={refetch}>
-        <div className="pb-safe h-full">
+        <div className="h-full flex flex-col">
           <div
-            className="h-full overflow-auto no-scrollbar"
+            className="grow overflow-auto no-scrollbar"
             onScroll={handleScroll}
           >
             <div className="relative">
               <ImageLazy
-                wrapperClassName="aspect-square !block"
-                className="w-full aspect-square object-cover"
+                wrapperClassName="aspect-[5/3] !block"
+                className="aspect-[5/3] object-cover w-full"
                 effect="blur"
-                src={toAbsolutePath(
-                  data?.Thumbnail || data?.source?.Thumbnail || data?.FileName
-                )}
+                src={toAbsolutePath(data?.root?.Thumbnail)}
               />
-              <div className="absolute left-0 bottom-0 w-full h-3/6 bg-pattern"></div>
-              <div className="absolute bottom-5 p-5 text-white text-lg font-bold uppercase">
-                {data?.source?.Title || data?.Title}
+            </div>
+            <div className="p-3">
+              <div className="text-app text-[16px] font-semibold leading-6">
+                {data?.root.Title}
               </div>
+              {(data?.root.Desc || data?.root.Detail) && (
+                <div className="text-sm mt-2">
+                  <HtmlParser>
+                    {data?.root.Desc}
+                    {data?.root.Detail}
+                  </HtmlParser>
+                </div>
+              )}
             </div>
-            <div className="-mt-5 relative bg-white rounded-t-3xl p-5 leading-6">
-              <HtmlParser>
-                {data?.source?.Desc || data?.Desc}
-                {data?.source?.Content || data?.Content}
-              </HtmlParser>
-            </div>
+            <CardWrap service={data} noMore />
+          </div>
+          <div className="p-3">
+            <NavLink className="bg-app py-3.5 text-center rounded-3xl text-white font-bold block cursor-pointer">
+              Đặt lịch ngay
+            </NavLink>
           </div>
         </div>
       </PullToRefresh>
@@ -148,4 +144,4 @@ const AdvDetailPage = () => {
   );
 };
 
-export default AdvDetailPage;
+export default CatalogueServicePage;
