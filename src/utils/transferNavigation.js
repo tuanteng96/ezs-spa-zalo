@@ -4,7 +4,7 @@ import { formatString } from "./formatString";
 export const transferNavigation = ({ navigate, to, useLocation, data }) => {
   let { pathname, search } = useLocation;
   let splitUrl = to.split("/");
-  if (!to) navigate(to);
+  if (!to) navigate(`/adv/${data.ID}`);
   else if (to.includes("/adv/")) {
     navigate("/adv/" + splitUrl[2]);
   } else if (to.includes("/news-list/")) {
@@ -27,15 +27,13 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
             },
           }
         );
-      }
-      else if (to.includes("/shop/selected/")) {
+      } else if (to.includes("/shop/selected/")) {
         navigate(`/catalogue/service/${splitUrl[3]}`, {
           state: {
             prevState: pathname + search,
           },
         });
-      }
-      else {
+      } else {
         navigate(`/catalogue?TypeID=${splitUrl[2]}`, {
           state: {
             prevState: pathname + search,
@@ -72,7 +70,8 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
     if (to.includes("/shop/list/")) {
       let urlRemoveParam = formatString.removeParameter("cateid", to);
       navigate(
-        `catalogue?TypeID=${splitUrl[3]}&CateID=${urlRemoveParam.split("/")[4]
+        `catalogue?TypeID=${splitUrl[3]}&CateID=${
+          urlRemoveParam.split("/")[4]
         }`,
         {
           state: {

@@ -12,7 +12,7 @@ import { NavLink } from "react-router-dom";
 import { CardWrap } from "../../components/Service/card-wrap";
 
 const CatalogueServicePage = () => {
-  const { state } = useLocation();
+  const { pathname } = useLocation();
   const navigate = useNavigate();
   let { id } = useParams();
 
@@ -134,7 +134,21 @@ const CatalogueServicePage = () => {
             <CardWrap service={data} noMore />
           </div>
           <div className="p-3">
-            <NavLink className="bg-app py-3.5 text-center rounded-3xl text-white font-bold block cursor-pointer">
+            <NavLink
+              to="/booking"
+              state={{
+                formState: {
+                  Roots: [
+                    {
+                      ID: data?.root?.ID,
+                      Title: data?.root.Title,
+                    },
+                  ],
+                },
+                prevState: pathname,
+              }}
+              className="bg-app py-3.5 text-center rounded-3xl text-white font-bold block cursor-pointer"
+            >
               Đặt lịch ngay
             </NavLink>
           </div>

@@ -146,8 +146,8 @@ const CatalogueDetailPage = () => {
             <div className="relative">
               <div className="bg-white mb-2">
                 <ImageLazy
-                  wrapperClassName="aspect-[5/3] !block"
-                  className="aspect-[5/3] object-cover w-full"
+                  wrapperClassName="aspect-square !block"
+                  className="aspect-square object-cover w-full"
                   effect="blur"
                   src={
                     images && images.length > 0
@@ -156,8 +156,8 @@ const CatalogueDetailPage = () => {
                   }
                   onClick={() => setVisible(true)}
                 />
-                <div className="p-3">
-                  {images && images.length > 0 && (
+                {images && images.length > 1 && (
+                  <div className="p-3">
                     <Swiper
                       spaceBetween={10}
                       autoplay={{
@@ -188,8 +188,8 @@ const CatalogueDetailPage = () => {
                         </SwiperSlide>
                       ))}
                     </Swiper>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
               <div className="bg-white mb-2 p-3">
                 <div className="text-[17px] leading-5 mb-3 font-semibold">

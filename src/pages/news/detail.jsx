@@ -123,8 +123,8 @@ const NewsDetailPage = () => {
           >
             <div className="relative">
               <ImageLazy
-                wrapperClassName="aspect-square !block"
-                className="w-full aspect-square object-cover"
+                wrapperClassName="aspect-[450x200] !block"
+                className="w-full aspect-[450x200] object-cover"
                 effect="blur"
                 src={toAbsolutePath(data?.Thumbnail || data?.source?.Thumbnail)}
               />
