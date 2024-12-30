@@ -28,6 +28,9 @@ const CartProvider = ({ children }) => {
       return data?.data;
     },
     enabled: !!AccessToken && Number(Auth?.ID) > 0,
+    initialData: {
+      data: [],
+    },
   });
 
   return (

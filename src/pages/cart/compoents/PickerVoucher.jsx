@@ -61,7 +61,7 @@ const SearchVoucher = ({ OrderID, onChange }) => {
               });
             }
           },
-        }
+        },
       );
     })(event);
   };
@@ -137,7 +137,7 @@ export const PickerVoucher = ({ children }) => {
               setVisible(false);
             });
         },
-      }
+      },
     );
   };
 
@@ -229,7 +229,7 @@ export const PickerVoucher = ({ children }) => {
                           key={index}
                           onClick={() =>
                             field.onChange(
-                              field.value === item.Code ? "" : item.Code
+                              field.value === item.Code ? "" : item.Code,
                             )
                           }
                         >
@@ -285,8 +285,8 @@ export const PickerVoucher = ({ children }) => {
                               {item.EndDate === null
                                 ? "Hạn sử dụng vĩnh viễn"
                                 : `Hạn sử dụng còn ${checkDateDiff(
-                                  item.EndDate
-                                )} ngày`}
+                                    item.EndDate,
+                                  )} ngày`}
                             </div>
                           </div>
                           <div className="pr-4 flex items-center">
@@ -295,7 +295,7 @@ export const PickerVoucher = ({ children }) => {
                                 "w-5 h-5 rounded-full border shadow-3xl relative transition",
                                 field.value === item.Code
                                   ? "border-app bg-app"
-                                  : "border-gray-500"
+                                  : "border-gray-500",
                               )}
                             >
                               <Icon
@@ -303,7 +303,7 @@ export const PickerVoucher = ({ children }) => {
                                   "text-white !absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 !text-[16px]",
                                   field.value === item.Code
                                     ? "opacity-100"
-                                    : "opacity-0"
+                                    : "opacity-0",
                                 )}
                                 icon="zi-check"
                               />
@@ -327,7 +327,7 @@ export const PickerVoucher = ({ children }) => {
             </div>
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

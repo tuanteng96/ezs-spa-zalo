@@ -28,7 +28,7 @@ const SalesTop = () => {
               <div
                 className={clsx(
                   "px-1 animate-pulse",
-                  index === 1 ? "aspect-5/3 w-[43%]" : "flex-1"
+                  index === 1 ? "aspect-5/3 w-[43%]" : "flex-1",
                 )}
               >
                 <div className="flex items-center justify-center w-full h-full bg-gray-300 rounded">
@@ -51,7 +51,7 @@ const SalesTop = () => {
               to={item.Link}
               className={clsx(
                 "px-1 cursor-pointer",
-                index === 1 ? "aspect-5/3 w-[43%]" : "flex-1"
+                index === 1 ? "aspect-5/3 w-[43%]" : "flex-1",
               )}
               key={index}
             >

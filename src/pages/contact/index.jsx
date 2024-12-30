@@ -59,13 +59,12 @@ const ContactPage = () => {
 
   const onSubmit = (values) => {
     if (!CurrentStocks?.ID) {
-      onOpenActionStocks()
-    }
-    else {
+      onOpenActionStocks();
+    } else {
       let dataPost = {
         contact: {
           ...values,
-          StockID: CurrentStocks?.ID
+          StockID: CurrentStocks?.ID,
         },
       };
       postMutation.mutate(dataPost, {

@@ -23,7 +23,6 @@ import { formatString } from "../../utils/formatString";
 import PullToRefresh from "react-simple-pull-to-refresh";
 
 const CustomerService = () => {
-
   const queryClient = useQueryClient();
   const queryParams = useQueryParams();
   const queryConfig = {
@@ -35,7 +34,7 @@ const CustomerService = () => {
 
   const { openSnackbar } = useSnackbar();
 
-  const [isPullRefresh, setIsPullRefresh] = useState(false)
+  const [isPullRefresh, setIsPullRefresh] = useState(false);
 
   const { data, isFetching } = useQuery({
     queryKey: ["ServiceCardList", { Token: AccessToken, MemberID: Auth?.ID }],
@@ -109,11 +108,11 @@ const CustomerService = () => {
   };
 
   const handleRefresh = () => {
-    setIsPullRefresh(true)
+    setIsPullRefresh(true);
     return Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["ServiceCardList"] })
-    ]).then(() => setIsPullRefresh(false))
-  }
+      queryClient.invalidateQueries({ queryKey: ["ServiceCardList"] }),
+    ]).then(() => setIsPullRefresh(false));
+  };
 
   return (
     <Page className="page !pb-0 !h-full !overflow-hidden" hideScrollbar>
@@ -231,14 +230,16 @@ const CustomerService = () => {
                             <div className="absolute w-full bottom-0 left-0 p-3 text-white">
                               <div className="uppercase font-semibold mb-2">
                                 {service.OrderItem.ProdTitle}
-                                <span className="pl-1.5">({service.Title})</span>
+                                <span className="pl-1.5">
+                                  ({service.Title})
+                                </span>
                               </div>
                               <div className="text-sm">
                                 <div>
                                   <span>Giá trị : </span>
                                   <span>
                                     {formatString.formatVND(
-                                      service.OrderItem.ToPay
+                                      service.OrderItem.ToPay,
                                     )}
                                   </span>
                                 </div>
@@ -246,7 +247,7 @@ const CustomerService = () => {
                                   <span>Dùng lần cuối : </span>
                                   <span>
                                     {moment(item.Services).format(
-                                      "HH:mm DD-MM-YYYY"
+                                      "HH:mm DD-MM-YYYY",
                                     )}
                                   </span>
                                 </div>
@@ -264,7 +265,7 @@ const CustomerService = () => {
                               <div
                                 className={clsx(
                                   "aspect-square rounded flex items-center justify-center relative",
-                                  clsStatus(card.Status)
+                                  clsStatus(card.Status),
                                 )}
                                 key={i}
                               >
@@ -299,7 +300,7 @@ const CustomerService = () => {
                                         className="border !w-5 !h-5"
                                         size={16}
                                         src={toAbsolutePathAPI(
-                                          "/app2021/images/avatar-null2.png"
+                                          "/app2021/images/avatar-null2.png",
                                         )}
                                         key={k}
                                         onClick={() =>

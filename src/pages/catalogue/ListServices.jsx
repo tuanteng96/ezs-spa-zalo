@@ -63,24 +63,25 @@ const ListServices = ({ queryConfig }) => {
     }
   }, [queryConfig.TypeID, queryConfig.CateID]);
 
-  const { data, fetchNextPage, isLoading, hasNextPage, refetch } = useInfiniteQuery({
-    queryKey: ["ProdProductsNew", { CurrentStocks, ...queryConfig }],
-    queryFn: async ({ pageParam = 1 }) => {
-      const newQueryParams = {
-        pi: pageParam,
-        ps: 3,
-        stockid: CurrentStocks?.ID || 0,
-        cates: queryConfig.CateID || "795",
-      };
-      const { data } = await ProdsAPI.listServiceRoot(newQueryParams);
-      return data || [];
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.pi === lastPage.pcount || !lastPage.pcount
-        ? undefined
-        : lastPage.pi + 1;
-    },
-  });
+  const { data, fetchNextPage, isLoading, hasNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ["ProdProductsNew", { CurrentStocks, ...queryConfig }],
+      queryFn: async ({ pageParam = 1 }) => {
+        const newQueryParams = {
+          pi: pageParam,
+          ps: 3,
+          stockid: CurrentStocks?.ID || 0,
+          cates: queryConfig.CateID || "795",
+        };
+        const { data } = await ProdsAPI.listServiceRoot(newQueryParams);
+        return data || [];
+      },
+      getNextPageParam: (lastPage) => {
+        return lastPage.pi === lastPage.pcount || !lastPage.pcount
+          ? undefined
+          : lastPage.pi + 1;
+      },
+    });
 
   const List = formatArray.useInfiniteQuery(data?.pages, "lst");
 

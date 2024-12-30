@@ -6,8 +6,8 @@ import { MasterLayout } from "./MasterLayout";
 import ProtectedRoute from "./_core/ProtectedRoute";
 
 const CataloguePage = lazy(() => import("../pages/catalogue"));
-const CatalogueServicePage = lazy(() =>
-  import("../pages/catalogue/CatalogueService")
+const CatalogueServicePage = lazy(
+  () => import("../pages/catalogue/CatalogueService"),
 );
 const CatalogueDetailPage = lazy(() => import("../pages/catalogue/detail"));
 
@@ -21,15 +21,21 @@ const UserPage = lazy(() => import("../pages/user"));
 const CustomerDiary = lazy(() => import("../pages/user/CustomerDiary"));
 const CustomerOrders = lazy(() => import("../pages/user/CustomerOrders"));
 const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
-const CustomerWalletCard = lazy(() =>
-  import("../pages/user/CustomerWalletCard")
+const CustomerWalletCard = lazy(
+  () => import("../pages/user/CustomerWalletCard"),
+);
+const CustomerPoints = lazy(
+  () => import("../pages/user/CustomerPoints"),
 );
 const CustomerService = lazy(() => import("../pages/user/CustomerService"));
-const CustomerBookingManage = lazy(() =>
-  import("../pages/user/CustomerBookingManage")
+const CustomerBookingManage = lazy(
+  () => import("../pages/user/CustomerBookingManage"),
 );
 const CustomerProfile = lazy(() => import("../pages/user/CustomerProfile"));
 const CustomerBranch = lazy(() => import("../pages/user/CustomerBranch"));
+const CustomerBranchDetail = lazy(
+  () => import("../pages/user/CustomerBranchDetail"),
+);
 
 const BookingPage = lazy(() => import("../pages/booking"));
 
@@ -38,6 +44,12 @@ const SearchPage = lazy(() => import("../pages/search"));
 const ContactPage = lazy(() => import("../pages/contact"));
 
 import HomePage from "../pages/home";
+import { SheetRating } from "../components/SheetRating";
+import { useLayout } from "./LayoutProvider";
+
+const CustomerRating = lazy(() => import("../pages/user/CustomerRating"));
+
+const CustomerAffs = lazy(() => import("../pages/user/CustomerAffs"));
 
 const NewsPage = lazy(() => import("../pages/news"));
 const NewsDetailPage = lazy(() => import("../pages/news/detail"));
@@ -59,6 +71,7 @@ const SuspensedView = ({ children }) => {
 };
 
 const Layout = () => {
+  const { Ratings } = useLayout()
   return (
     <MasterLayout>
       <AnimationRoutes forceRefresh>
@@ -114,11 +127,9 @@ const Layout = () => {
         <Route
           path="/cart"
           element={
-            <ProtectedRoute>
-              <SuspensedView>
-                <CartPage />
-              </SuspensedView>
-            </ProtectedRoute>
+            <SuspensedView>
+              <CartPage />
+            </SuspensedView>
           }
         />
         <Route
@@ -134,11 +145,9 @@ const Layout = () => {
         <Route
           path="/user"
           element={
-            <ProtectedRoute>
-              <SuspensedView>
-                <UserPage />
-              </SuspensedView>
-            </ProtectedRoute>
+            <SuspensedView>
+              <UserPage />
+            </SuspensedView>
           }
         />
         <Route
@@ -157,6 +166,16 @@ const Layout = () => {
             <ProtectedRoute>
               <SuspensedView>
                 <CustomerBranch />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-branch/:id"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerBranchDetail />
               </SuspensedView>
             </ProtectedRoute>
           }
@@ -212,6 +231,36 @@ const Layout = () => {
           }
         />
         <Route
+          path="/user/customer-points"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerPoints />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-rating"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerRating />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-affs"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerAffs />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/user/customer-booking-manage"
           element={
             <ProtectedRoute>
@@ -234,11 +283,9 @@ const Layout = () => {
         <Route
           path="/booking"
           element={
-            <ProtectedRoute>
-              <SuspensedView>
-                <BookingPage />
-              </SuspensedView>
-            </ProtectedRoute>
+            <SuspensedView>
+              <BookingPage />
+            </SuspensedView>
           }
         />
         <Route
@@ -259,6 +306,9 @@ const Layout = () => {
         />
       </AnimationRoutes>
       <Navigation />
+      {
+        Ratings && Ratings.length > 0 && <SheetRating data={Ratings} />
+      }
     </MasterLayout>
   );
 };

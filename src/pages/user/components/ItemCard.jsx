@@ -13,7 +13,7 @@ export const ItemCard = ({ item }) => {
         <div
           className={clsx(
             "text-white mb-3 last:mb-0 rounded-md px-5 py-6 !bg-cover !bg-no-repeat cursor-pointer",
-            item.trang_thai === "Khóa" && "opacity-80"
+            item.trang_thai === "Khóa" && "opacity-80",
           )}
           style={{ backgroundImage: `url(${BgCard})` }}
           onClick={open}

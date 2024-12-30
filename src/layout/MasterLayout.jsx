@@ -3,6 +3,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { getUserInfo } from "zmp-sdk";
 import ConfigsAPI from "../api/configs.api";
 import { SheetRegistration } from "../components/SheetRegistration";
+import { useLayout } from "./LayoutProvider";
+import { SheetStocks } from "../components/sheet-stocks";
 
 const ConfigContext = createContext();
 
@@ -12,15 +14,9 @@ const useConfigs = () => {
 
 const MasterLayout = ({ children }) => {
   const [ZaloInfo, setZaloInfo] = useState(null);
-  const [GlobalConfig, setGlobalConfig] = useState(null);
+  const { splashScreen, Auth } = useLayout();
 
-  useQuery({
-    queryKey: ["GlobalConfig"],
-    queryFn: () => ConfigsAPI.global(),
-    onSuccess: ({ data }) => {
-      setGlobalConfig(data);
-    },
-  });
+  const [sheetProtected, setSheetProtected] = useState(false);
 
   useEffect(() => {
     getUserInfo({
@@ -33,17 +29,28 @@ const MasterLayout = ({ children }) => {
         setZaloInfo(error);
       },
     });
-  }, []);
+  }, [Auth]);
+
+  const openSheetProtected = () => {
+    setSheetProtected(true);
+  };
+
+  const closeSheetProtected = () => {
+    setSheetProtected(false);
+  };
 
   return (
     <ConfigContext.Provider
       value={{
         ZaloInfo,
-        GlobalConfig,
+        sheetProtected,
+        openSheetProtected,
+        closeSheetProtected
       }}
     >
       {children}
-      <SheetRegistration />
+      <SheetRegistration open={sheetProtected} onClose={closeSheetProtected} />
+      {!splashScreen && <SheetStocks />}
     </ConfigContext.Provider>
   );
 };

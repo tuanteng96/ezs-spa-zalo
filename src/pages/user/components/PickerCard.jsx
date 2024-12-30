@@ -124,7 +124,7 @@ export const PickerCard = ({ children, item }) => {
                       Sản phẩm :
                       <span className="pl-1 font-bold text-base">
                         {formatString.formatVND(
-                          item.gia_tri_chi_tieu_sp - item.su_dung_sp
+                          item.gia_tri_chi_tieu_sp - item.su_dung_sp,
                         )}
                       </span>
                     </span>
@@ -132,7 +132,7 @@ export const PickerCard = ({ children, item }) => {
                       Dịch vụ :
                       <span className="pl-1 font-bold text-base">
                         {formatString.formatVND(
-                          item.gia_tri_chi_tieu_dv - item.su_dung_dv
+                          item.gia_tri_chi_tieu_dv - item.su_dung_dv,
                         )}
                       </span>
                     </span>
@@ -150,7 +150,9 @@ export const PickerCard = ({ children, item }) => {
                         <li
                           className={clsx(
                             "mb-6 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px]",
-                            index > 0 ? "before:bg-success" : "before:bg-danger"
+                            index > 0
+                              ? "before:bg-success"
+                              : "before:bg-danger",
                           )}
                           key={index}
                         >
@@ -158,7 +160,7 @@ export const PickerCard = ({ children, item }) => {
                             <div
                               className={clsx(
                                 "font-bold text-base",
-                                index > 0 ? "text-success" : "text-danger"
+                                index > 0 ? "text-success" : "text-danger",
                               )}
                             >
                               <div className="h-4 bg-gray-200 rounded-full w-24"></div>
@@ -190,7 +192,7 @@ export const PickerCard = ({ children, item }) => {
                               "mb-6 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px]",
                               item.gia_tri > 0
                                 ? "before:bg-success"
-                                : "before:bg-danger"
+                                : "before:bg-danger",
                             )}
                             key={index}
                           >
@@ -200,7 +202,7 @@ export const PickerCard = ({ children, item }) => {
                                   "font-bold text-base",
                                   item.gia_tri > 0
                                     ? "text-success"
-                                    : "text-danger"
+                                    : "text-danger",
                                 )}
                               >
                                 <span className="pr-1">
@@ -225,7 +227,7 @@ export const PickerCard = ({ children, item }) => {
             </div>
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

@@ -27,7 +27,7 @@ export const OrderItem = ({ item }) => {
     item.thanhtoan?.tong_gia_tri_dh -
       item.thanhtoan?.thanh_toan_tien -
       item.thanhtoan?.thanh_toan_vi -
-      item.thanhtoan?.thanh_toan_ao
+      item.thanhtoan?.thanh_toan_ao,
   );
 
   let TotalProd =
@@ -112,7 +112,7 @@ export const OrderItem = ({ item }) => {
               onClick={open}
               className={clsx(
                 "bg-app text-white h-11 px-4 rounded",
-                !(item.Status !== "cancel" && TotalDebt > 0) && "opacity-50"
+                !(item.Status !== "cancel" && TotalDebt > 0) && "opacity-50",
               )}
               type="button"
               disabled={!(item.Status !== "cancel" && TotalDebt > 0)}

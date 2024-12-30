@@ -39,27 +39,28 @@ const SearchPage = () => {
     }
   }, []);
 
-  const { data, fetchNextPage, isLoading, hasNextPage, refetch } = useInfiniteQuery({
-    queryKey: ["ProdSearch", { CurrentStocks, keyValue }],
-    queryFn: async ({ pageParam = 1 }) => {
-      const newQueryParams = {
-        pi: pageParam,
-        ps: 12,
-        stockid: CurrentStocks?.ID || 0,
-        key: keyValue,
-      };
-      const { data } = await ProdsAPI.search(newQueryParams);
-      return data?.data || [];
-    },
-    getNextPageParam: (lastPage) => {
-      return lastPage.pi === lastPage.pcount || !lastPage.pcount
-        ? undefined
-        : lastPage.pi + 1;
-    },
-    onSuccess: () => {
-      setLoading(false);
-    },
-  });
+  const { data, fetchNextPage, isLoading, hasNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ["ProdSearch", { CurrentStocks, keyValue }],
+      queryFn: async ({ pageParam = 1 }) => {
+        const newQueryParams = {
+          pi: pageParam,
+          ps: 12,
+          stockid: CurrentStocks?.ID || 0,
+          key: keyValue,
+        };
+        const { data } = await ProdsAPI.search(newQueryParams);
+        return data?.data || [];
+      },
+      getNextPageParam: (lastPage) => {
+        return lastPage.pi === lastPage.pcount || !lastPage.pcount
+          ? undefined
+          : lastPage.pi + 1;
+      },
+      onSuccess: () => {
+        setLoading(false);
+      },
+    });
 
   const List = formatArray.useInfiniteQuery(data?.pages, "lst");
 

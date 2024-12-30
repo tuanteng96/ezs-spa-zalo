@@ -71,7 +71,7 @@ export const PickerSender = ({ children, value = "", onChange }) => {
             </div>
           </form>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

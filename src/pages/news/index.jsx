@@ -16,7 +16,14 @@ const NewsPage = () => {
     queryKey: ["NewsHot"],
     queryFn: async () => {
       const { data } = await NewsAPI.getListToID("835");
-      return data?.data || [];
+      let rs = null
+      if (data?.data && data.data.length > 0) {
+        rs = await NewsAPI.getInfoToCateID("835")
+      }
+      return data?.data ? data?.data.map(x => ({
+        ...x,
+        CateTitle2: rs?.data?.data?.length > 0 && rs?.data?.data[0].Title
+      })) : [];
     },
     initialData: state?.dataProps,
     enabled: !state?.dataProps,
@@ -33,7 +40,7 @@ const NewsPage = () => {
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>
           <Text.Title className="text-app">
-            {isLoading ? "Đang tải ..." : data[0].source.CateTitle2}
+            {isLoading ? "Đang tải ..." : data[0].CateTitle2}
           </Text.Title>
         </div>
       </div>

@@ -8,7 +8,7 @@ module.exports = {
       colors: {
         separator: "#f4f4f4",
         gray: "#767A7F",
-        app: "#ee4d2d",
+        app: "#ff898d",
         muted: "#a1a5b7",
         danger: "#ee2624",
         success: "#00bfa5",
@@ -31,6 +31,7 @@ module.exports = {
         "3xl": "0px 10px 30px 0px rgba(82,63,105,.05)",
         "4xl": "0 0 40px 0 rgba(82,63,105,.1)",
         "5xl": "0 3px 20px rgba(0,0,0,.04)",
+        cate: "2px_0px_0px_2px_#e4ad2f",
       },
       fontFamily: {
         cherry: ["Cherry Bomb One"],
@@ -47,11 +48,11 @@ module.exports = {
           "linear-gradient(-180deg,transparent 5%,rgba(0,0,0,.4) 51%,rgba(0,0,0,.6))",
       },
       padding: {
-        "safe": "var(--zaui-safe-area-inset-top, 0px)",
+        safe: "var(--zaui-safe-area-inset-top, 0px)",
         "safe-bottom": "var(--zaui-safe-area-inset-bottom, 0px)",
       },
       translate: {
-        "ptr": "calc(var(--zaui-safe-area-inset-top, 0px)  + 67px)"
+        ptr: "calc(var(--zaui-safe-area-inset-top, 0px)  + 67px)",
       },
       animation: {
         tada: "tada 1s ease-in-out infinite",

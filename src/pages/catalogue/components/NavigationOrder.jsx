@@ -1,12 +1,18 @@
 import React from "react";
 import { openChat } from "zmp-sdk";
-import { useConfigs } from "../../../layout/MasterLayout";
 import { PickerOrder } from "./PickerOrder";
 import { useSnackbar } from "zmp-ui";
+import { Link, useLocation } from "react-router-dom";
+import clsx from "clsx";
+import { useLayout } from "../../../layout/LayoutProvider";
 
-export const NavigationOrder = ({ item, options }) => {
-  let { GlobalConfig } = useConfigs();
+export const NavigationOrder = ({ item, options, combo }) => {
+  let { GlobalConfig } = useLayout();
+  const { Auth } = useLayout();
+
   const { openSnackbar } = useSnackbar();
+
+  let { pathname } = useLocation()
 
   const openChatScreen = () => {
     openChat({
@@ -15,11 +21,17 @@ export const NavigationOrder = ({ item, options }) => {
       message: item.Title,
     });
   };
+
+  let showOrderBtn = () => {
+    if (item.IsService === 1 && GlobalConfig?.APP?.Services?.HideButtonOrder) return false
+    return true
+  }
+
   return (
     <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white">
-      <div className="grid grid-cols-4 h-12">
+      <div className="flex h-12">
         <div
-          className="bg-success text-white flex items-center justify-center relative"
+          className="bg-success text-white flex items-center justify-center relative w-[70px]"
           onClick={openChatScreen}
         >
           <svg
@@ -44,7 +56,7 @@ export const NavigationOrder = ({ item, options }) => {
         >
           {({ open }) => (
             <div
-              className="bg-success text-white flex items-center justify-center cursor-pointer"
+              className="bg-success text-white flex items-center justify-center cursor-pointer w-[70px]"
               onClick={() => {
                 if (item.IsDisplayPrice !== 0) open();
                 else {
@@ -84,28 +96,58 @@ export const NavigationOrder = ({ item, options }) => {
                   strokeMiterlimit={10}
                 />
               </svg>
+
             </div>
           )}
         </PickerOrder>
-        <PickerOrder item={item} options={options} buttonText="Mua ngay">
-          {({ open }) => (
-            <div
-              className="col-span-2 bg-app flex items-center justify-center text-white cursor-pointer"
-              onClick={() => {
-                if (item.IsDisplayPrice !== 0) open();
-                else {
-                  openSnackbar({
-                    text: "Liên hệ để được mua mặt hàng.",
-                    type: "warning",
-                    duration: 10000,
-                  });
-                }
-              }}
-            >
-              Mua ngay
-            </div>
-          )}
-        </PickerOrder>
+        {item.IsService === 1 && <Link to={`/booking?prevState=${pathname}&initialValues=${JSON.stringify({
+          RootIdS: [
+            {
+              Title: combo[0].Product.Title,
+              ID: combo[0].Product.ID
+            }
+          ]
+        })}`} className={clsx("flex-1 text-white relative text-center flex items-center justify-center", (item.IsService === 1 ? (!GlobalConfig?.APP?.Services?.HideButtonOrder && item.IsDisplayPrice !== 0) : item.IsService !== 1) ? "bg-success" : "bg-app")}>
+          Đặt lịch
+          {
+            (item.IsService === 1 ? (!GlobalConfig?.APP?.Services?.HideButtonOrder && item.IsDisplayPrice !== 0) : item.IsService !== 1) && (
+              <div className="absolute h-7 w-[1px] bg-white left-0 top-2/4 -translate-y-2/4 opacity-50"></div>
+            )
+          }
+        </Link>}
+
+        {
+          showOrderBtn() && (
+            <PickerOrder item={item} options={options} buttonText="Mua ngay">
+              {({ open }) => (
+                <div
+                  className="flex-1 bg-app flex items-center justify-center text-white cursor-pointer"
+                  onClick={() => {
+                    if (!Auth?.ID) {
+                      openSnackbar({
+                        text: "Đăng ký trở thành thành viên để mua hàng.",
+                        type: "warning",
+                        duration: 10000,
+                      });
+                      return;
+                    };
+                    if (item.IsDisplayPrice !== 0) open();
+                    else {
+                      openSnackbar({
+                        text: "Liên hệ để được mua mặt hàng.",
+                        type: "warning",
+                        duration: 10000,
+                      });
+                    }
+                  }}
+                >
+                  Mua ngay
+                </div>
+              )}
+            </PickerOrder>
+          )
+        }
+
       </div>
     </div>
   );

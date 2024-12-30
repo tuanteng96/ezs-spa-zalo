@@ -5,6 +5,20 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
   let { pathname, search } = useLocation;
   let splitUrl = to.split("/");
   if (!to) navigate(`/adv/${data.ID}`);
+  else if(to.includes("/wallet/")) {
+    if(to.includes("tab=card")) {
+      navigate("/user/customer-wallet-card?Type=Card");
+    }
+    else {
+      navigate("/user/customer-wallet-card");
+    }
+  }
+  else if(to.includes("/maps/")) {
+    navigate("/user/customer-branch");
+  }
+  else if(to.includes("/cardservice/")) {
+    navigate("/user/customer-service");
+  }
   else if (to.includes("/adv/")) {
     navigate("/adv/" + splitUrl[2]);
   } else if (to.includes("/news-list/")) {
@@ -25,7 +39,7 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
             state: {
               prevState: pathname + search,
             },
-          }
+          },
         );
       } else if (to.includes("/shop/selected/")) {
         navigate(`/catalogue/service/${splitUrl[3]}`, {
@@ -56,7 +70,7 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
         });
       } else {
         navigate(
-          `/catalogue?TypeID=${paramCateId}&CateID=${cateid}&SheetID=${dvgocId}`
+          `/catalogue?TypeID=${paramCateId}&CateID=${cateid}&SheetID=${dvgocId}`,
         );
       }
     }
@@ -77,7 +91,7 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
           state: {
             prevState: pathname + search,
           },
-        }
+        },
       );
     }
   } else if (to.includes("/voucher")) {

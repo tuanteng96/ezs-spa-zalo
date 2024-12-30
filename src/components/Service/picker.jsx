@@ -67,7 +67,7 @@ export const ServicePicker = ({ children, service }) => {
             </div>
           )}
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

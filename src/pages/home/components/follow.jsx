@@ -1,11 +1,12 @@
 import React from "react";
 import { followOA } from "zmp-sdk";
 import { Icon, useSnackbar } from "zmp-ui";
-import { useConfigs } from "../../../layout/MasterLayout";
+import { useLayout } from "../../../layout/LayoutProvider";
+import { toAbsolutePathAPI } from "../../../utils/assetPath";
 
 const Follow = () => {
   const { openSnackbar } = useSnackbar();
-  let { GlobalConfig } = useConfigs();
+  let { GlobalConfig } = useLayout();
 
   const follow = () => {
     followOA({
@@ -19,7 +20,7 @@ const Follow = () => {
     });
   };
 
-  if (GlobalConfig?.ZALO?.type !== "oa") return <></>
+  if (GlobalConfig?.ZALO?.type !== "oa") return <></>;
 
   return (
     <div
@@ -32,7 +33,7 @@ const Follow = () => {
       <div className="w-14 relative">
         <img
           className="rounded-full aspect-square shadow-4xl border border-white"
-          src="https://ezs.vn/wp-content/themes/ezsthemes/assets/img/icon.jpg"
+          src={toAbsolutePathAPI("/app2021/images/icon-zalo-oa.jpg")}
         />
         <div className="absolute text-primary left-2/4 -bottom-[10px] -translate-x-2/4 bg-white rounded-full w-6 h-6">
           <div className="absolute">

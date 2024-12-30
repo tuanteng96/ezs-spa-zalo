@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Icon, Sheet } from "zmp-ui";
 import MoreAPI from "../../api/more.api";
 import { useLayout } from "../../layout/LayoutProvider";
+import { SheetProvince } from "./SheetProvince";
 
 const SheetStocks = () => {
   const {
@@ -15,18 +16,33 @@ const SheetStocks = () => {
     onHideActionStocks,
     setStocks,
     Stocks,
+    GlobalConfig
   } = useLayout();
 
   useQuery({
-    queryKey: ["ListStocks"],
+    queryKey: ["ListStocks", GlobalConfig],
     queryFn: async () => {
       const { data } = await MoreAPI.getStocks();
+
       return data?.data?.all
         ? data?.data?.all.filter((x) => x.ParentID !== 0)
         : [];
     },
     onSuccess: (data) => {
-      setStocks(data);
+      setStocks(
+        data
+          ? data.map((x) => {
+            let obj = { ...x };
+            let newDesc = x.DescSEO ? JSON.parse(x.DescSEO) : null;
+
+            if (newDesc && newDesc.place && newDesc.place.length > 0) {
+              obj.Province = newDesc.place.filter((o) => o.Parentid > 0)[0];
+              obj.District = newDesc.place.filter((o) => !o.Parentid)[0];
+            }
+            return obj;
+          })
+          : [],
+      );
     },
   });
 
@@ -40,6 +56,9 @@ const SheetStocks = () => {
     }
   }, [Stocks, CurrentStocks]);
 
+  if (GlobalConfig?.APP?.ByProvince) {
+    return <SheetProvince />;
+  }
   return createPortal(
     <Sheet
       className="bg-white"
@@ -58,7 +77,7 @@ const SheetStocks = () => {
             <div
               className={clsx(
                 "px-12 h-12 border-t border-separator flex items-center justify-center font-semibold capitalize cursor-pointer relative",
-                item.ID === CurrentStocks?.ID && "text-app"
+                item.ID === CurrentStocks?.ID && "text-app",
               )}
               key={index}
               onClick={() => onSaveStocks(item)}
@@ -79,7 +98,7 @@ const SheetStocks = () => {
         Đóng
       </div>
     </Sheet>,
-    document.body
+    document.body,
   );
 };
 

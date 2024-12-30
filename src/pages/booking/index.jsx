@@ -21,11 +21,40 @@ const initialValue = {
   FullName: "",
   Phone: "",
   UserServiceIDs: "",
+  AmountPeople: 1
 };
+
+const formatDesc = (Desc) => {
+  let AmountPeople = 1;
+  let newDesc = Desc;
+
+  let descSplit = Desc?.split("\n");
+  if (descSplit) {
+    for (let i of descSplit) {
+      if (i.includes("Số lượng khách:")) {
+        let SL = Number(i.match(/\d+/)[0]);
+        AmountPeople = SL ? Number(SL) : 1;
+      }
+      if (i.includes("Ghi chú:")) {
+        newDesc = i.replaceAll("Ghi chú: ", "");
+        let indexCut =
+          newDesc && newDesc.indexOf("(Thay đổi từ");
+        if (indexCut > -1) {
+          newDesc = newDesc.substring(0, indexCut);
+        }
+      }
+    }
+  }
+
+  return {
+    AmountPeople: AmountPeople,
+    Desc: newDesc.replaceAll("</br>", "\n")
+  }
+}
 
 const BookingPage = () => {
   const navigate = useNavigate();
-  const { Auth, CurrentStocks } = useLayout();
+  const { Auth, CurrentStocks, GlobalConfig } = useLayout();
   const { state } = useLocation();
 
   const queryParams = useQueryParams();
@@ -34,31 +63,32 @@ const BookingPage = () => {
   const methods = useForm({
     defaultValues: !state?.formState
       ? {
-          ...initialValue,
-          StockID: CurrentStocks?.ID || "",
-          MemberID: Auth?.ID || "",
-        }
+        ...initialValue,
+        StockID: CurrentStocks?.ID || "",
+        MemberID: Auth?.ID || "",
+      }
       : {
-          ...initialValue,
-          BookDate: state?.formState?.BookDate
-            ? moment(state?.formState?.BookDate, "YYYY-MM-DD HH:mm:ss").toDate()
-            : "",
-          ID: state?.formState?.ID || 0,
-          AtHome: state?.formState?.AtHome || false,
-          MemberID: state?.formState?.MemberID || Auth?.ID,
-          RootIdS: state?.formState?.Roots
-            ? state?.formState?.Roots.map((x) => x.ID)
-            : [],
-          Desc: state?.formState?.Desc || "",
-          StockID: state?.formState?.StockID || "",
-          FullName: state?.formState?.Member?.FullName || "",
-          Phone: state?.formState?.Member?.MobilePhone || "",
-          UserServiceIDs:
-            state?.formState?.UserServices &&
+        ...initialValue,
+        BookDate: state?.formState?.BookDate
+          ? moment(state?.formState?.BookDate, "YYYY-MM-DD HH:mm:ss").toDate()
+          : "",
+        ID: state?.formState?.ID || 0,
+        AtHome: state?.formState?.AtHome || false,
+        MemberID: state?.formState?.MemberID || Auth?.ID,
+        RootIdS: state?.formState?.Roots
+          ? state?.formState?.Roots
+          : [],
+        Desc: state?.formState?.Desc ? formatDesc(state?.formState?.Desc).Desc : "",
+        AmountPeople: state?.formState?.Desc ? formatDesc(state?.formState?.Desc).AmountPeople : 1,
+        StockID: state?.formState?.StockID || CurrentStocks?.ID || "",
+        FullName: state?.formState?.Member?.FullName || "",
+        Phone: state?.formState?.Member?.MobilePhone || "",
+        UserServiceIDs:
+          state?.formState?.UserServices &&
             state?.formState?.UserServices.length > 0
-              ? state?.formState.UserServices[0].ID
-              : "",
-        },
+            ? state?.formState.UserServices[0].ID
+            : "",
+      },
   });
   const { handleSubmit, setValue, reset, watch } = methods;
 
@@ -74,21 +104,73 @@ const BookingPage = () => {
       setValue("MemberID", Auth?.ID || "");
   }, [Auth, state?.formState]);
 
+  useEffect(() => {
+    if (queryParams.initialValues) {
+      let initialValues = JSON.parse(queryParams.initialValues)
+      setValue("RootIdS", initialValues.RootIdS)
+    }
+  }, [queryParams.initialValues])
+
   const addBookingMutation = useMutation({
     mutationFn: (body) => BookingAPI.add(body),
     mutationKey: ["addBooking"],
   });
 
   const onSubmit = (values) => {
+    let Tags = [];
+
+    if (values.RootIdS && values.RootIdS.length > 0) {
+      if (
+        values.RootIdS.some(
+          (item) =>
+            item.OsBook > 0 ||
+            item.OsDoing > 0 ||
+            item.OsNew > 0 ||
+            item.OsBH > 0
+        )
+      ) {
+        Tags.push("Có thẻ");
+      }
+      if (
+        values.RootIdS.some(
+          (item) =>
+            item.OsBook === 0 &&
+            item.OsDoing === 0 &&
+            item.OsNew === 0 &&
+            item.OsBH === 0
+        )
+      ) {
+        Tags.push("Không thẻ");
+      }
+    }
+
+    let newDesc =
+      GlobalConfig?.APP?.SL_khach && values?.AmountPeople
+        ? `Số lượng khách: ${values?.AmountPeople
+        }. \nTags: ${Tags.toString()} \nGhi chú: ${(values.Desc ? values.Desc.replaceAll("\n", "</br>") : "") +
+        (state?.formState
+          ? ` (Thay đổi từ ${state?.formState?.RootTitles} - ${moment(
+            state?.formState?.BookDate
+          ).format("HH:mm DD-MM-YYYY")}`
+          : "")
+        }`
+        : (values.Desc ? values.Desc.replaceAll("\n", "</br>") : "") +
+        (state?.formState
+          ? ` (Thay đổi từ ${state?.formState?.RootTitles} - ${moment(
+            state?.formState?.BookDate
+          ).format("HH:mm DD-MM-YYYY")})`
+          : "");
+
     const dataSubmit = {
       booking: [
         {
           ...values,
-          RootIdS: values?.RootIdS ? values?.RootIdS.toString() : "",
+          RootIdS: values?.RootIdS ? values?.RootIdS.map(x => x.ID).toString() : "",
           BookDate: values?.BookDate
             ? moment(values?.BookDate).format("YYYY-MM-DD HH:mm")
             : "",
           StockID: values?.StockID || 0,
+          Desc: newDesc
         },
       ],
     };
@@ -129,7 +211,7 @@ const BookingPage = () => {
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
             onClick={() => {
               if (queryKey === "Time" || queryKey === "Finish") {
-                navigate(state?.prevState || "/");
+                navigate(state?.prevState || queryParams?.prevState || "/");
               } else {
                 navigate(-1);
               }
@@ -148,7 +230,7 @@ const BookingPage = () => {
             onChange={onChangeTabs}
           >
             <Tabs.Tab key="Time" label="Thời gian">
-              <BookingTime />
+              <BookingTime invisible={queryKey !== 'Time'} />
             </Tabs.Tab>
             <Tabs.Tab key="Service" label="Dịch vụ">
               <BookingService addBookingMutation={addBookingMutation} />

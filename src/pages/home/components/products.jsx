@@ -8,7 +8,6 @@ import { NavLink } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const Products = () => {
-
   const { CurrentStocks, AccessToken } = useLayout();
 
   const { data, isLoading } = useQuery({
@@ -19,7 +18,7 @@ const Products = () => {
         ps: 6,
         cates: "794,10106",
         stockid: CurrentStocks?.ID || 0,
-        token: AccessToken || ''
+        token: AccessToken || "",
       });
       return data?.data?.lst || [];
     },
@@ -49,7 +48,9 @@ const Products = () => {
             Array(3)
               .fill()
               .map((_, index) => (
-                <SwiperSlide style={{ width: window.innerWidth / 3 - 6 + "px" }}>
+                <SwiperSlide
+                  style={{ width: window.innerWidth / 3 - 6 + "px" }}
+                >
                   <div className="bg-white border border-separator animate-pulse">
                     <div>
                       <div className="aspect-square">

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon, Input, Sheet } from "zmp-ui";
 import MemberAPI from "../../api/member.api";
+import { useLayout } from "../../layout/LayoutProvider";
 
 const Stars = ({ value }) => {
   return (
@@ -14,7 +15,7 @@ const Stars = ({ value }) => {
           <svg
             className={clsx(
               "w-4 h-4 mr-1",
-              index + 1 <= value ? "text-yellow-300" : "text-gray-300"
+              index + 1 <= value ? "text-yellow-300" : "text-gray-300",
             )}
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -33,6 +34,7 @@ const Stars = ({ value }) => {
 };
 
 const UserItem = ({ user, onChange, checked }) => {
+  const { GlobalConfig } = useLayout();
   return (
     <div
       className="py-4 pl-4 pr-8 border-b cursor-pointer relative"
@@ -41,22 +43,27 @@ const UserItem = ({ user, onChange, checked }) => {
       <div
         className={clsx(
           checked && "text-app",
-          "text-[16px] transition truncate pr-10"
+          "text-[16px] transition truncate pr-10",
         )}
       >
         {user.text}
       </div>
-      <Stars
-        value={
-          user.source.AverRate > 5
-            ? 5
-            : Math.round(user.source.AverRate * 2) / 2
-        }
-      />
+      {
+        GlobalConfig.Admin.dat_lich_nhan_vien_sao ? (
+          <Stars
+            value={
+              user.source.AverRate > 5
+                ? 5
+                : Math.round(user.source.AverRate * 2) / 2
+            }
+          />
+        ) : <></>
+      }
+
       <div
         className={clsx(
           "absolute right-4 top-2/4 -translate-y-2/4 text-app transition",
-          checked ? "opacity-100" : "opacity-0"
+          checked ? "opacity-100" : "opacity-0",
         )}
       >
         <Icon icon="zi-check" />
@@ -119,7 +126,7 @@ const EzsSelectUserDV = ({ label, StockID, onChange, value, ...props }) => {
               ))}
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

@@ -58,7 +58,7 @@ export function useDrag() {
         setDragging(false);
         setClicked(false);
       }),
-    []
+    [],
   );
 
   const dragMove = (ev, cb) => {

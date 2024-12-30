@@ -10,6 +10,8 @@ import { News } from "./components/news";
 import { SalesTop } from "./components/sales-top";
 import { Follow } from "./components/follow";
 import { useQueryClient } from "@tanstack/react-query";
+import { SalesService } from "./components/sale-service";
+import { SalesServiceHot } from "./components/sale-service-hot";
 
 const HomePage = () => {
   const queryClient = useQueryClient();
@@ -19,20 +21,24 @@ const HomePage = () => {
     setScrollTop(event.currentTarget.scrollTop);
   };
 
-  const handleRefresh = () => Promise.all([
-    queryClient.invalidateQueries({ queryKey: ["AdvBannerTop"] }),
-    queryClient.invalidateQueries({ queryKey: ["NewsHot"] }),
-    queryClient.invalidateQueries({ queryKey: ["AdvBannerSalesTop"] }),
-    queryClient.invalidateQueries({ queryKey: ["AdvBannerMain"] }),
-    queryClient.invalidateQueries({ queryKey: ["ProdSales"] }),
-    queryClient.invalidateQueries({ queryKey: ["HomeCategories"] }),
-    queryClient.invalidateQueries({ queryKey: ["HomeCategoriesRequired"] })
-  ])
+  const handleRefresh = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["AdvBannerTop"] }),
+      queryClient.invalidateQueries({ queryKey: ["NewsHot"] }),
+      queryClient.invalidateQueries({ queryKey: ["AdvBannerSalesTop"] }),
+      queryClient.invalidateQueries({ queryKey: ["AdvBannerMain"] }),
+      queryClient.invalidateQueries({ queryKey: ["ProdSales"] }),
+      queryClient.invalidateQueries({ queryKey: ["HomeCategories"] }),
+      queryClient.invalidateQueries({ queryKey: ["HomeCategoriesRequired"] }),
+    ]);
 
   return (
     <Page className="page !pt-0" hideScrollbar onScroll={handleScroll}>
       <PullToRefresh className="ezs-ptr ezs-ptr-safe" onRefresh={handleRefresh}>
-        <div className="h-full overflow-auto no-scrollbar" onScroll={handleScroll}>
+        <div
+          className="h-full overflow-auto no-scrollbar"
+          onScroll={handleScroll}
+        >
           <Search scrollTop={scrollTop} />
           <Banner />
           <div className="grid grid-cols-4 gap-y-4 bg-white px-3 pt-5 pb-3 mb-3">
@@ -40,6 +46,8 @@ const HomePage = () => {
             <Category ID="45" QueryKey="HomeCategoriesRequired" isRequired />
           </div>
           <div className="mb-3">
+            <SalesService />
+            <SalesServiceHot />
             <Sales />
             <SalesTop />
           </div>

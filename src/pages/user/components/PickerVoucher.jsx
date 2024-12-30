@@ -28,9 +28,9 @@ export const PickerVoucher = ({ children, item }) => {
                   {item.ngay === null
                     ? "Không giới hạn"
                     : `${moment(item?.ngay?.From).format(
-                        "HH:mm DD/MM/YYYY"
+                        "HH:mm DD/MM/YYYY",
                       )} - ${moment(item?.ngay?.To).format(
-                        "HH:mm DD/MM/YYYY"
+                        "HH:mm DD/MM/YYYY",
                       )}`}
                 </div>
               </div>
@@ -150,7 +150,7 @@ export const PickerVoucher = ({ children, item }) => {
                   <div className="font-medium text-primary">
                     {item.Voucher.VoucherMeta?.Perc > 100
                       ? `${formatString.formatVND(
-                          item.Voucher.VoucherMeta?.Perc
+                          item.Voucher.VoucherMeta?.Perc,
                         )}`
                       : `${item.Voucher.VoucherMeta?.Perc}%`}
                   </div>
@@ -159,7 +159,7 @@ export const PickerVoucher = ({ children, item }) => {
             </div>
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

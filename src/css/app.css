@@ -105,6 +105,18 @@ p:not(:last-child) {
   max-height: 80%;
 }
 
+.select-not-label .zaui-input-group-addon {
+  @apply hidden;
+}
+
+.select-not-label .zaui-input-affix-wrapper {
+  @apply m-0;
+}
+
+.select-not-label .zaui-input-affix-wrapper-disabled {
+  border: 1px solid #b9bdc1;
+}
+
 /* Tabs */
 
 .tab-scrollbar {
@@ -145,6 +157,14 @@ p:not(:last-child) {
   display: none;
 }
 
+.next-zaui-modal-wrapper ~ .zaui-modal-wrapper {
+  height: 100%;
+}
+
+.sheet-content-max .zaui-sheet-content {
+  max-height: 90vh;
+}
+
 /* Booking */
 
 .slider-booking-time .slider-control-centerright {
@@ -162,7 +182,7 @@ p:not(:last-child) {
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
-  @apply relative overflow-visible capitalize font-medium;
+  @apply relative overflow-visible font-medium capitalize;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
@@ -184,7 +204,7 @@ p:not(:last-child) {
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item {
-  @apply bg-white relative;
+  @apply relative bg-white;
 }
 
 .tab-booking > .zaui-tabs-tabbar > .zaui-tabs-tabbar-item::after {
@@ -192,7 +212,7 @@ p:not(:last-child) {
   height: 1px;
   position: absolute;
 
-  @apply top-2/4 -translate-y-2/4 w-5 -right-5 bg-app;
+  @apply w-5 top-2/4 -translate-y-2/4 -right-5 bg-app;
 }
 
 .tabs-time-booking .zaui-tabs-tabbar {
@@ -204,13 +224,13 @@ p:not(:last-child) {
 .tabs-time-booking .zaui-tabs-tabbar .zaui-tabs-tabbar-item {
   padding: 12px 6px;
   background-color: rgba(77, 89, 149, 0.06);
-  @apply rounded-sm cursor-pointer text-center transition;
+  @apply text-center transition rounded-sm cursor-pointer;
 }
 
 .tabs-time-booking
   .zaui-tabs-tabbar
   .zaui-tabs-tabbar-item.zaui-tabs-tabbar-item-active {
-  @apply bg-app text-white;
+  @apply text-white bg-app;
 }
 
 .tabs-time-booking .zaui-tabs-tabbar .zaui-tabs-tabbar-active-line {
@@ -222,12 +242,13 @@ p:not(:last-child) {
   @apply !bg-app;
 }
 
-.ezs-ptr.ezs-ptr-safe.ptr--pull-down-treshold-breached .ptr__pull-down--loading {
+.ezs-ptr.ezs-ptr-safe.ptr--pull-down-treshold-breached
+  .ptr__pull-down--loading {
   @apply p-safe;
 }
 
 .ezs-ptr.ezs-ptr-safe.ptr--pull-down-treshold-breached .ptr__children {
-  @apply !translate-y-ptr
+  @apply !translate-y-ptr;
 }
 
 .ezs-ptr .ptr__pull-down--pull-more {

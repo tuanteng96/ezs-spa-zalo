@@ -4,7 +4,7 @@ import { configAppView, openChat } from "zmp-sdk";
 import { BottomNavigation, Icon, useNavigate } from "zmp-ui";
 import { useVirtualKeyboardVisible } from "../../hook";
 import { useCart } from "../../layout/CartProvider";
-import { useConfigs } from "../../layout/MasterLayout";
+import { useLayout } from "../../layout/LayoutProvider";
 import { CartIcon } from "./CartIcon";
 
 export const NO_BOTTOM_NAVIGATION_PAGES = [
@@ -18,11 +18,14 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-voucher",
   "/user/customer-wallet-card",
   "/user/customer-service",
+  "/user/customer-points",
+  "/user/customer-affs",
+  "/user/customer-rating",
   "/user/customer-booking-manage",
   "/user/customer-branch",
   "/booking",
   "/search",
-  "/contact",
+  "/contact"
 ];
 
 export const BOTTOM_NAVIGATION_SEARCH_PAGE = ["Type=Finish"];
@@ -34,7 +37,7 @@ export const Navigation = () => {
   const { pathname, search } = useLocation();
   const [active, setActive] = useState("/");
   const keyboardVisible = useVirtualKeyboardVisible();
-  let { GlobalConfig } = useConfigs();
+  let { GlobalConfig } = useLayout();
 
   let navigate = useNavigate();
 

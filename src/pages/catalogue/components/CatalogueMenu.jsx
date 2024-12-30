@@ -26,14 +26,14 @@ function onWheel({ getItemById, items, visibleItems, scrollToItem }, ev) {
     // NOTE: for center items
     const nextGroupItems = slidingWindow(
       items.toItemsKeys(),
-      visibleItems
+      visibleItems,
     ).next();
     const { center } = getItemsPos(nextGroupItems);
     scrollToItem(getItemById(center), "smooth", "center");
   } else if (ev.deltaY > 0) {
     const prevGroupItems = slidingWindow(
       items.toItemsKeys(),
-      visibleItems
+      visibleItems,
     ).prev();
     const { center } = getItemsPos(prevGroupItems);
     scrollToItem(getItemById(center), "smooth", "center");
@@ -49,7 +49,7 @@ const Item = ({ itemId, selected, onClick, item }) => {
       <div
         className={clsx(
           "whitespace-nowrap h-12 flex items-center font-semibold",
-          selected && "text-app"
+          selected && "text-app",
         )}
       >
         {item.Title}
@@ -114,7 +114,7 @@ const CatalogueMenu = ({ queryConfig }) => {
           state: {
             prevState: state?.prevState || "",
           },
-        }
+        },
       );
     };
 
@@ -124,7 +124,7 @@ const CatalogueMenu = ({ queryConfig }) => {
         getItemById(queryConfig.TypeID),
         "smooth",
         "center",
-        "nearest"
+        "nearest",
       );
     }
   };

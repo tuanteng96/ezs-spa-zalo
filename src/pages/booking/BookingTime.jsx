@@ -7,8 +7,9 @@ import ConfigsAPI from "../../api/configs.api";
 import { useLayout } from "../../layout/LayoutProvider";
 import Carousel from "nuka-carousel";
 import clsx from "clsx";
-import { createSearchParams } from "react-router-dom";
-import { useConfigs } from "../../layout/MasterLayout";
+import { createSearchParams, useLocation } from "react-router-dom";
+import { SheetProvince } from "../../components/sheet-stocks/SheetProvince";
+import { createPortal } from "react-dom";
 
 const GroupByCount = (List, Count) => {
   return List.reduce((acc, x, i) => {
@@ -39,14 +40,47 @@ const settings = {
   ),
 };
 
-const BookingTime = () => {
+const formatTimeOpenClose = ({ Text, InitialTime, Date }) => {
+  let Times = { ...InitialTime }
+
+  let CommonTime = Array.from(Text.matchAll(/\[([^\][]*)]/g), x => x[1])
+
+  if (CommonTime && CommonTime.length > 0) {
+    let CommonTimeJs = CommonTime[0].split(';')
+    Times.TimeOpen = CommonTimeJs[0]
+    Times.TimeClose = CommonTimeJs[1]
+  }
+
+  let PrivateTime = Array.from(Text.matchAll(/{+([^}]+)}+/g), x => x[1])
+  PrivateTime = PrivateTime.filter(x => x.split(';').length > 2).map(x => ({
+    DayName: x.split(';')[0],
+    TimeOpen: x.split(';')[1],
+    TimeClose: x.split(';')[2]
+  }))
+  if (Date) {
+    let index = PrivateTime.findIndex(
+      x => x.DayName === moment(Date, 'DD/MM/YYYY').format('ddd')
+    )
+
+    if (index > -1) {
+      Times.TimeOpen = PrivateTime[index].TimeOpen
+      Times.TimeClose = PrivateTime[index].TimeClose
+    }
+  }
+
+  return Times
+}
+
+const BookingTime = ({ invisible }) => {
   const navigate = useNavigate();
-  const { Stocks } = useLayout();
-  const { GlobalConfig } = useConfigs();
+  const { pathname } = useLocation();
+  const { Stocks, AccessToken, GlobalConfig } = useLayout();
 
   const [key, setKey] = useState("0");
   const [ListChoose, setListChoose] = useState([]);
   const [DateChoose, setDateChoose] = useState();
+
+  const [open, setOpen] = useState(false);
 
   const { watch, control, setValue } = useFormContext();
   const { StockID, BookDate } = watch();
@@ -92,29 +126,66 @@ const BookingTime = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [DateChoose, ListLock, StockID, GlobalConfig]);
 
-  useEffect(() => {}, []);
-
   const getListChoose = (DateChoose) => {
-    const { TimeOpen, TimeClose, TimeNext } = {
-      TimeOpen: GlobalConfig?.APP?.Booking?.TimeOpen || {
+
+    const { TimeOpenG, TimeCloseG, TimeNext, ScheduledMinutes } = {
+      TimeOpenG: GlobalConfig?.APP?.Booking?.TimeOpen || {
         hour: "10",
         minute: "00",
         second: "00",
       },
-      TimeClose: GlobalConfig?.APP?.Booking?.TimeClose || {
+      TimeCloseG: GlobalConfig?.APP?.Booking?.TimeClose || {
         hour: "21",
         minute: "00",
         second: "00",
       },
       TimeNext: GlobalConfig?.APP?.Booking?.TimeNext || 15,
+      ScheduledMinutes: GlobalConfig?.APP?.ScheduledMinutes || 0,
       AtHome: true,
       hideNoteTime: true,
     };
+
+    let TimeOpen = TimeOpenG;
+    let TimeClose = TimeCloseG;
+
+    let indexStock = Stocks?.findIndex(x => x.ID === StockID)
+
+    if (indexStock > -1) {
+      let StockI = Stocks[indexStock].KeySEO
+      if (StockI) {
+        let bookDate = moment().format('DD/MM/YYYY')
+        if (key === '1') {
+          bookDate = moment().add(1, 'day').format('DD/MM/YYYY')
+        }
+        if (DateChoose) {
+          bookDate = moment(DateChoose).format('DD/MM/YYYY')
+        }
+        let TimesObj = formatTimeOpenClose({
+          Text: StockI,
+          InitialTime: {
+            TimeOpen: TimeOpen
+              ? moment().set(TimeOpen).format('HH:mm:ss')
+              : '06:00:00',
+            TimeClose: TimeClose
+              ? moment().set(TimeClose).format('HH:mm:ss')
+              : '18:00:00'
+          },
+          Date: bookDate
+        })
+        TimeOpen.hour = TimesObj.TimeOpen.split(':')[0]
+        TimeOpen.minute = TimesObj.TimeOpen.split(':')[1]
+        TimeClose.hour = TimesObj.TimeClose.split(':')[0]
+        TimeClose.minute = TimesObj.TimeClose.split(':')[1]
+      } else {
+        TimeOpen = TimeOpenG
+        TimeClose = TimeCloseG
+      }
+    }
     const newListChoose = [];
     let ListDisable = [];
     if (ListLock && ListLock.length > 0) {
       const indexLock = ListLock.findIndex(
-        (item) => Number(item.StockID) === Number(StockID)
+        (item) => Number(item.StockID) === Number(StockID),
       );
 
       if (indexLock > -1) {
@@ -127,7 +198,10 @@ const BookingTime = () => {
         day = DateChoose;
       }
       let startDate = moment(day).set(TimeOpen);
-      let closeDate = moment(day).set(TimeClose);
+      let closeDate = moment(day).set(TimeClose).subtract(
+        ScheduledMinutes || 0,
+        'minutes'
+      );
       var duration = moment.duration(closeDate.diff(startDate));
       var MinutesTotal = duration.asMinutes();
       let newListTime = [];
@@ -138,7 +212,7 @@ const BookingTime = () => {
           const indexDayOf = ListDisable.findIndex(
             (x) =>
               moment(x.Date, "DD/MM/YYYY").format("DD/MM/YYYY") ===
-              moment(datetime).format("DD/MM/YYYY")
+              moment(datetime).format("DD/MM/YYYY"),
           );
           if (indexDayOf > -1) {
             if (
@@ -148,24 +222,24 @@ const BookingTime = () => {
               isDayOff = ListDisable[indexDayOf].TimeClose.some((time) => {
                 const DateStartDayOf = moment(
                   ListDisable[indexDayOf].Date + time.Start,
-                  "DD/MM/YYYY HH:mm"
+                  "DD/MM/YYYY HH:mm",
                 );
                 const DateEndDayOf = moment(
                   ListDisable[indexDayOf].Date + time.End,
-                  "DD/MM/YYYY HH:mm"
+                  "DD/MM/YYYY HH:mm",
                 );
                 let isStart =
                   moment(datetime, "HH:mm").isSameOrAfter(
-                    moment(DateStartDayOf, "HH:mm")
+                    moment(DateStartDayOf, "HH:mm"),
                   ) ||
                   moment(datetime).format("HH:mm") ===
-                    moment(DateStartDayOf).format("HH:mm");
+                  moment(DateStartDayOf).format("HH:mm");
                 let isEnd =
                   moment(datetime, "HH:mm").isSameOrBefore(
-                    moment(DateEndDayOf, "HH:mm")
+                    moment(DateEndDayOf, "HH:mm"),
                   ) ||
                   moment(datetime).format("HH:mm") ===
-                    moment(DateEndDayOf).format("HH:mm");
+                  moment(DateEndDayOf).format("HH:mm");
                 return isStart && isEnd;
               });
             } else {
@@ -175,7 +249,7 @@ const BookingTime = () => {
         }
         newListTime.push({
           Time: datetime,
-          Disable: moment().diff(datetime, "minutes") > 0 || isDayOff,
+          Disable: moment().add(ScheduledMinutes, 'minutes').diff(datetime, "minutes") > 0 || isDayOff,
         });
       }
 
@@ -195,30 +269,45 @@ const BookingTime = () => {
   };
 
   const onNext = () => {
-    if (!StockID) {
-      openSnackbar({
-        text: "Bạn vui lòng chọn cơ sở muốn đặt lịch?",
-        type: "error",
-      });
-    } else if (!BookDate) {
-      openSnackbar({
-        text: "Bạn vui lòng chọn thời gian đặt lịch?",
-        type: "error",
-      });
+    if (!AccessToken) {
+      navigate(`${pathname}?fromProtected=${pathname}`);
     } else {
-      navigate({
-        pathname: "/booking",
-        search: createSearchParams({
-          Type: "Service",
-        }).toString(),
-      });
+      if (!StockID) {
+        openSnackbar({
+          text: "Bạn vui lòng chọn cơ sở muốn đặt lịch?",
+          type: "error",
+        });
+      } else if (!BookDate) {
+        openSnackbar({
+          text: "Bạn vui lòng chọn thời gian đặt lịch?",
+          type: "error",
+        });
+      } else {
+        navigate({
+          pathname: "/booking",
+          search: createSearchParams({
+            Type: "Service",
+          }).toString(),
+        });
+      }
     }
   };
 
   let StocksBooking = GlobalConfig?.StocksNotBook
     ? Stocks &&
-      Stocks.filter((o) => !GlobalConfig?.StocksNotBook?.includes(o.ID))
+    Stocks.filter((o) => !GlobalConfig?.StocksNotBook?.includes(o.ID))
     : Stocks;
+
+  const getBookName = (val, StocksBooking) => {
+    if (!StocksBooking || StocksBooking.length === 0) {
+      return "Đang tải ...";
+    }
+    let index =
+      StocksBooking && StocksBooking.findIndex((x) => x.ID === Number(val));
+    if (index > -1) {
+      return StocksBooking[index].Title;
+    }
+  };
 
   return (
     <div className="overflow-auto h-full no-scrollbar">
@@ -226,27 +315,66 @@ const BookingTime = () => {
         <div className="mb-3 uppercase font-semibold text-sm">
           1. Chọn cơ sở gần bạn
         </div>
-        <div className={clsx("grid gap-3", Stocks.length > 1 && "grid-cols-2")}>
+        <div
+          className={clsx(
+            !GlobalConfig?.APP?.ByProvince && "grid gap-3",
+            Stocks.length > 1 && "grid-cols-2",
+          )}
+        >
           <Controller
             name="StockID"
             control={control}
             render={({ field: { ref, ...field }, fieldState }) => (
               <>
-                {StocksBooking &&
-                  StocksBooking.map((stock, index) => (
-                    <div
-                      className={clsx(
-                        "flex items-center justify-center p-3 rounded-sm cursor-pointer transition",
-                        Number(field.value) === stock.ID
-                          ? "bg-app text-white"
-                          : "bg-light"
-                      )}
-                      key={index}
-                      onClick={() => field.onChange(stock.ID)}
-                    >
-                      <div className="font-medium truncate">{stock.Title}</div>
+                {GlobalConfig?.APP?.ByProvince ? (
+                  <>
+                    <div>
+                      {field.value
+                        ? "Bạn đang đặt lịch tại"
+                        : "Bạn chưa chọn cơ sở đặt lịch."}
+                      <span className="text-app pl-1.5 font-medium">
+                        {getBookName(field.value, StocksBooking)}
+                      </span>
+                      <div
+                        className="text-primary mt-1.5 underline"
+                        onClick={() => setOpen(true)}
+                      >
+                        {field.value ? "Thay đổi cơ sở ?" : "Chọn cơ sở ?"}
+                      </div>
+                      <SheetProvince
+                        active={Number(field.value)}
+                        open={open}
+                        onHide={() => setOpen(false)}
+                        onChange={(val) => {
+                          field.onChange(val.ID);
+                          setValue("BookDate", "");
+                          setOpen(false);
+                        }}
+                        StocksHide={GlobalConfig?.StocksNotBook || []}
+                      />
                     </div>
-                  ))}
+                  </>
+                ) : (
+                  <>
+                    {StocksBooking &&
+                      StocksBooking.map((stock, index) => (
+                        <div
+                          className={clsx(
+                            "flex items-center justify-center p-3 rounded-sm cursor-pointer transition",
+                            Number(field.value) === stock.ID
+                              ? "bg-app text-white"
+                              : "bg-light",
+                          )}
+                          key={index}
+                          onClick={() => { field.onChange(stock.ID); setValue("BookDate", ""); }}
+                        >
+                          <div className="font-medium truncate">
+                            {stock.Title}
+                          </div>
+                        </div>
+                      ))}
+                  </>
+                )}
               </>
             )}
           />
@@ -300,9 +428,9 @@ const BookingTime = () => {
                             ? moment(DateChoose).format("DD/MM/YYYY")
                             : "Ngày khác"
                           : moment(item.day).calendar({
-                              sameDay: (now) => `[Hôm nay]`,
-                              nextDay: (now) => `[Ngày mai]`,
-                            })
+                            sameDay: (now) => `[Hôm nay]`,
+                            nextDay: (now) => `[Ngày mai]`,
+                          })
                       }
                     >
                       <div className="pb-10 slider-booking-time -mx-[5px]">
@@ -323,13 +451,13 @@ const BookingTime = () => {
                                         className={clsx(
                                           "h-10 rounded-sm border flex items-center justify-center text-[13px] font-semibold cursor-pointer transition",
                                           time.Disable &&
-                                            "disabled bg-stripes text-muted",
+                                          "disabled bg-stripes text-muted",
                                           field.value &&
-                                            moment(field.value).diff(
-                                              time.Time,
-                                              "minutes"
-                                            ) === 0 &&
-                                            "bg-app text-white !border-app"
+                                          moment(field.value).diff(
+                                            time.Time,
+                                            "minutes",
+                                          ) === 0 &&
+                                          "bg-app text-white !border-app",
                                         )}
                                         onClick={() =>
                                           !time.Disable &&
@@ -355,17 +483,20 @@ const BookingTime = () => {
         (*) Nếu khung giờ bạn chọn đã kín lịch, chúng tôi sẽ liên hệ trực tiếp
         để thông báo.
       </div>
-      <div className="fixed bottom-0 left-0 w-full pb-safe-bottom bg-white">
-        <div className="h-12">
-          <button
-            onClick={onNext}
-            type="button"
-            className="w-full h-full text-white uppercase font-semibold text-sm bg-app"
-          >
-            Chọn dịch vụ
-          </button>
-        </div>
-      </div>
+      {
+        !invisible && createPortal(<div className="fixed z-50 bottom-0 left-0 w-full pb-safe-bottom bg-white">
+          <div className="h-12">
+            <button
+              onClick={onNext}
+              type="button"
+              className="w-full h-full text-white uppercase font-semibold text-sm bg-app disabled:opacity-60"
+            >
+              Chọn dịch vụ
+            </button>
+          </div>
+        </div>, document.body)
+      }
+
     </div>
   );
 };

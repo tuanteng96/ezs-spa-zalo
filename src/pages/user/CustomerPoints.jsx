@@ -1,28 +1,43 @@
 import { TruckIcon } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import moment from "moment";
+import React, { useRef } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { Icon, Page, Text, useNavigate } from "zmp-ui";
 import AuthAPI from "../../api/auth.api";
 import { useLayout } from "../../layout/LayoutProvider";
-import { OrderItem } from "./components/OrderItem";
+import { formatArray } from "../../utils/formatArray";
 
-const CustomerDiary = () => {
+const CustomerPoints = () => {
   const navigate = useNavigate();
   const { Auth, AccessToken } = useLayout();
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["VouchersList", AccessToken],
-    queryFn: async () => {
-      const { data } = await AuthAPI.orders(AccessToken);
-      return data || [];
-    },
-    enabled: Number(Auth?.ID) > -1,
-  });
+  const elRoot = useRef();
+
+  const { data, fetchNextPage, isLoading, hasNextPage, isFetching, refetch } =
+    useInfiniteQuery({
+      queryKey: ["Points", { AccessToken }],
+      queryFn: async ({ pageParam = 1 }) => {
+        const { data } = await AuthAPI.points({
+          Token: AccessToken,
+          data: { "StockID": "", "DateStart": "", "DateEnd": "", "Pi": pageParam, "Ps": 10, "Order": "ID desc", "MemberID": Auth?.ID }
+        });
+        return data || [];
+      },
+      getNextPageParam: (lastPage) => {
+        return lastPage.Pi === lastPage.PCount || !lastPage.PCount
+          ? undefined
+          : lastPage.Pi + 1;
+      },
+      enabled: Number(Auth?.ID) > -1,
+    });
+
+  const List = formatArray.useInfiniteQuery(data?.pages, "lst");
 
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
-      <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white">
+      <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white border-b">
         <div className="w-2/3 relative flex items-center h-full pl-10">
           <div
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
@@ -31,78 +46,29 @@ const CustomerDiary = () => {
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>
           <Text.Title className="text-app">
-            Đơn hàng của tôi
-            {data && data.length > 0 && (
-              <span className="pl-1">({data.length})</span>
-            )}
+            Tích điểm
+            {/* {data?.pages && data.pages.length > 0 && data.pages[0].TotalPoint > 0 && (
+              <span className="pl-1">({data.pages && data.pages.length > 0 && data.pages[0].TotalPoint} điểm)</span>
+            )} */}
           </Text.Title>
         </div>
       </div>
       <>
         {isLoading && (
           <>
-            {Array(2)
+            {Array(4)
               .fill()
               .map((_, index) => (
-                <div className="bg-white mt-1.5 animate-pulse" key={index}>
-                  <div className="px-3 py-3 flex justify-between">
-                    <TruckIcon className="w-6 text-app" />
-                    <div className="flex items-center">
-                      <div className="text-sm">
-                        <div className="h-3 bg-gray-200 w-32"></div>
-                      </div>
-                      <div className="w-px bg-gray-300 mx-3 h-5"></div>
-                      <div>
-                        <div className="h-3 bg-gray-200 w-12"></div>
-                      </div>
-                    </div>
+                <div className="bg-white p-4 border-b animate-pulse" key={index}>
+                  <div className="flex justify-between mb-3">
+                    <div className="h-3 bg-gray-200 w-32 rounded-lg"></div>
+                    <div className="h-3 bg-gray-200 w-12 rounded-lg"></div>
                   </div>
-                  <div className="border-t border-b">
-                    {Array(2)
-                      .fill()
-                      .map((_, idx) => (
-                        <div className="p-3 flex" key={idx}>
-                          <div className="w-16">
-                            <div className="flex items-center justify-center w-full h-16 bg-gray-300">
-                              <svg
-                                className="w-8 h-8 text-gray-200"
-                                xmlns="http://www.w3.org/2000/svg"
-                                aria-hidden="true"
-                                fill="currentColor"
-                                viewBox="0 0 640 512"
-                              >
-                                <path d="M480 80C480 35.82 515.8 0 560 0C604.2 0 640 35.82 640 80C640 124.2 604.2 160 560 160C515.8 160 480 124.2 480 80zM0 456.1C0 445.6 2.964 435.3 8.551 426.4L225.3 81.01C231.9 70.42 243.5 64 256 64C268.5 64 280.1 70.42 286.8 81.01L412.7 281.7L460.9 202.7C464.1 196.1 472.2 192 480 192C487.8 192 495 196.1 499.1 202.7L631.1 419.1C636.9 428.6 640 439.7 640 450.9C640 484.6 612.6 512 578.9 512H55.91C25.03 512 .0006 486.1 .0006 456.1L0 456.1z" />
-                              </svg>
-                            </div>
-                          </div>
-                          <div className="flex-1 pl-3">
-                            <div className="h-3 bg-gray-200 w-full mb-2"></div>
-                            <div className="h-3 bg-gray-200 w-32"></div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                  <div className="p-3 flex justify-between border-b items-center cursor-pointer">
-                    <div className="text-muted text-sm">
-                      <div className="h-3 bg-gray-200 w-16"></div>
+                  <div>
+                    <div>
+                      <div className="h-3 bg-gray-200 w-full mb-2 rounded-lg"></div>
+                      <div className="h-3 bg-gray-200 w-32 rounded-lg"></div>
                     </div>
-                    <div className="flex items-center text-sm">
-                      <div className="h-3 bg-gray-200 w-32"></div>
-                      <Icon className="text-muted" icon="zi-chevron-right" />
-                    </div>
-                  </div>
-
-                  <div className="p-3 flex justify-between items-center">
-                    <div className="text-sm">
-                      <div className="h-3 bg-gray-200 w-32"></div>
-                    </div>
-                    <button
-                      className="bg-app text-white h-11 px-4 rounded opacity-50"
-                      type="button"
-                      disabled
-                    >
-                      Thanh toán
-                    </button>
                   </div>
                 </div>
               ))}
@@ -110,8 +76,8 @@ const CustomerDiary = () => {
         )}
         {!isLoading && (
           <PullToRefresh className="ezs-ptr" onRefresh={refetch}>
-            <div className="h-full overflow-auto no-scrollbar">
-              {(!data || data.length === 0) && (
+            <div className="h-full overflow-auto no-scrollbar bg-white" id="scrollablePoints" ref={elRoot}>
+              {(!List || List.length === 0) && (
                 <div className="flex flex-col items-center px-5 py-12">
                   <svg
                     className="w-16 mb-5"
@@ -143,18 +109,90 @@ const CustomerDiary = () => {
                     </g>
                   </svg>
                   <div className="font-bold text-lg mb-px">
-                    "Hổng" có đơn hàng nào ?
+                    "Hổng" có dữ liệu nào ?
                   </div>
                   <div className="text-center">
-                    Hãy bắt đầu mua mặt hàng bạn đang tìm ngay ...
+                    Không tìm thấy dữ liệu tích điểm của bạn ...
                   </div>
                 </div>
               )}
-              {data &&
-                data.length > 0 &&
-                data.map((item, index) => (
-                  <OrderItem item={item} key={index} />
-                ))}
+              {List && List.length > 0 && (
+                <InfiniteScroll
+                  dataLength={List.length}
+                  next={fetchNextPage}
+                  hasMore={hasNextPage}
+                  loader={
+                    <div className="px-3 py-3.5 rounded-sm cursor-pointer bg-white border-b">
+                      <div className="h-3.5 bg-gray-200 rounded-full w-full animate-pulse"></div>
+                      <div className="h-2.5 mt-2 bg-gray-200 rounded-full w-2/4 animate-pulse"></div>
+                    </div>
+                  }
+                  scrollableTarget="scrollablePoints"
+                  refreshFunction={refetch}
+                  releaseToRefreshContent={
+                    <div className="flex items-center justify-center">
+                      <div className="lds-ellipsis">
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                      </div>
+                    </div>
+                  }
+                  pullDownToRefresh
+                  pullDownToRefreshThreshold={70}
+                  pullDownToRefreshContent={
+                    <div className="flex items-center justify-center">
+                      <div className="lds-ellipsis">
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                        <div className="!bg-app"></div>
+                      </div>
+                    </div>
+                  }
+                >
+                  <div className="grid grid-cols-1">
+                    {List.map((item, index) => (
+                      <div
+                        className="flex flex-col p-4 border-b last:border-0"
+                        key={index}
+                      >
+                        <div className="flex justify-between mb-2.5">
+                          <div
+                            style={{
+                              fontSize: "15px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {moment(item.CreateDate).format("DD/MM/YYYY")}
+                            <span className="px-5px">-</span>#{item.ID}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "15px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            Điểm : {item.Point}
+                          </div>
+                        </div>
+                        <div className="text-gray-600">
+                          {item.RefOrderID > 0 &&
+                            item.Point > 0 &&
+                            `Tích điểm đơn hàng : #${item.RefOrderID} - ${item.Title}`}
+                          {item.RefOrderID > 0 &&
+                            item.Point < 0 &&
+                            `Khấu trừ tích điểm đơn hàng : #${item.RefOrderID} - ${item.Title}`}
+                          {!item.RefOrderID && item.Desc}
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                </InfiniteScroll>
+              )}
+
             </div>
           </PullToRefresh>
         )}
@@ -163,4 +201,4 @@ const CustomerDiary = () => {
   );
 };
 
-export default CustomerDiary;
+export default CustomerPoints;

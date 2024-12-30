@@ -31,7 +31,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Thanh toán thực tế</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.thanh_toan_tien)
+                            Math.abs(item.thanhtoan.thanh_toan_tien),
                           )}
                         </span>
                       </div>
@@ -41,7 +41,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Thanh toán ví</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.thanh_toan_vi)
+                            Math.abs(item.thanhtoan.thanh_toan_vi),
                           )}
                         </span>
                       </div>
@@ -51,7 +51,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Hoàn ví khi trả hàng</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.hoan_vi_tra_hang)
+                            Math.abs(item.thanhtoan.hoan_vi_tra_hang),
                           )}
                         </span>
                       </div>
@@ -61,7 +61,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Hoàn ví khi kết thúc thẻ</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.hoan_vi_ket_thuc_the)
+                            Math.abs(item.thanhtoan.hoan_vi_ket_thuc_the),
                           )}
                         </span>
                       </div>
@@ -71,7 +71,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Kết thúc thẻ hoàn tiền</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.ket_thuc_the_hoan_tien)
+                            Math.abs(item.thanhtoan.ket_thuc_the_hoan_tien),
                           )}
                         </span>
                       </div>
@@ -81,7 +81,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Kết thúc thẻ hoàn ví</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.ket_thuc_the_hoan_vi)
+                            Math.abs(item.thanhtoan.ket_thuc_the_hoan_vi),
                           )}
                         </span>
                       </div>
@@ -91,7 +91,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Trả hàng hoàn tiền</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.tra_hang_hoan_tien)
+                            Math.abs(item.thanhtoan.tra_hang_hoan_tien),
                           )}
                         </span>
                       </div>
@@ -101,7 +101,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
                         <span>Trả hàng ví</span>
                         <span className="font-semibold">
                           {formatString.formatVND(
-                            Math.abs(item.thanhtoan.tra_hang_hoan_vi)
+                            Math.abs(item.thanhtoan.tra_hang_hoan_vi),
                           )}
                         </span>
                       </div>
@@ -120,7 +120,7 @@ export const PickerOrder = ({ children, item, TotalDebt }) => {
             )}
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

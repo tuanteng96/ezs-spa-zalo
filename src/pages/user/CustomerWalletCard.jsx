@@ -50,7 +50,11 @@ const CustomerWalletCard = () => {
     enabled: Number(Auth?.ID) > -1,
   });
 
-  const { data, isLoading, refetch: refetchCard } = useQuery({
+  const {
+    data,
+    isLoading,
+    refetch: refetchCard,
+  } = useQuery({
     queryKey: ["MoneyCardList", Auth?.ID],
     queryFn: async () => {
       const { data } = await AuthAPI.moneyCard(Auth?.ID);
@@ -143,7 +147,7 @@ const CustomerWalletCard = () => {
                       <div className="h-5 bg-gray-200 animate-pulse rounded-lg w-40"></div>
                     ) : (
                       formatString.formatVNDPositive(
-                        WalletCard?.Wallet?.TotalWallet
+                        WalletCard?.Wallet?.TotalWallet,
                       )
                     )}
                   </div>
@@ -159,7 +163,7 @@ const CustomerWalletCard = () => {
                               <div className="h-3 bg-gray-200 rounded-lg w-28 animate-pulse"></div>
                             ) : (
                               formatString.formatVNDPositive(
-                                WalletCard?.Wallet?.DemonsWallet
+                                WalletCard?.Wallet?.DemonsWallet,
                               )
                             )}
                           </div>
@@ -174,7 +178,7 @@ const CustomerWalletCard = () => {
                             ) : (
                               formatString.formatVNDPositive(
                                 WalletCard?.Wallet?.TotalWallet -
-                                WalletCard?.Wallet?.DemonsWallet
+                                WalletCard?.Wallet?.DemonsWallet,
                               )
                             )}
                           </div>
@@ -198,7 +202,7 @@ const CustomerWalletCard = () => {
                                 "mb-6 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px]",
                                 index > 0
                                   ? "before:bg-success"
-                                  : "before:bg-danger"
+                                  : "before:bg-danger",
                               )}
                               key={index}
                             >
@@ -206,7 +210,7 @@ const CustomerWalletCard = () => {
                                 <div
                                   className={clsx(
                                     "font-bold text-base",
-                                    index > 0 ? "text-success" : "text-danger"
+                                    index > 0 ? "text-success" : "text-danger",
                                   )}
                                 >
                                   <div className="h-4 bg-white rounded-full w-24"></div>
@@ -272,7 +276,7 @@ const CustomerWalletCard = () => {
                                       "mb-6 last:mb-0 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px]",
                                       item.Value > 0
                                         ? "before:bg-success"
-                                        : "before:bg-danger"
+                                        : "before:bg-danger",
                                     )}
                                     key={index}
                                   >
@@ -282,14 +286,14 @@ const CustomerWalletCard = () => {
                                           "font-bold text-base",
                                           item.Value > 0
                                             ? "text-success"
-                                            : "text-danger"
+                                            : "text-danger",
                                         )}
                                       >
                                         <span className="pr-1">
                                           {item.Value > 0 ? "+" : "-"}
                                         </span>
                                         {formatString.formatVNDPositive(
-                                          item.Value
+                                          item.Value,
                                         )}
                                       </div>
                                       <div className="mt-2 text-muted">
@@ -297,10 +301,17 @@ const CustomerWalletCard = () => {
                                       </div>
                                     </div>
                                     <div className="note absolute bottom-0 right-0">
-                                      {VietnamesType(item)}
+                                      <div>{VietnamesType(item)}</div>
+                                      {item.canh_bao_thanh_toan ? (
+                                        <div className="text-danger text-sm">
+                                          ( Chưa thanh toán hết )
+                                        </div>
+                                      ) : (
+                                        <></>
+                                      )}
                                     </div>
                                   </li>
-                                )
+                                ),
                               )}
                             </ul>
                           )}

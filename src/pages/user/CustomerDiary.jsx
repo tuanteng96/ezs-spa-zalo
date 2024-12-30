@@ -25,7 +25,7 @@ const CustomerOrders = () => {
       const index = data.findIndex(
         (x) =>
           moment().format("DD-MM-YYYY") ===
-          moment(x.dayFull).format("DD-MM-YYYY")
+          moment(x.dayFull).format("DD-MM-YYYY"),
       );
       if (index > -1) {
         setTabActive(data[index].day);
@@ -164,7 +164,7 @@ const CustomerOrders = () => {
                                       dangerouslySetInnerHTML={{
                                         __html: sub.Content.replaceAll(
                                           "/Upload/image/",
-                                          ProcessENV.URL + "/Upload/image/"
+                                          ProcessENV.URL + "/Upload/image/",
                                         ),
                                       }}
                                     ></div>

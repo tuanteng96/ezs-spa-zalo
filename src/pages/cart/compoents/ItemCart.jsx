@@ -8,7 +8,7 @@ const ItemCart = ({ item }) => {
   return (
     <PickerCart item={item}>
       {({ open }) => (
-        <div className="p-3 flex bg-[#f6f6f6]" onClick={open}>
+        <div className="p-3 flex bg-[#f6f6f6] border-b border-white last:border-0" onClick={open}>
           <div className="w-16">
             <ImageLazy
               wrapperClassName="aspect-square !block"

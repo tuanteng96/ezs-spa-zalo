@@ -7,6 +7,7 @@ import { formatString } from "../../../utils/formatString";
 import { ImageLazy } from "../../../components/ImagesLazy";
 import { QRCodeSVG } from "qrcode.react";
 import LogoEZS from "../../../static/images/logo-ezs.jpg";
+import clsx from "clsx";
 
 const QrCodeRender = ({ item, Banks, Bank, TotalDebt }) => {
   if (Bank.ma_nh === "MoMoPay" || Bank.ma_nh === "ZaloPay") {
@@ -84,7 +85,7 @@ export const PickerBanks = ({ children, Banks, Bank, item, TotalDebt }) => {
             TotalDebt={TotalDebt}
           />
         </Modal>,
-        document.body
+        document.body,
       )}
     </>
   );
@@ -98,7 +99,7 @@ export const PickerOrderPayted = ({ children, item, TotalDebt }) => {
     queryKey: ["InfoQrCode"],
     queryFn: async () => {
       const { data } = await ConfigsAPI.getNames(
-        "App.thanhtoan,MA_QRCODE_NGAN_HANG"
+        "App.thanhtoan,MA_QRCODE_NGAN_HANG",
       );
       return data?.data || [];
     },
@@ -107,7 +108,7 @@ export const PickerOrderPayted = ({ children, item, TotalDebt }) => {
 
   useEffect(() => {
     if (data && data.length > 1) {
-      setBanks(JSON.parse(data[1].ValueLines));
+      setBanks(JSON.parse(data[1].Value));
     }
   }, [data]);
 
@@ -119,28 +120,30 @@ export const PickerOrderPayted = ({ children, item, TotalDebt }) => {
       })}
       {createPortal(
         <Sheet visible={visible} onClose={() => setVisible(false)} autoHeight>
-          <div className="p-3">
+          <div className="py-3 px-5">
             <div
               dangerouslySetInnerHTML={{
                 __html:
                   data &&
                   data.length > 1 &&
-                  data[0].ValueLines.replaceAll(
+                  data[0].Value.replaceAll(
                     "ID_ĐH",
-                    `<b class="text-app">#${item.ID}</b>`
+                    `<b class="text-app">#${item.ID}</b>`,
                   )
                     .replaceAll(
                       "MONEY",
                       `<b class="text-app">${formatString.formatVND(
-                        Math.abs(item.ToPay)
-                      )}</b>`
+                        Math.abs(item.ToPay),
+                      )}</b>`,
                     )
                     .replaceAll("ID_DH", `<b class="text-app">${item.ID}</b>`),
               }}
             />
-            <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="text-center mt-5">Chọn ngân hàng để lấy mã QR thanh toán</div>
+            <div className={clsx("grid gap-3 mt-5", Banks &&
+              Banks.ngan_hang && Banks.ngan_hang.filter(x => x.ma_nh !== "DealToday").length > 1 ? "grid-cols-2" : "grid-cols-1")}>
               {Banks &&
-                Banks.ngan_hang.map((bank, index) => (
+                Banks.ngan_hang && Banks.ngan_hang.filter(x => x.ma_nh !== "DealToday").map((bank, index) => (
                   <PickerBanks
                     key={index}
                     Bank={bank}
@@ -161,7 +164,7 @@ export const PickerOrderPayted = ({ children, item, TotalDebt }) => {
             </div>
           </div>
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

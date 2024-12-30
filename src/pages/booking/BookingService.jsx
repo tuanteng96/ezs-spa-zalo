@@ -28,11 +28,11 @@ const BookingServiceItem = ({ item }) => {
           onClick={() => {
             let index =
               field.value &&
-              field.value.findIndex((x) => Number(x) === item.ID);
+              field.value.findIndex((x) => Number(x.ID) === item.ID);
             if (index > -1) {
-              field.onChange(field.value.filter((x) => Number(x) !== item.ID));
+              field.onChange(field.value.filter((x) => Number(x.ID) !== item.ID));
             } else {
-              field.onChange([...field.value, item.ID]);
+              field.onChange([...field.value, item]);
             }
           }}
         >
@@ -65,17 +65,17 @@ const BookingServiceItem = ({ item }) => {
             className={clsx(
               "border-2 w-6 h-6 rounded-full flex items-center justify-center",
               field.value &&
-              field.value.includes(item.ID) &&
-              "bg-app text-white"
+              field.value.some(x => x.ID === item.ID) &&
+              "bg-app text-white",
             )}
           >
             <Icon
               icon="zi-check"
               className={clsx(
                 "!w-[16px] !h-[18px] !text-[17px] transition",
-                field.value && field.value.includes(item.ID)
+                field.value && field.value.some(x => x.ID === item.ID)
                   ? "opacity-100"
-                  : "opacity-0"
+                  : "opacity-0",
               )}
             />
           </div>

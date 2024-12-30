@@ -39,7 +39,7 @@ const NewsDetailPage = () => {
       >
         <div
           className={clsx(
-            "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3"
+            "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
           )}
         >
           <div className="w-2/3 relative flex items-center h-full pl-12">
@@ -90,7 +90,7 @@ const NewsDetailPage = () => {
       <div
         className={clsx(
           "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
-          scrollTop > 50 && "shadow-3xl"
+          scrollTop > 50 && "shadow-3xl",
         )}
         style={{
           background: `rgba(255,255,255,${
@@ -108,7 +108,7 @@ const NewsDetailPage = () => {
           <Text.Title
             className={clsx(
               "text-app truncate transition",
-              scrollTop > 100 ? "opacity-100" : "opacity-0"
+              scrollTop > 100 ? "opacity-100" : "opacity-0",
             )}
           >
             {data?.source?.Title || data?.Title}

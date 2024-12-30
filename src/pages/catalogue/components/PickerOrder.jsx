@@ -19,10 +19,10 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
   const { handleSubmit, control, watch } = useFormContext();
   const { openSnackbar } = useSnackbar();
 
-  let watchForm = watch()
+  let watchForm = watch();
 
   const [visible, setVisible] = useState(false);
-  const [CrProduct, setCrProduct] = useState(item)
+  const [CrProduct, setCrProduct] = useState(item);
 
   const { fields } = useFieldArray({
     control,
@@ -31,18 +31,19 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
 
   useEffect(() => {
     if (options && options.length > 0) {
-      let watchAdds = watchForm.adds
-      let index = options.findIndex(x => x.ID === Number(watchAdds[0].ProdID))
+      let watchAdds = watchForm.adds;
+      let index = options.findIndex(
+        (x) => x.ID === Number(watchAdds[0].ProdID),
+      );
       if (index > -1) {
-        setCrProduct(options[index])
+        setCrProduct(options[index]);
       } else {
-        setCrProduct(item)
+        setCrProduct(item);
       }
+    } else {
+      setCrProduct(item);
     }
-    else {
-      setCrProduct(item)
-    }
-  }, [watchForm, options])
+  }, [watchForm, options]);
 
   const queryClient = useQueryClient();
 
@@ -62,6 +63,7 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
             queryClient
               .invalidateQueries({ queryKey: ["ListsCart"] })
               .then(() => {
+                setVisible(false)
                 if (buttonText === "Mua ngay") {
                   navigate("/cart");
                 } else {
@@ -74,7 +76,7 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
                 }
               });
           },
-        }
+        },
       );
     }
   };
@@ -103,55 +105,54 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
                   <PriceSaleDetail product={CrProduct} />
                 </div>
               </div>
-              {
-                options && options.length > 0 && (
-                  <>
-                    <div className="border-b p-3">
-                      <div className="mb-2">Loại</div>
-                      <div className="grid grid-cols-2 gap-3">
-                        {fields &&
-                          fields.map((item, index) => (
-                            <Controller
-                              key={item.id}
-                              name={`adds[${index}].ProdID`}
-                              control={control}
-                              render={({ field: { ref, ...field } }) => (
-                                <>
-                                  {
-                                    options.map((otp, i) => (
-                                      <div
-                                        className={
-                                          clsx('flex items-center px-3 py-2 rounded-sm cursor-pointer border', Number(field.value) === otp.ID ? 'border-app bg-white' : 'border-light bg-light')
-                                        }
-                                        onClick={() => {
-                                          field.onChange(otp.ID)
-                                        }}
-                                        key={i}
-                                      >
-                                        <div className="w-8">
-                                          <ImageLazy
-                                            wrapperClassName="aspect-square !block border border-white"
-                                            className="aspect-square object-cover w-full rounded-sm"
-                                            effect="blur"
-                                            src={toAbsolutePath(otp?.Thumbnail)}
-                                          />
-                                        </div>
-                                        <div className="flex-1 pl-3 truncate">{otp.Opt1}</div>
-                                      </div>
-                                    ))
-                                  }
-                                </>
-                              )}
-                            />
-                          ))}
-                      </div>
+              {options && options.length > 0 && (
+                <>
+                  <div className="border-b p-3">
+                    <div className="mb-2">Loại</div>
+                    <div className="grid grid-cols-2 gap-3">
+                      {fields &&
+                        fields.map((item, index) => (
+                          <Controller
+                            key={item.id}
+                            name={`adds[${index}].ProdID`}
+                            control={control}
+                            render={({ field: { ref, ...field } }) => (
+                              <>
+                                {options.map((otp, i) => (
+                                  <div
+                                    className={clsx(
+                                      "flex items-center px-3 py-2 rounded-sm cursor-pointer border",
+                                      Number(field.value) === otp.ID
+                                        ? "border-app bg-white"
+                                        : "border-light bg-light",
+                                    )}
+                                    onClick={() => {
+                                      field.onChange(otp.ID);
+                                    }}
+                                    key={i}
+                                  >
+                                    <div className="w-8">
+                                      <ImageLazy
+                                        wrapperClassName="aspect-square !block border border-white"
+                                        className="aspect-square object-cover w-full rounded-sm"
+                                        effect="blur"
+                                        src={toAbsolutePath(otp?.Thumbnail)}
+                                      />
+                                    </div>
+                                    <div className="flex-1 pl-3 truncate">
+                                      {otp.Opt1}
+                                    </div>
+                                  </div>
+                                ))}
+                              </>
+                            )}
+                          />
+                        ))}
                     </div>
-                  </>
-                )
-              }
-              <div>
-
-              </div>
+                  </div>
+                </>
+              )}
+              <div></div>
               <div className="p-3 flex justify-between items-center">
                 <div>Số lượng</div>
                 <div className="w-36">
@@ -175,7 +176,7 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
                 <Button
                   className={clsx(
                     "!bg-app",
-                    addCartMutation.isLoading && "!bg-opacity-70"
+                    addCartMutation.isLoading && "!bg-opacity-70",
                   )}
                   fullWidth
                   size="large"
@@ -188,7 +189,7 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
             </div>
           )}
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

@@ -14,6 +14,7 @@ import { HtmlParser } from "../../components/HtmlParser";
 import { Swiper, SwiperSlide } from "swiper/react";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { NavLink } from "react-router-dom";
+import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 const CatalogueDetailPage = () => {
   const { Auth, CurrentStocks } = useLayout();
@@ -58,7 +59,7 @@ const CatalogueDetailPage = () => {
             src: toAbsolutePath(x.Value),
             alt: "",
             key: index,
-          }))
+          })),
         );
       }
     },
@@ -116,12 +117,11 @@ const CatalogueDetailPage = () => {
             <div
               className={clsx(
                 "navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] transition px-3",
-                scrollTop > 50 && "shadow-3xl"
+                scrollTop > 50 && "shadow-3xl",
               )}
               style={{
-                background: `rgba(255,255,255,${
-                  scrollTop <= 100 ? scrollTop / 100 : scrollTop
-                })`,
+                background: `rgba(255,255,255,${scrollTop <= 100 ? scrollTop / 100 : scrollTop
+                  })`,
               }}
             >
               <div className="w-2/3 relative flex items-center h-full pl-12">
@@ -136,7 +136,7 @@ const CatalogueDetailPage = () => {
                 <Text.Title
                   className={clsx(
                     "text-app truncate transition",
-                    scrollTop > 100 ? "opacity-100" : "opacity-0"
+                    scrollTop > 100 ? "opacity-100" : "opacity-0",
                   )}
                 >
                   {data?.product?.Title}
@@ -174,7 +174,7 @@ const CatalogueDetailPage = () => {
                           <div
                             className={clsx(
                               "border rounded-sm",
-                              Number(activeIndex) === index && "border-app"
+                              Number(activeIndex) === index && "border-app",
                             )}
                             onClick={() => setActiveIndex(index)}
                           >
@@ -191,6 +191,25 @@ const CatalogueDetailPage = () => {
                   </div>
                 )}
               </div>
+              {!Auth?.ID && (
+                <div
+                  className="px-3 mb-3 mt-2.5"
+                  onClick={() => navigate(`${pathname}?fromProtected=${pathname}`)}
+                >
+                  <div className="bg-app/90 text-white p-4 rounded relative z-[1]">
+                    <div className="text-[16px] font-semibold">Đăng ký thành viên</div>
+                    <div className="text-[13px] mt-1">
+                      Trở thành thành viên để tiếp tục mua hàng ...{" "}
+                    </div>
+                    <div className="absolute right-[20px] top-2/4 rounded-full bg-app flex justify-center w-12 h-12 -z-[1] -translate-y-2/4 skew-y-[20deg]">
+                      <CurrencyDollarIcon className="w-8 text-white opacity-40" />
+                    </div>
+                    <div className="absolute right-[80px] top-2/4 rounded-full bg-app flex justify-center w-6 h-6 -z-[1] -translate-y-2/4 skew-y-[10deg]">
+                      <CurrencyDollarIcon className="w-6 text-white opacity-40" />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="bg-white mb-2 p-3">
                 <div className="text-[17px] leading-5 mb-3 font-semibold">
                   {data?.product?.Title}
@@ -234,32 +253,32 @@ const CatalogueDetailPage = () => {
                 (data.combos &&
                   data.combos.length > 0 &&
                   data.combos[0].Product?.Desc)) && (
-                <div className="bg-white mb-2">
-                  <div className="border-b p-3 font-semibold">Mô tả</div>
-                  <div className="p-3">
-                    <HtmlParser>
-                      {data?.product?.Desc || data.combos[0].Product?.Desc}
-                    </HtmlParser>
+                  <div className="bg-white mb-2">
+                    <div className="border-b p-3 font-semibold">Mô tả</div>
+                    <div className="p-3">
+                      <HtmlParser>
+                        {data?.product?.Desc || data.combos[0].Product?.Desc}
+                      </HtmlParser>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {(data?.product?.Detail ||
                 (data.combos &&
                   data.combos.length > 0 &&
                   data.combos[0].Product?.Detail)) && (
-                <div className="bg-white mb-2">
-                  <div className="border-b p-3 font-semibold">Chi tiết</div>
-                  <div className="p-3">
-                    <HtmlParser>
-                      {data?.product?.Detail || data.combos[0].Product?.Detail}
-                    </HtmlParser>
+                  <div className="bg-white mb-2">
+                    <div className="border-b p-3 font-semibold">Chi tiết</div>
+                    <div className="p-3">
+                      <HtmlParser>
+                        {data?.product?.Detail || data.combos[0].Product?.Detail}
+                      </HtmlParser>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           </form>
         </PullToRefresh>
-        <NavigationOrder item={data?.product} options={data?.options} />
+        <NavigationOrder item={data?.product} options={data?.options} combo={data?.combos} />
       </FormProvider>
       <ImageViewer
         onClose={() => setVisible(false)}

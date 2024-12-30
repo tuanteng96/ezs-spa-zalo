@@ -106,6 +106,14 @@ class WalletMM {
   }
   availableWallet() {
     return this.data.Grouped.filter((item) => {
+      if (
+        item.Type !== "THANH_TOAN_DH" &&
+        item?.ReturnOfID > 0 &&
+        item.Order &&
+        item.Order.RemainPay !== 0
+      ) {
+        return false;
+      }
       return item.Type === "MUA_HANG" ||
         item.Type === "GIOI_THIEU" ||
         item.Type === "CHIA_SE_MAGIAMGIA"

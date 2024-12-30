@@ -5,6 +5,7 @@ import ConfigsAPI from "../../api/configs.api";
 import { formatString } from "../../utils/formatString";
 import { PickerBanks } from "../../pages/user/components/PickerOrderPayted";
 import { useLocation } from "react-router";
+import clsx from "clsx"
 
 const CartFinish = () => {
   const { state } = useLocation();
@@ -15,7 +16,7 @@ const CartFinish = () => {
     queryKey: ["InfoQrCode"],
     queryFn: async () => {
       const { data } = await ConfigsAPI.getNames(
-        "App.thanhtoan,MA_QRCODE_NGAN_HANG"
+        "App.thanhtoan,MA_QRCODE_NGAN_HANG",
       );
       return data?.data || [];
     },
@@ -23,7 +24,7 @@ const CartFinish = () => {
 
   useEffect(() => {
     if (data && data.length > 1) {
-      setBanks(JSON.parse(data[1].ValueLines));
+      setBanks(JSON.parse(data[1].Value));
     }
   }, [data]);
 
@@ -44,7 +45,7 @@ const CartFinish = () => {
         </div>
       </div>
       <div className="h-full border-top overflow-auto no-scrollbar flex flex-col justify-center">
-        <div className="px-3 text-center">
+        <div className="px-5 text-center">
           <div className="mb-6">
             <div className="flex items-center justify-center mb-4">
               <svg
@@ -82,26 +83,28 @@ const CartFinish = () => {
               __html:
                 data &&
                 data.length > 1 &&
-                data[0].ValueLines.replaceAll(
+                data[0].Value.replaceAll(
                   "ID_ĐH",
-                  `<b class="text-app">#${state?.formState?.ID}</b>`
+                  `<b class="text-app">#${state?.formState?.ID}</b>`,
                 )
                   .replaceAll(
                     "MONEY",
                     `<b class="text-app">${formatString.formatVND(
-                      Math.abs(state?.formState?.ToPay)
-                    )}</b>`
+                      Math.abs(state?.formState?.ToPay),
+                    )}</b>`,
                   )
                   .replaceAll(
                     "ID_DH",
-                    `<b class="text-app">${state?.formState?.ID}</b>`
+                    `<b class="text-app">${state?.formState?.ID}</b>`,
                   ),
             }}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3 mt-2 px-3">
+        <div className="text-center mt-5">Chọn ngân hàng để lấy mã QR thanh toán</div>
+        <div className={clsx("grid gap-3 mt-2 px-5", Banks &&
+          Banks.ngan_hang && Banks.ngan_hang.filter(x => x.ma_nh !== "DealToday").length > 1 ? "grid-cols-2" : "grid-cols-1")}>
           {Banks &&
-            Banks.ngan_hang.map((bank, index) => (
+            Banks.ngan_hang && Banks.ngan_hang.filter(x => x.ma_nh !== "DealToday").map((bank, index) => (
               <PickerBanks
                 key={index}
                 Bank={bank}

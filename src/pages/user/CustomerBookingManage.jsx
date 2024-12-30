@@ -101,7 +101,7 @@ const BookingItem = ({ sub }) => {
               htmlType="button"
               className={clsx(
                 "!bg-danger text-white !px-3 !py-2 !rounded !h-auto !ml-2 cursor-pointer",
-                deleteBookingMutation.isLoading && "!bg-opacity-70"
+                deleteBookingMutation.isLoading && "!bg-opacity-70",
               )}
               onClick={() => onDelete(sub)}
               loading={deleteBookingMutation.isLoading}
@@ -120,7 +120,7 @@ const CustomerBookingManage = () => {
   const queryClient = useQueryClient();
   const { Auth } = useLayout();
   const [TabActive, setTabActive] = useState("");
-  const [isPullRefresh, setIsPullRefresh] = useState(false)
+  const [isPullRefresh, setIsPullRefresh] = useState(false);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["BookingList", { MemberID: Auth?.ID }],
@@ -134,7 +134,7 @@ const CustomerBookingManage = () => {
       const index = data.findIndex(
         (x) =>
           moment().format("DD-MM-YYYY") ===
-          moment(x.dayFull).format("DD-MM-YYYY")
+          moment(x.dayFull).format("DD-MM-YYYY"),
       );
       if (index > -1) {
         setTabActive(data[index].day);
@@ -145,11 +145,11 @@ const CustomerBookingManage = () => {
   });
 
   const handleRefresh = () => {
-    setIsPullRefresh(true)
+    setIsPullRefresh(true);
     return Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["BookingList"] })
-    ]).then(() => setIsPullRefresh(false))
-  }
+      queryClient.invalidateQueries({ queryKey: ["BookingList"] }),
+    ]).then(() => setIsPullRefresh(false));
+  };
 
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
@@ -262,7 +262,10 @@ const CustomerBookingManage = () => {
                     key={item.day}
                     label={"Ngày " + moment(item.dayFull).format("DD-MM-YYYY")}
                   >
-                    <PullToRefresh className="ezs-ptr" onRefresh={handleRefresh}>
+                    <PullToRefresh
+                      className="ezs-ptr"
+                      onRefresh={handleRefresh}
+                    >
                       <div className="h-full p-3 overflow-auto no-scrollbar">
                         <div className="relative mt-3">
                           <ul className="pl-7 before:border-l before:border-[#cccbcd] before:border-dashed before:content-[''] before:h-full before:left-2 before:absolute">
@@ -280,7 +283,6 @@ const CustomerBookingManage = () => {
           </>
         )}
       </div>
-
     </Page>
   );
 };

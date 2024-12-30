@@ -62,7 +62,7 @@ export const PickerCart = ({ children, item }) => {
               setVisible(false);
             });
         },
-      }
+      },
     );
   };
 
@@ -112,7 +112,7 @@ export const PickerCart = ({ children, item }) => {
                   className={clsx(
                     "transition",
                     watchQty > 0 ? "!bg-app" : "!bg-danger",
-                    addCartMutation.isLoading && "!bg-opacity-70"
+                    addCartMutation.isLoading && "!bg-opacity-70",
                   )}
                   fullWidth
                   size="large"
@@ -125,7 +125,7 @@ export const PickerCart = ({ children, item }) => {
             </div>
           )}
         </Sheet>,
-        document.body
+        document.body,
       )}
     </>
   );

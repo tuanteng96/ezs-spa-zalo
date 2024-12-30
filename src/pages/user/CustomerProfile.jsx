@@ -317,7 +317,7 @@ const CustomerProfile = () => {
             loading={addUpdateMutation.isLoading}
             className={clsx(
               "!bg-app",
-              addUpdateMutation.isLoading && "!opacity-75"
+              addUpdateMutation.isLoading && "!opacity-75",
             )}
             htmlType="submit"
             fullWidth
