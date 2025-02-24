@@ -103,6 +103,7 @@ const CartPage = () => {
           method: JSON.stringify(params.method),
           mac: mac,
           success: (data) => {
+            console.log(data)
             // Tạo đơn hàng thành công
             // Hệ thống tự động chuyển sang trang thanh toán.
             submitCartMutation.mutate(

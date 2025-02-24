@@ -2,6 +2,7 @@ import { openWebview } from "zmp-sdk";
 import { formatString } from "./formatString";
 
 export const transferNavigation = ({ navigate, to, useLocation, data }) => {
+  
   let { pathname, search } = useLocation;
   let splitUrl = to.split("/");
   if (!to) navigate(`/adv/${data.ID}`);

@@ -10,6 +10,7 @@ import ProdsAPI from "../../../api/prods.api";
 import {
   CalendarDaysIcon
 } from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 const SalesBanner = () => {
   let { GlobalConfig, CurrentStocks, AccessToken } = useLayout();
@@ -88,10 +89,10 @@ const SalesBanner = () => {
         {data &&
           data.map((item, index) => (
             <SwiperSlide className="w-[75%]" key={index}>
-              <NavLinkAdv
+              <Link
                 className="cursor-pointer block relative bg-white p-4 border rounded"
                 data={item}
-                to={item.Link}
+                to={`/catalogue/service/${item.root?.ID}`}
               >
                 <div className="images bd-rd3">
                   <ImageLazy
@@ -138,7 +139,7 @@ const SalesBanner = () => {
                     </svg>
                   </div>
                 </div>
-              </NavLinkAdv>
+              </Link>
             </SwiperSlide>
           ))}
       </Swiper>

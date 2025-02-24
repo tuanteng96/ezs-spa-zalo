@@ -2997,7 +2997,6 @@ function paging(lst, pi, ps) {
 
             ClientZData().then(_data => {
                 console.log('_data',_data);
-
                 try {
                     data = _data;
 
@@ -3011,8 +3010,6 @@ function paging(lst, pi, ps) {
                     CurrentMemberID = null;
 
                     if (Object.getPrototypeOf(url).isForProd) {
-
-
 
                         switch (Param.cmd) {
                             case 'getid':

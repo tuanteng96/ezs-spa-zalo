@@ -93,9 +93,8 @@ const NewsDetailPage = () => {
           scrollTop > 50 && "shadow-3xl",
         )}
         style={{
-          background: `rgba(255,255,255,${
-            scrollTop <= 100 ? scrollTop / 100 : scrollTop
-          })`,
+          background: `rgba(255,255,255,${scrollTop <= 100 ? scrollTop / 100 : scrollTop
+            })`,
         }}
       >
         <div className="w-2/3 relative flex items-center h-full pl-12">
