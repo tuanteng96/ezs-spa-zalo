@@ -58,7 +58,7 @@ const Category = ({ ID, QueryKey, isRequired }) => {
           >
             <ImageLazy
               wrapperClassName="aspect-square w-16 !block"
-              className="rounded-full w-16 shadow-[2px_0px_0px_2px_#ff898d] aspect-square object-cover"
+              className="rounded-full w-16 aspect-square object-cover"
               effect="blur"
               src={toAbsolutePath(item.FileName)}
             />
