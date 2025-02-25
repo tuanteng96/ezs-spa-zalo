@@ -48,7 +48,11 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
   const queryClient = useQueryClient();
 
   const addCartMutation = useMutation({
-    mutationFn: (body) => CartAPI.list(body),
+    mutationFn: async (body) => {
+      let data = await CartAPI.list(body);
+      await queryClient.invalidateQueries({ queryKey: ["ListsCart"] });
+      return data
+    },
   });
 
   const onSubmit = (values) => {
@@ -60,21 +64,17 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
         { token: AccessToken, body: values },
         {
           onSuccess: () => {
-            queryClient
-              .invalidateQueries({ queryKey: ["ListsCart"] })
-              .then(() => {
-                setVisible(false)
-                if (buttonText === "Mua ngay") {
-                  navigate("/cart");
-                } else {
-                  openSnackbar({
-                    text: "Đã thêm vào giỏ !",
-                    type: "success",
-                    duration: 2000,
-                  });
-                  navigate(-1);
-                }
+            setVisible(false)
+            if (buttonText === "Mua ngay") {
+              navigate("/cart");
+            } else {
+              openSnackbar({
+                text: "Đã thêm vào giỏ !",
+                type: "success",
+                duration: 2000,
               });
+              navigate(-1);
+            }
           },
         },
       );

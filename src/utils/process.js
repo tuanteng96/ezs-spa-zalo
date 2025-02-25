@@ -1,6 +1,5 @@
 export const ProcessENV = {
-  URL: "https://cserbeauty.com",
-  ZaloOaID: "52576634589693766",
-  SecretKey: "NJHs3KLrQlS1XCvzKG2H",
-  PrivateKey: "b0aff4781192219228cb2dd83eb87bfd"
+  URL: "https://olala45.com",
+  SecretKey: "M5YSP7VV88XtH9N83YvE",
+  PrivateKey: "427f0694601b60ae820602aaa98e7f61"
 };

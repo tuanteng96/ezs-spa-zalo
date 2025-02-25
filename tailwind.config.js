@@ -8,7 +8,7 @@ module.exports = {
       colors: {
         separator: "#f4f4f4",
         gray: "#767A7F",
-        app: "#ff898d",
+        app: "#4d5941",
         muted: "#a1a5b7",
         danger: "#ee2624",
         success: "#00bfa5",
