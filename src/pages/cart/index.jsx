@@ -27,7 +27,7 @@ import CryptoJS from 'crypto-js';
 
 
 const CartPage = () => {
-  const { Auth, CurrentStocks, onOpenActionStocks, AccessToken, GlobalConfig } = useLayout();
+  const { Auth, CurrentStocks, onOpenActionStocks, AccessToken, GlobalConfig, Stocks } = useLayout();
   const { Orders, isLoading } = useCart();
   const { openSheetProtected } = useConfigs();
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const CartPage = () => {
   });
 
   const onSubmit = ({ SenderOther, SenderAddress }) => {
-    if (!CurrentStocks) {
+    if (!CurrentStocks || !Stocks.some(x => x.ID === CurrentStocks?.ID)) {
       onOpenActionStocks();
     } else {
       const dataPost = {

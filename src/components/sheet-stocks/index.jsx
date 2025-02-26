@@ -2,10 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { removeStorage } from "zmp-sdk";
 import { Icon, Sheet } from "zmp-ui";
 import MoreAPI from "../../api/more.api";
 import { useLayout } from "../../layout/LayoutProvider";
 import { SheetProvince } from "./SheetProvince";
+
 
 const SheetStocks = () => {
   const {
@@ -47,13 +49,27 @@ const SheetStocks = () => {
   });
 
   useEffect(() => {
-    if (Stocks && !CurrentStocks) {
-      if (Stocks.length > 1) {
-        onOpenActionStocks();
-      } else {
-        onSaveStocks(Stocks[0]);
+    if (Stocks && Stocks.length > 0) {
+      if (!CurrentStocks) {
+        if (Stocks.length > 1) {
+          onOpenActionStocks();
+        } else {
+          onSaveStocks(Stocks[0]);
+        }
+      }
+      else {
+        let index = Stocks.findIndex(x => x.ID === CurrentStocks?.ID)
+        if (index === -1) {
+          removeStorage({ keys: ["CurrentStocks"] })
+          if (Stocks.length > 1) {
+            onOpenActionStocks();
+          } else {
+            onSaveStocks(Stocks[0]);
+          }
+        }
       }
     }
+
   }, [Stocks, CurrentStocks]);
 
   if (GlobalConfig?.APP?.ByProvince) {

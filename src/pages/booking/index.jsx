@@ -54,7 +54,7 @@ const formatDesc = (Desc) => {
 
 const BookingPage = () => {
   const navigate = useNavigate();
-  const { Auth, CurrentStocks, GlobalConfig } = useLayout();
+  const { Auth, CurrentStocks, GlobalConfig, Stocks } = useLayout();
   const { state } = useLocation();
 
   const queryParams = useQueryParams();
@@ -64,7 +64,7 @@ const BookingPage = () => {
     defaultValues: !state?.formState
       ? {
         ...initialValue,
-        StockID: CurrentStocks?.ID || "",
+        StockID: CurrentStocks?.ID && Stocks.some(x => x.ID === CurrentStocks?.ID) ? CurrentStocks?.ID : "",
         MemberID: Auth?.ID || "",
       }
       : {
@@ -80,7 +80,7 @@ const BookingPage = () => {
           : [],
         Desc: state?.formState?.Desc ? formatDesc(state?.formState?.Desc).Desc : "",
         AmountPeople: state?.formState?.Desc ? formatDesc(state?.formState?.Desc).AmountPeople : 1,
-        StockID: state?.formState?.StockID || CurrentStocks?.ID || "",
+        StockID: state?.formState?.StockID || (CurrentStocks?.ID && Stocks.some(x => x.ID === CurrentStocks?.ID) ? CurrentStocks?.ID : ""),
         FullName: state?.formState?.Member?.FullName || "",
         Phone: state?.formState?.Member?.MobilePhone || "",
         UserServiceIDs:
@@ -96,7 +96,7 @@ const BookingPage = () => {
 
   useEffect(() => {
     if (!state?.formState && !watchForm.ID)
-      setValue("StockID", CurrentStocks?.ID || "");
+      setValue("StockID", CurrentStocks?.ID && Stocks.some(x => x.ID === CurrentStocks?.ID) ? CurrentStocks?.ID : "");
   }, [CurrentStocks, state?.formState]);
 
   useEffect(() => {
