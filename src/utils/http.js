@@ -312,9 +312,7 @@ const handlers = [
                 }
 
             }
-
-
-            if (url.indexOf('/app/index.aspx?cmd=voucherandaff&') > -1) return true;
+            if (url.indexOf('/app/index.aspx?cmd=voucherandaff&') > -1) return false;
             return false;
         },
         promise(args) {
@@ -391,7 +389,7 @@ window.ClientZ = axios.create({
 // Add a request interceptor
 ClientZ.interceptors.request.use(
     config => {
-        return config
+      return config
     },
     error => {
         return Promise.reject(error)
@@ -2927,7 +2925,6 @@ function paging(lst, pi, ps) {
                 },
                 //timeout:1,
             };
-
             if (recentvoucherandaff.time && new Date().getTime() - recentvoucherandaff.time < 1000) {
                 voucherCont = recentvoucherandaff.data;
                 window.VoucherInfo = recentvoucherandaff.data;
@@ -3003,7 +3000,7 @@ function paging(lst, pi, ps) {
                     var url = args[0];
                     var opt = args[1] || {};
                     var Param = urlParams(url);
-                    log && console.log('input', opt, Param);
+                    //log && console.log('input', opt, Param);
                     window.url = url;
 
                     MemberGroups = null;
@@ -3264,7 +3261,7 @@ function paging(lst, pi, ps) {
                             order.Voucher = null;
                             fn();
                         } else {
-                            //log && console.log('getServerVouchers');
+                            //console.log('getServerVouchers');
                             getServerVouchers().then(fn);
                         }
 

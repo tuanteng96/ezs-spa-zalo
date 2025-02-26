@@ -213,11 +213,11 @@ const Layout = () => {
         <Route
           path="/user/customer-voucher"
           element={
-            <ProtectedRoute>
-              <SuspensedView>
-                <CustomerVoucher />
-              </SuspensedView>
-            </ProtectedRoute>
+
+            <SuspensedView>
+              <CustomerVoucher />
+            </SuspensedView>
+
           }
         />
         <Route

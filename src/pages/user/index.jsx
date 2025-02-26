@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Icon, Page, Text } from "zmp-ui";
 import { useLayout } from "../../layout/LayoutProvider";
 import { useConfigs } from "../../layout/MasterLayout";

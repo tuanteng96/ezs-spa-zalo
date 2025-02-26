@@ -23,6 +23,7 @@ const SalesTop = () => {
           .fill()
           .map((_, index) => (
             <div
+              key={index}
               className={clsx(
                 "px-1 animate-pulse",
                 index === 1 ? "aspect-5/3 w-[43%]" : "flex-1",

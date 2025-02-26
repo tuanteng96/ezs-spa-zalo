@@ -47,7 +47,7 @@ const LayoutProvider = ({ children }) => {
       keys: ["AccessToken"],
       success: (data) => {
         // xử lý khi gọi api thành công
-        const { AccessToken } = data;
+        let { AccessToken } = data;
         if (AccessToken) {
           // Lấy Lại Info Token
           AuthAPI.authen({ token: AccessToken })
