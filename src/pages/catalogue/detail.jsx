@@ -197,7 +197,7 @@ const CatalogueDetailPage = () => {
                   onClick={() => navigate(`${pathname}?fromProtected=${pathname}`)}
                 >
                   <div className="bg-app/90 text-white p-4 rounded relative z-[1]">
-                    <div className="text-[16px] font-semibold">Đăng ký thành viên</div>
+                    <div className="text-[16px] font-semibold">Đăng nhập thành viên</div>
                     <div className="text-[13px] mt-1">
                       Trở thành thành viên để tiếp tục mua hàng ...{" "}
                     </div>

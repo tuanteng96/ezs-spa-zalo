@@ -379,9 +379,9 @@ function clone(x) {
 window.ClientZ = axios.create({
     baseURL: window.SERVER,
     headers: {
-        "Content-type": "application/x-www-form-urlencoded"
+        "Content-type": "application/x-www-form-urlencoded",
+        //"ISZALO": "1"
     },
-
 });
 
 
@@ -389,6 +389,9 @@ window.ClientZ = axios.create({
 // Add a request interceptor
 ClientZ.interceptors.request.use(
     config => {
+      if(config.url.indexOf("zalo.me") === -1) {
+        config.headers["ISZALO"] = "1"
+      }
       return config
     },
     error => {

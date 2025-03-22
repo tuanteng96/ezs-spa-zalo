@@ -43,6 +43,15 @@ const LayoutProvider = ({ children }) => {
   const { openSnackbar } = useSnackbar();
 
   useEffect(() => {
+    // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjM5ODU2IiwiVG9rZW5JZCI6IjIzIiwibmJmIjoxNzQyNjExOTA5LCJleHAiOjE4MjkwMTE5MDksImlhdCI6MTc0MjYxMTkwOX0.Rg8M4WRzs8xx24CBfIYfKaHqrktdk_Z1JA8DY6GfN7o" })
+    //         .then(({ data }) => {
+    //           if (!data?.error) {
+    //             onSaveAuth(data);
+    //           } else {
+    //             onLogout();
+    //           }
+    //         })
+    //         .catch((error) => console.log(error));
     getStorage({
       keys: ["AccessToken"],
       success: (data) => {

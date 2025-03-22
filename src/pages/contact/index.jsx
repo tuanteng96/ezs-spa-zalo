@@ -105,8 +105,6 @@ const ContactPage = () => {
               <HtmlParser>{state?.formState?.Desc}</HtmlParser>
             </div>
           )}
-
-          {!Auth && (
             <div className="p-3 border-t">
               <div className="mb-3">
                 <Controller
@@ -141,7 +139,7 @@ const ContactPage = () => {
                 />
               </div>
             </div>
-          )}
+          
         </div>
         <div className="p-3">
           <Button

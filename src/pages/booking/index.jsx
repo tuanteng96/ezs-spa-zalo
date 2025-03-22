@@ -88,6 +88,7 @@ const BookingPage = () => {
             state?.formState?.UserServices.length > 0
             ? state?.formState.UserServices[0].ID
             : "",
+        PrevBook: state?.formState
       },
   });
   const { handleSubmit, setValue, reset, watch } = methods;
@@ -115,7 +116,7 @@ const BookingPage = () => {
     mutationFn: (body) => BookingAPI.add(body),
     mutationKey: ["addBooking"],
   });
-
+    
   const onSubmit = (values) => {
     let Tags = [];
 
@@ -148,16 +149,16 @@ const BookingPage = () => {
       GlobalConfig?.APP?.SL_khach && values?.AmountPeople
         ? `Số lượng khách: ${values?.AmountPeople
         }. \nTags: ${Tags.toString()} \nGhi chú: ${(values.Desc ? values.Desc.replaceAll("\n", "</br>") : "") +
-        (state?.formState
-          ? ` (Thay đổi từ ${state?.formState?.RootTitles} - ${moment(
-            state?.formState?.BookDate
-          ).format("HH:mm DD-MM-YYYY")}`
+        (values?.PrevBook
+          ? ` (Thay đổi từ ${values?.PrevBook?.RootTitles} - ${moment(
+            values?.PrevBook?.BookDate
+          ).format("HH:mm DD-MM-YYYY")})`
           : "")
         }`
         : (values.Desc ? values.Desc.replaceAll("\n", "</br>") : "") +
-        (state?.formState
-          ? ` (Thay đổi từ ${state?.formState?.RootTitles} - ${moment(
-            state?.formState?.BookDate
+        (values?.PrevBook
+          ? ` (Thay đổi từ ${values?.PrevBook?.RootTitles} - ${moment(
+            values?.PrevBook?.BookDate
           ).format("HH:mm DD-MM-YYYY")})`
           : "");
 

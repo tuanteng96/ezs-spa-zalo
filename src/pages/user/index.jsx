@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Icon, Page, Text } from "zmp-ui";
+import React, { useState } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Icon, Page, Text, Modal, useSnackbar } from "zmp-ui";
 import { useLayout } from "../../layout/LayoutProvider";
 import { useConfigs } from "../../layout/MasterLayout";
 import { toAbsolutePath } from "../../utils/assetPath";
@@ -9,9 +9,13 @@ import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import ProtectedNavLink from "../../layout/_core/ProtectedNavLink";
 
 const UserPage = () => {
-  const { Auth } = useLayout();
+  const { Auth, onLogout } = useLayout();
   const { ZaloInfo } = useConfigs();
   const navigate = useNavigate();
+
+  const { openSnackbar } = useSnackbar();
+
+  const [dialogVisible, setDialogVisible] = useState(false);
 
   const { pathname } = useLocation();
 
@@ -30,7 +34,7 @@ const UserPage = () => {
           onClick={() => navigate(`${pathname}?fromProtected=${pathname}`)}
         >
           <div className="bg-app/90 text-white p-4 rounded relative z-[1]">
-            <div className="text-[16px] font-semibold">Đăng ký thành viên</div>
+            <div className="text-[16px] font-semibold">Đăng nhập thành viên</div>
             <div className="text-[13px] mt-1">
               Đặt lịch, quản lý đặt lịch & thẻ dịch vụ, đặt hàng ...{" "}
             </div>
@@ -354,6 +358,54 @@ const UserPage = () => {
           )}
         </ProtectedNavLink>
       </div>
+      {Auth?.ID && (
+        <div className="bg-white mt-2 mb-2">
+        <div
+              className="flex px-3 py-4 items-center border-b cursor-pointer"
+              onClick={() => {
+                setDialogVisible(true)
+                //onLogout()
+              }}
+            >
+              <div className="text-app">
+                <Icon icon="zi-leave" />
+              </div>
+              <div className="font-medium flex-1 pl-3 text-danger">Đăng xuất tài khoản</div>
+              <div className="text-muted">
+                <Icon icon="zi-chevron-right" />
+              </div>
+            </div>
+      </div>
+      )}
+      
+      <Modal
+      visible={dialogVisible}
+      title="Thông báo"
+        onClose={() => {
+          setDialogVisible(false);
+        }}
+        actions={[
+          {
+            text: "Đóng",
+            close: true,
+          },
+          {
+            text: "Đăng xuất",
+            //close: true,
+            highLight: true,
+            onClick: () => {
+              onLogout(() => {
+                openSnackbar({
+                  text: "Đăng xuất thành công.",
+                  type: "success",
+                });
+                setDialogVisible(false)
+              })
+            }
+          },
+        ]}
+        description="Bạn muốn thực hiện đang xuất tài khoản ?"
+      />
     </Page>
   );
 };

@@ -1,7 +1,7 @@
 import { openWebview } from "zmp-sdk";
 import { formatString } from "./formatString";
 
-export const transferNavigation = ({ navigate, to, useLocation, data }) => {
+export const transferNavigation = ({ navigate, to, useLocation, data, open }) => {
   
   let { pathname, search } = useLocation;
   let splitUrl = to.split("/");
@@ -112,11 +112,12 @@ export const transferNavigation = ({ navigate, to, useLocation, data }) => {
       },
     });
   } else if (to.includes("/pupup-contact/")) {
-    navigate("/contact", {
-      state: {
-        formState: data,
-      },
-    });
+    open()
+    // navigate("/contact", {
+    //   state: {
+    //     formState: data,
+    //   },
+    // });
   } else if (formatString.validURL(to)) {
     openWebview({
       url: to,

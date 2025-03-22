@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
@@ -48,6 +49,7 @@ const SheetRegistration = ({ open, onClose }) => {
     mutationFn: async (body) => {
       let result = null;
       let { data } = await ZaloAPI.getNumberPhone(body);
+
       let { userInfo } = await getUserInfo({})
 
       if (data?.data?.number) {
@@ -82,6 +84,7 @@ const SheetRegistration = ({ open, onClose }) => {
 
       getAccessToken({
         success: (accessToken) => {
+
           getPhoneNumber({
             success: async ({ token }) => {
               addMutation.mutate(
@@ -165,7 +168,7 @@ const SheetRegistration = ({ open, onClose }) => {
                     <Button
                       loading={loading || addMutation.isLoading}
                       htmlType="button"
-                      className="!text-warning !border-solid !border-2 !border-warning !px-5 !py-3 !h-auto !rounded-3xl !font-bold !bg-transparent"
+                      className={clsx("!text-warning !border-solid !border-2 !border-warning !px-5 !py-3 !h-auto !rounded-3xl !font-bold !bg-transparent", loading || addMutation.isLoading && ("pointer-events-none"))}
                     >
                       Kích hoạt thành viên ngay
                     </Button>

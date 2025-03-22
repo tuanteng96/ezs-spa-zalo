@@ -17,7 +17,7 @@ import BookingAPI from "../../api/booking.api";
 import { useLayout } from "../../layout/LayoutProvider";
 import { formatArray } from "../../utils/formatArray";
 
-const BookingItem = ({ sub }) => {
+const BookingItem = ({ sub, hidden }) => {
   const { pathname } = useLocation();
   const { openSnackbar } = useSnackbar();
 
@@ -64,51 +64,117 @@ const BookingItem = ({ sub }) => {
     });
   };
 
+  const getStatus = (Status) => {
+    if (Status === "XAC_NHAN") {
+      return {
+        Color: "primary",
+        Text: "Xác nhận",
+      };
+    }
+    if (Status === "CHUA_XAC_NHAN") {
+      return {
+        Color: "warning",
+        Text: "Chưa xác nhận",
+      };
+    }
+    if (Status === "KHACH_KHONG_DEN") {
+      return {
+        Color: "danger",
+        Text: "Khách không đến",
+      };
+    }
+    if (Status === "KHACH_DEN") {
+      return {
+        Color: "info",
+        Text: "Khách đến",
+      };
+    }
+    if (Status === "TU_CHOI") {
+      return {
+        Color: "danger",
+        Text: "Khách huỷ lịch",
+      };
+    }
+    if (Status === "doing") {
+      return {
+        Color: "success",
+        Text: "Đang thực hiện",
+      };
+    }
+    if (Status === "done") {
+      return {
+        Color: "secondary",
+        Text: "Hoàn thành",
+      };
+    }
+    return {
+      Color: "warning",
+      Text: "Chưa xác định",
+    };
+  };
+
   return (
-    <li className="mb-6 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px] before:bg-success">
+    <li className="mb-6 relative before:content-[''] before:rounded-full before:w-[10px] before:h-[10px] before:absolute before:-left-[24px] before:top-[6px] before:bg-success last:mb-2">
       <div className="relative">
         <div className="font-medium text-sm text-success">
-          Thực hiện lúc {moment(sub.BookDate).format("HH:mm A")}
+          {moment(sub.dayFull).format("DD-MM-YYYY")}
         </div>
-        <div className="mt-2 bg-white rounded p-3">
-          <div className="mb-2.5">
-            <div className="text-muted leading-6">Dịch vụ</div>
-            <div className="font-semibold">
-              {sub?.RootTitles || "Chưa có dịch vụ"}
+        <div>
+          {sub.items.map((item,x) => (
+            <div className="mt-2 bg-white rounded p-3" key={x}>
+            <div className="mb-2.5">
+              <div className="text-muted leading-6">Dịch vụ</div>
+              <div className="font-semibold">
+                {item?.RootTitles || "Chưa có dịch vụ"}
+              </div>
             </div>
-          </div>
-          <div className="mb-2.5">
-            <div className="text-muted leading-6">Thời gian</div>
-            <div className="font-semibold">
-              {moment(sub.BookDate).format("HH:mm DD/MM/YYYY")}
+            <div className="mb-2.5">
+              <div className="text-muted leading-6">Thời gian</div>
+              <div className="font-semibold">
+                {moment(item.BookDate).format("HH:mm DD/MM/YYYY")}
+              </div>
             </div>
-          </div>
-          <div className="mb-3">
-            <div className="text-muted leading-6">Địa điểm thực hiện</div>
-            <div className="font-semibold">
-              {sub.AtHome ? "Tại nhà" : sub?.Stock?.Title}
+            <div className="mb-3">
+              <div className="text-muted leading-6">Địa điểm thực hiện</div>
+              <div className="font-semibold">
+                {item.AtHome ? "Tại nhà" : item?.Stock?.Title}
+              </div>
             </div>
+            {
+              !hidden && (
+                <>
+                  <div className="mb-3">
+              <div className="text-muted leading-6">Trạng thái</div>
+              <div className={clsx("font-semibold", "text-" + getStatus(item.Status).Color)}>
+                {getStatus(item.Status).Text}
+              </div>
+            </div>
+            <div className="flex">
+              <NavLink
+                to="/booking"
+                state={{ formState: item, prevState: pathname }}
+                className="bg-success text-white px-3 py-2 rounded cursor-pointer"
+              >
+                Thay đổi lịch
+              </NavLink>
+              <Button
+                htmlType="button"
+                className={clsx(
+                  "!bg-danger text-white !px-3 !py-2 !rounded !h-auto !ml-2 cursor-pointer",
+                  deleteBookingMutation.isLoading && "!bg-opacity-70",
+                )}
+                onClick={() => onDelete(item)}
+                loading={deleteBookingMutation.isLoading}
+              >
+                Hủy lịch
+              </Button>
+            </div>
+                </>
+              )
+            }
+            
           </div>
-          <div className="flex">
-            <NavLink
-              to="/booking"
-              state={{ formState: sub, prevState: pathname }}
-              className="bg-success text-white px-3 py-2 rounded cursor-pointer"
-            >
-              Thay đổi lịch
-            </NavLink>
-            <Button
-              htmlType="button"
-              className={clsx(
-                "!bg-danger text-white !px-3 !py-2 !rounded !h-auto !ml-2 cursor-pointer",
-                deleteBookingMutation.isLoading && "!bg-opacity-70",
-              )}
-              onClick={() => onDelete(sub)}
-              loading={deleteBookingMutation.isLoading}
-            >
-              Hủy lịch
-            </Button>
-          </div>
+          ))}
         </div>
       </div>
     </li>
@@ -119,28 +185,46 @@ const CustomerBookingManage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { Auth } = useLayout();
-  const [TabActive, setTabActive] = useState("");
+  const [TabActive, setTabActive] = useState(0);
   const [isPullRefresh, setIsPullRefresh] = useState(false);
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ["BookingList", { MemberID: Auth?.ID }],
     queryFn: async () => {
       const { data } = await BookingAPI.list({ MemberID: Auth?.ID });
-      return formatArray.groupbyDDHHMM(data?.data || [], "BookDate");
+      let rs = [
+        {
+          Title: "Danh sách đặt lịch",
+          Items: formatArray.groupbyDDHHMM((data?.data || []).filter(
+            (x) =>
+              !x.Desc ||
+              (x.Desc && x.Desc.indexOf("Tự động đặt lịch") === -1)
+          ), "BookDate")
+        },
+        {
+          Title: "Dự kiến đặt lịch",
+          Items: formatArray.groupbyDDHHMM((data?.data || []).filter(
+            (x) => x.Desc && x.Desc.indexOf("Tự động đặt lịch") > -1
+          ), "BookDate")
+        }
+      ]
+      
+
+      return rs;
     },
     enabled: Number(Auth?.ID) > -1,
     onSuccess: (data) => {
-      if (!data || data.length === 0) return;
-      const index = data.findIndex(
-        (x) =>
-          moment().format("DD-MM-YYYY") ===
-          moment(x.dayFull).format("DD-MM-YYYY"),
-      );
-      if (index > -1) {
-        setTabActive(data[index].day);
-      } else {
-        setTabActive(data[0].day);
-      }
+      // if (!data || data.length === 0) return;
+      // const index = data.findIndex(
+      //   (x) =>
+      //     moment().format("DD-MM-YYYY") ===
+      //     moment(x.dayFull).format("DD-MM-YYYY"),
+      // );
+      // if (index > -1) {
+      //   setTabActive(data[index].day);
+      // } else {
+      //   setTabActive(data[0].day);
+      // }
     },
   });
 
@@ -150,7 +234,7 @@ const CustomerBookingManage = () => {
       queryClient.invalidateQueries({ queryKey: ["BookingList"] }),
     ]).then(() => setIsPullRefresh(false));
   };
-
+  console.log(data)
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white">
@@ -253,14 +337,14 @@ const CustomerBookingManage = () => {
             {data && data.length > 0 && (
               <Tabs
                 className="tab-scrollbar"
-                activeKey={TabActive}
-                onChange={(e) => setTabActive(e)}
+                //activeKey={TabActive}
+                //onChange={(e) => setTabActive(e)}
                 scrollable
               >
-                {data.map((item) => (
+                {data.map((item, index) => (
                   <Tabs.Tab
-                    key={item.day}
-                    label={"Ngày " + moment(item.dayFull).format("DD-MM-YYYY")}
+                    key={index}
+                    label={item.Title}
                   >
                     <PullToRefresh
                       className="ezs-ptr"
@@ -269,8 +353,8 @@ const CustomerBookingManage = () => {
                       <div className="h-full p-3 overflow-auto no-scrollbar">
                         <div className="relative mt-3">
                           <ul className="pl-7 before:border-l before:border-[#cccbcd] before:border-dashed before:content-[''] before:h-full before:left-2 before:absolute">
-                            {item.items.map((sub, idx) => (
-                              <BookingItem sub={sub} key={idx} />
+                            {item.Items.map((sub, idx) => (
+                              <BookingItem sub={sub} key={idx} hidden={item.Title !== "Danh sách đặt lịch"}/>
                             ))}
                           </ul>
                         </div>

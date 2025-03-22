@@ -1,6 +1,10 @@
 import http from "../utils/http";
 
 const AuthAPI = {
+  login: ({ USN = "", PWD = "" }) =>
+  http.get(`/app/index.aspx?cmd=authen&USN=${USN}&PWD=${encodeURIComponent(
+    PWD
+  )}&deviceid=&v=2`),
   authen: ({ ZaloID = "", token = "" }) =>
     http.get(`/app/index.aspx?cmd=authen&token=${token}&zaloid=${ZaloID}`),
   barcode: (MemberID) =>
