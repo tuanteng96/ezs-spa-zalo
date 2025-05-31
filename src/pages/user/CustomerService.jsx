@@ -36,6 +36,26 @@ const CustomerService = () => {
 
   const [isPullRefresh, setIsPullRefresh] = useState(false);
 
+  const formatCard = (arr) => {
+    let newArr = arr.map((x) => {
+      let obj = {
+        ...x,
+        ServicesNew: x.Services.filter((x) => x.Status === "done").sort(
+          (a, b) => new Date(b.BookDate) - new Date(a.BookDate)
+        ),
+      };
+      return {
+        ...obj,
+        BookDate:
+          obj.ServicesNew && obj.ServicesNew.length > 0
+            ? obj.ServicesNew[0].BookDate
+            : null,
+      };
+    });
+    newArr = newArr.sort((a, b) => new Date(b.BookDate) - new Date(a.BookDate));
+    return newArr;
+  };
+
   const { data, isFetching } = useQuery({
     queryKey: ["ServiceCardList", { Token: AccessToken, MemberID: Auth?.ID }],
     queryFn: async () => {
@@ -56,12 +76,12 @@ const CustomerService = () => {
           {
             Key: "Insurance",
             Title: "Thẻ bảo hành",
-            Items: result.filter((item) => item.TabIndex === 1),
+            Items: formatCard(result.filter((item) => item.TabIndex === 1)),
           },
           {
             Key: "Excessive",
             Title: "Thẻ hết hạn",
-            Items: result.filter((item) => item.TabIndex === 2),
+            Items: formatCard(result.filter((item) => item.TabIndex === 2)),
           },
         ],
       };
