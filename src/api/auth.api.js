@@ -28,6 +28,12 @@ const AuthAPI = {
           Authorization: `Bearer ${Token}`
         }
     }),
+    getPointsVoucher(body) {
+      return http.post(`/api/v4/gift@get`, JSON.stringify(body));
+    },
+    changePointVoucher(body) {
+      return http.post(`/api/v4/gift@swap`, JSON.stringify(body));
+    },
     getAffs({data, Token = ''}) {
       return http.post(
         `/api/v3/member23@MemberByAffMemberID`, JSON.stringify(data), {
@@ -39,7 +45,17 @@ const AuthAPI = {
     },
     rating: (MemberID = "") =>
     http.get(`/api/v3/OrderService?cmd=get_service_unrate&mid=${MemberID}`),
-    updateRating: ({MemberID, data}) => http.post(`/api/v3/OrderService?cmd=get_service_unrate&mid=${MemberID}`, data)
+    updateRating: ({MemberID, data}) => http.post(`/api/v3/OrderService?cmd=get_service_unrate&mid=${MemberID}`, data),
+    getHistoryService: ({MemberID, Token}) => http.get(`https://cserbeauty.com/services/preview.aspx?a=1&token=${Token}&cmd=loadOrderService&MemberID=${MemberID}&IsMember=0&fromOrderAdd=0
+    `),
+    getImageStaff2(data) {
+      return http.post(`/api/v3/OrderService?cmd=attachmentList`, JSON.stringify(data));
+    },
+    getMemberGroups(body) {
+      return http.get(
+        `api/v3/membergroup?${new URLSearchParams(body).toString()}`
+      );
+    }
 };
 
 export default AuthAPI;

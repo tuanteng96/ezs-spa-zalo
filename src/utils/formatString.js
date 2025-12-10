@@ -6,11 +6,11 @@ export const formatString = {
     e.innerHTML = content;
     return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
   },
-  formatVND: (price) => {
+  formatVND: (price, str = 'đ') => {
     if (!price || price === 0) {
       return "0";
     } else {
-      return price.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.") + "đ";
+      return price.toFixed(0).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.") + str;
     }
   },
   formatVNDPositive: (price) => {

@@ -42,59 +42,66 @@ const LayoutProvider = ({ children }) => {
 
   const { openSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjM5ODU2IiwiVG9rZW5JZCI6IjIzIiwibmJmIjoxNzQyNjExOTA5LCJleHAiOjE4MjkwMTE5MDksImlhdCI6MTc0MjYxMTkwOX0.Rg8M4WRzs8xx24CBfIYfKaHqrktdk_Z1JA8DY6GfN7o" })
-    //         .then(({ data }) => {
-    //           if (!data?.error) {
-    //             onSaveAuth(data);
-    //           } else {
-    //             onLogout();
-    //           }
-    //         })
-    //         .catch((error) => console.log(error));
-    getStorage({
-      keys: ["AccessToken"],
-      success: (data) => {
-        // xử lý khi gọi api thành công
-        let { AccessToken } = data;
-        if (AccessToken) {
-          // Lấy Lại Info Token
-          AuthAPI.authen({ token: AccessToken })
-            .then(({ data }) => {
-              if (!data?.error && data.ZaloID) {
-                onSaveAuth(data);
-              } else {
-                onLogout();
-              }
-            })
-            .catch((error) => console.log(error));
-        } else {
-          // Check Zalo ID get Token & Info
-          getUserInfo({
-            success: (data) => {
-              const { userInfo } = data;
-              AuthAPI.authen({ ZaloID: userInfo.id })
-                .then(({ data }) => {
-                  if (!data?.error) {
-                    onSaveAuth(data);
-                  } else {
-                    onLogout();
-                  }
-                })
-                .catch((error) => console.log(error));
-            },
-            fail: (error) => {
-              console.log(error);
-            },
-          });
-        }
-      },
-      fail: (error) => {
-        // xử lý khi gọi api thất bại
-        console.log(error);
-      },
-    });
-  }, []);
+  useQuery({
+    queryKey: ["Authen"],
+    queryFn: async () => {
+      return null;
+    },
+    onSuccess: (data) => {
+      AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQxNTkyIiwiVG9rZW5JZCI6IjExMzIxMDUyNzQzMDA3ODEiLCJuYmYiOjE3NjUzMzUxODIsImV4cCI6MTg1MTczNTE4MiwiaWF0IjoxNzY1MzM1MTgyfQ.KYdxX4DRCIW11d4xDrLZ6PkZH_0qYIH-TpjCc6r1zkc" })
+        .then(({ data }) => {
+          if (!data?.error) {
+            onSaveAuth(data);
+          } else {
+            onLogout();
+          }
+        })
+        .catch((error) => console.log(error));
+
+      // getStorage({
+      //   keys: ["AccessToken"],
+      //   success: (data) => {
+      //     // xử lý khi gọi api thành công
+      //     let { AccessToken } = data;
+      //     if (AccessToken) {
+      //       // Lấy Lại Info Token
+      //       AuthAPI.authen({ token: AccessToken })
+      //         .then(({ data }) => {
+      //           if (!data?.error && data.ZaloID) {
+      //             onSaveAuth(data);
+      //           } else {
+      //             onLogout();
+      //           }
+      //         })
+      //         .catch((error) => console.log(error));
+      //     } else {
+      //       // Check Zalo ID get Token & Info
+      //       getUserInfo({
+      //         success: (data) => {
+      //           const { userInfo } = data;
+      //           AuthAPI.authen({ ZaloID: userInfo.id })
+      //             .then(({ data }) => {
+      //               if (!data?.error) {
+      //                 onSaveAuth(data);
+      //               } else {
+      //                 onLogout();
+      //               }
+      //             })
+      //             .catch((error) => console.log(error));
+      //         },
+      //         fail: (error) => {
+      //           console.log(error);
+      //         },
+      //       });
+      //     }
+      //   },
+      //   fail: (error) => {
+      //     // xử lý khi gọi api thất bại
+      //     console.log(error);
+      //   },
+      // });
+    }
+  });
 
   useEffect(() => {
     getStorage({

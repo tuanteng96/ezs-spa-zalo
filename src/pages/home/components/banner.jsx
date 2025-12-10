@@ -56,7 +56,7 @@ const Banner = () => {
                 to={item.Link}
               >
                 <ImageLazy
-                  wrapperClassName="aspect-[5/7] !block"
+                  wrapperClassName="!block"
                   className="aspect-[5/7] object-cover"
                   effect="blur"
                   src={toAbsolutePath(item.FileName)}

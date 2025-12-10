@@ -8,7 +8,7 @@ import { useLayout } from "../../layout/LayoutProvider";
 import { formatArray } from "../../utils/formatArray";
 import { ProcessENV } from "../../utils/process";
 
-const CustomerOrders = () => {
+const CustomerDiary = () => {
   const navigate = useNavigate();
   const { Auth, AccessToken } = useLayout();
   const [TabActive, setTabActive] = useState("");
@@ -96,7 +96,7 @@ const CustomerOrders = () => {
             {(!data || data.length === 0) && (
               <div className="h-5/6">
                 <PullToRefresh className="ezs-ptr" onRefresh={refetch}>
-                  <div className="flex flex-col justify-center items-center">
+                  <div className="flex flex-col justify-center items-center h-full">
                     <svg
                       className="w-16 mb-5"
                       viewBox="0 0 56 60"
@@ -187,4 +187,4 @@ const CustomerOrders = () => {
   );
 };
 
-export default CustomerOrders;
+export default CustomerDiary;

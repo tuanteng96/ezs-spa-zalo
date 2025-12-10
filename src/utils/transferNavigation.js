@@ -97,7 +97,10 @@ export const transferNavigation = ({ navigate, to, useLocation, data, open }) =>
     }
   } else if (to.includes("/voucher")) {
     navigate("/user/customer-voucher");
-  } else if (to.includes("/schedule/")) {
+  } else if(to.includes("/points-change")) {
+    navigate("/user/customer-points-change");
+  }
+  else if (to.includes("/schedule/")) {
     let ID = formatString.getParameter({ key: "SelectedId", url: to });
     navigate("/booking", {
       state: {

@@ -58,7 +58,7 @@ const BookingPage = () => {
   const { state } = useLocation();
 
   const queryParams = useQueryParams();
-  let queryKey = queryParams?.Type || "Time";
+  let queryKey = queryParams?.Type || "Service";
 
   const methods = useForm({
     defaultValues: !state?.formState
@@ -116,7 +116,7 @@ const BookingPage = () => {
     mutationFn: (body) => BookingAPI.add(body),
     mutationKey: ["addBooking"],
   });
-    
+
   const onSubmit = (values) => {
     let Tags = [];
 

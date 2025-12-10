@@ -254,3 +254,8 @@ p:not(:last-child) {
 .ezs-ptr .ptr__pull-down--pull-more {
   display: none !important;
 }
+
+/* // */
+.fancybox__dialog .fancybox__container {
+  @apply !pb-safe-bottom !pt-safe
+}

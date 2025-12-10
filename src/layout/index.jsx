@@ -24,8 +24,12 @@ const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
 const CustomerWalletCard = lazy(
   () => import("../pages/user/CustomerWalletCard"),
 );
+
 const CustomerPoints = lazy(
   () => import("../pages/user/CustomerPoints"),
+);
+const CustomerPointsChange = lazy(
+  () => import("../pages/user/CustomerPointsChange"),
 );
 const CustomerService = lazy(() => import("../pages/user/CustomerService"));
 const CustomerBookingManage = lazy(
@@ -46,6 +50,10 @@ const ContactPage = lazy(() => import("../pages/contact"));
 import HomePage from "../pages/home";
 import { SheetRating } from "../components/SheetRating";
 import { useLayout } from "./LayoutProvider";
+
+const CustomerMemberGroup = lazy(() => import("../pages/user/CustomerMemberGroup"));
+
+const CustomerHistoryService = lazy(() => import("../pages/user/CustomerHistoryService"));
 
 const CustomerRating = lazy(() => import("../pages/user/CustomerRating"));
 
@@ -241,6 +249,16 @@ const Layout = () => {
           }
         />
         <Route
+          path="/user/customer-points-change"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerPointsChange />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/user/customer-rating"
           element={
             <ProtectedRoute>
@@ -266,6 +284,26 @@ const Layout = () => {
             <ProtectedRoute>
               <SuspensedView>
                 <CustomerBookingManage />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-history-service"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerHistoryService />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-member-group"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerMemberGroup />
               </SuspensedView>
             </ProtectedRoute>
           }
