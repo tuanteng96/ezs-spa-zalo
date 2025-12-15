@@ -184,10 +184,16 @@ const CustomerVoucher = () => {
                               Code <span className="text-app">{item.ma}</span>
                             </div>
                             <div className="font-medium text-[13px] border border-primary inline-block px-2 py-px text-primary rounded">
-                              <span className="pr-1">Giảm tối đa</span>
-                              {item?.gia_tri?.Phan_tram > 0
-                                ? item.gia_tri.Phan_tram + "%"
-                                : formatString.formatVND(item?.gia_tri?.Tien)}
+                              {
+                                item?.Voucher?.ValueType == 2 ? <>Đồng giá {formatString.formatVND(item?.gia_tri?.Tien)}</> : <>
+                                  Giảm tối đa{" "}
+                                  {item.Voucher.Discount > 100
+                                    ? `${formatString.formatVND(
+                                      item.Voucher.Discount
+                                    )}`
+                                    : `${item?.Voucher?.Discount}%`}
+                                </>
+                              }
                             </div>
                             <div className="flex mt-2 justify-between">
                               <div className="text-sm">

@@ -285,8 +285,8 @@ export const PickerVoucher = ({ children }) => {
                               {item.EndDate === null
                                 ? "Hạn sử dụng vĩnh viễn"
                                 : `Hạn sử dụng còn ${checkDateDiff(
-                                    item.EndDate,
-                                  )} ngày`}
+                                  item.EndDate,
+                                )} ngày`}
                             </div>
                           </div>
                           <div className="pr-4 flex items-center">

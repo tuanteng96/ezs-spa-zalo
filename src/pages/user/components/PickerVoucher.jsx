@@ -28,18 +28,25 @@ export const PickerVoucher = ({ children, item }) => {
                   {item.ngay === null
                     ? "Không giới hạn"
                     : `${moment(item?.ngay?.From).format(
-                        "HH:mm DD/MM/YYYY",
-                      )} - ${moment(item?.ngay?.To).format(
-                        "HH:mm DD/MM/YYYY",
-                      )}`}
+                      "HH:mm DD/MM/YYYY",
+                    )} - ${moment(item?.ngay?.To).format(
+                      "HH:mm DD/MM/YYYY",
+                    )}`}
                 </div>
               </div>
               <div className="border-b p-3 last:border-0">
                 <div className="text-muted mb-1">Giá trị giảm giá</div>
                 <div className="font-medium text-primary">
-                  {item?.gia_tri?.Phan_tram > 0
-                    ? `${item?.gia_tri.Phan_tram}%`
-                    : `${formatString.formatVND(item?.gia_tri?.Tien)}`}
+                  {
+                    item?.Voucher?.ValueType == 2 ? <>Đồng giá {formatString.formatVND(item?.gia_tri?.Tien)}</> : <>
+                      Giảm tối đa{" "}
+                      {item.Voucher.Discount > 100
+                        ? `${formatString.formatVND(
+                          item.Voucher.Discount
+                        )}`
+                        : `${item?.Voucher?.Discount}%`}
+                    </>
+                  }
                 </div>
               </div>
               <div className="border-b p-3 last:border-0">
@@ -63,7 +70,7 @@ export const PickerVoucher = ({ children, item }) => {
                   ) : (
                     <>
                       {Number(item?.gioi_han_so_lan_su_dung) <=
-                      Number(item?.so_lan_su_dung)
+                        Number(item?.so_lan_su_dung)
                         ? "Hết lượt sử dụng"
                         : `${item?.so_lan_su_dung} / ${item?.gioi_han_so_lan_su_dung} lần`}
                     </>
@@ -116,8 +123,8 @@ export const PickerVoucher = ({ children, item }) => {
                           <span className="pl-1">
                             {item.dieu_Kien.danh_muc.length > 0
                               ? item.dieu_Kien.danh_muc
-                                  .map((item) => item.Title)
-                                  .join(", ")
+                                .map((item) => item.Title)
+                                .join(", ")
                               : "Tất cả"}
                           </span>
                         </>
@@ -128,10 +135,10 @@ export const PickerVoucher = ({ children, item }) => {
                           Sản phẩm lẻ :
                           <span>
                             {item.dieu_Kien.san_pham &&
-                            item.dieu_Kien.san_pham.length > 0
+                              item.dieu_Kien.san_pham.length > 0
                               ? item.dieu_Kien.san_pham
-                                  .map((item) => item.Title)
-                                  .join(", ")
+                                .map((item) => item.Title)
+                                .join(", ")
                               : "Tất cả"}
                           </span>
                         </div>
@@ -150,8 +157,8 @@ export const PickerVoucher = ({ children, item }) => {
                   <div className="font-medium text-primary">
                     {item.Voucher.VoucherMeta?.Perc > 100
                       ? `${formatString.formatVND(
-                          item.Voucher.VoucherMeta?.Perc,
-                        )}`
+                        item.Voucher.VoucherMeta?.Perc,
+                      )}`
                       : `${item.Voucher.VoucherMeta?.Perc}%`}
                   </div>
                 </div>

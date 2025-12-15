@@ -48,7 +48,7 @@ const LayoutProvider = ({ children }) => {
       return null;
     },
     onSuccess: (data) => {
-      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQxNTkyIiwiVG9rZW5JZCI6IjExMzIxMDUyNzQzMDA3ODEiLCJuYmYiOjE3NjUzMzUxODIsImV4cCI6MTg1MTczNTE4MiwiaWF0IjoxNzY1MzM1MTgyfQ.KYdxX4DRCIW11d4xDrLZ6PkZH_0qYIH-TpjCc6r1zkc" })
+      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQxNzE0IiwiVG9rZW5JZCI6IjExMzQ5MTE1MTA2MDAwODEiLCJuYmYiOjE3NjU3Nzg1MTQsImV4cCI6MTg1MjE3ODUxNCwiaWF0IjoxNzY1Nzc4NTE0fQ.4pEmhbUmTylRUvAwUzI-uJrnesEchVl7SL2ncjmhpHI" })
       //   .then(({ data }) => {
       //     if (!data?.error) {
       //       onSaveAuth(data);
