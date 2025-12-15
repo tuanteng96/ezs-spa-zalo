@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
 import React from "react";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { Icon, Page, Text, useNavigate } from "zmp-ui";
@@ -17,7 +18,7 @@ const CustomerVoucher = () => {
     queryKey: ["VouchersList", AccessToken],
     queryFn: async () => {
       const { data } = await AuthAPI.vouchers(Auth?.ID);
-      return data?.data?.danh_sach ? data?.data?.danh_sach.reverse() : [];
+      return [...(data?.data?.danh_sach ? data?.data?.danh_sach.reverse() : []), ...(data?.data?.contactMiniGame || [])];
     },
     enabled: Number(Auth?.ID) > -1,
   });
@@ -143,75 +144,154 @@ const CustomerVoucher = () => {
                           className="border shadow-3xl border-l-0 rounded-sm overflow-hidden flex mb-3 last:mb-0 bg-white cursor-pointer"
                           onClick={open}
                         >
-                          <div className="w-[6.625rem] h-[6.625rem] relative">
-                            <div
-                              style={{
-                                background:
-                                  "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
-                                borderBottom:
-                                  "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
-                                borderBottomLeftRadius: "0.125rem",
-                                borderTop: "0.0625rem solid #70000A",
-                                borderTopLeftRadius: "0.125rem",
-                                height: "100%",
-                                left: 0,
-                                overflow: "hidden",
-                                position: "absolute",
-                                top: 0,
-                                width: "100%",
-                              }}
-                            >
-                              <div
-                                className="flex items-center justify-center"
-                                style={{
-                                  background:
-                                    "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
-                                  bottom: "calc(0.25rem - 0.0625rem)",
-                                  position: "absolute",
-                                  top: "calc(0.25rem - 0.0625rem)",
-                                  width: "100%",
-                                }}
-                              >
-                                <img
-                                  className="aspect-square w-12"
-                                  src={GiftSVG}
-                                />
+                          {
+                            item?.Type === "contact" ? (
+                              <>
+                                <div className="w-[6.625rem] h-[6.625rem] relative">
+                                  <div
+                                    style={{
+                                      background:
+                                        "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
+                                      borderBottom:
+                                        "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
+                                      borderBottomLeftRadius: "0.125rem",
+                                      borderTop: "0.0625rem solid #70000A",
+                                      borderTopLeftRadius: "0.125rem",
+                                      height: "100%",
+                                      left: 0,
+                                      overflow: "hidden",
+                                      position: "absolute",
+                                      top: 0,
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <div
+                                      className="flex items-center justify-center"
+                                      style={{
+                                        background:
+                                          "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
+                                        bottom: "calc(0.25rem - 0.0625rem)",
+                                        position: "absolute",
+                                        top: "calc(0.25rem - 0.0625rem)",
+                                        width: "100%",
+                                      }}
+                                    >
+                                      <img
+                                        className="aspect-square w-12"
+                                        src={GiftSVG}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="px-3 py-2.5 flex-1">
+                                  <div className="text-[17px] font-bold mb-3">
+                                    {item?.Title}
+                                  </div>
+                                  <div className="font-medium text-[13px] border border-primary inline-block px-2 py-px text-primary rounded">
+                                    {item.Content} -{" "}
+                                    <span className="text-danger">
+                                      Liên hệ để sử dụng.
+                                    </span>
+                                  </div>
+                                  <div className="flex mt-2 justify-between">
+                                    <div className="text-sm">
+                                      <span className="pr-1">HSD :</span>
+                                      {!item.EndDate ? (
+                                        "Không giới hạn"
+                                      ) : (
+                                        <>
+                                          Còn <b>{checkDateDiff(item.EndDate)}</b>{" "}
+                                          ngày
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="uppercase font-bold text-[13px] text-primary">
+                                      Chi tiết
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            ) : <>
+                              <div className="w-[6.625rem] h-[6.625rem] relative">
+                                <div
+                                  style={{
+                                    background:
+                                      "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
+                                    borderBottom:
+                                      "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
+                                    borderBottomLeftRadius: "0.125rem",
+                                    borderTop: "0.0625rem solid #70000A",
+                                    borderTopLeftRadius: "0.125rem",
+                                    height: "100%",
+                                    left: 0,
+                                    overflow: "hidden",
+                                    position: "absolute",
+                                    top: 0,
+                                    width: "100%",
+                                  }}
+                                >
+                                  <div
+                                    className="flex items-center justify-center"
+                                    style={{
+                                      background:
+                                        "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
+                                      bottom: "calc(0.25rem - 0.0625rem)",
+                                      position: "absolute",
+                                      top: "calc(0.25rem - 0.0625rem)",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <img
+                                      className="aspect-square w-12"
+                                      src={GiftSVG}
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                          <div className="px-3 py-2.5 flex-1">
-                            <div className="text-[17px] font-bold mb-3">
-                              Code <span className="text-app">{item.ma}</span>
-                            </div>
-                            <div className="font-medium text-[13px] border border-primary inline-block px-2 py-px text-primary rounded">
-                              {
-                                item?.Voucher?.ValueType == 2 ? <>Đồng giá {formatString.formatVND(item?.gia_tri?.Tien)}</> : <>
-                                  Giảm tối đa{" "}
-                                  {item.Voucher.Discount > 100
-                                    ? `${formatString.formatVND(
-                                      item.Voucher.Discount
-                                    )}`
-                                    : `${item?.Voucher?.Discount}%`}
-                                </>
-                              }
-                            </div>
-                            <div className="flex mt-2 justify-between">
-                              <div className="text-sm">
-                                <span className="pr-1">HSD :</span>
-                                {item?.ngay === null ? (
-                                  "Không giới hạn"
-                                ) : (
-                                  <>
-                                    Còn <b>{checkDateDiff(item?.ngay?.To)}</b>{" "}
-                                    ngày
-                                  </>
-                                )}
+                              <div className="px-3 py-2.5 flex-1">
+                                <div className="text-[17px] font-bold mb-3">
+                                  {item?.Voucher?.Title &&
+                                    item?.Voucher?.Title.toUpperCase().indexOf(
+                                      "ĐỔI QUÀ"
+                                    ) > -1 ? (
+                                    <span>Đổi Quà</span>
+                                  ) : (
+                                    <span>Mã</span>
+                                  )}
+                                  <span className="text-app pl-1">{item.ma}</span>
+                                </div>
+                                <div className="font-medium text-[13px] border border-primary inline-block px-2 py-px text-primary rounded">
+                                  {
+                                    item?.Voucher?.ValueType == 2 ? <>Đồng giá {formatString.formatVND(item?.gia_tri?.Tien)}</> : <>
+                                      Giảm tối đa{" "}
+                                      {item.Voucher.Discount > 100
+                                        ? `${formatString.formatVND(
+                                          item.Voucher.Discount
+                                        )}`
+                                        : `${item?.Voucher?.Discount}%`}
+                                    </>
+                                  }
+                                </div>
+                                <div className="flex mt-2 justify-between">
+                                  <div className="text-sm">
+                                    <span className="pr-1">HSD :</span>
+                                    {item?.ngay === null ? (
+                                      "Không giới hạn"
+                                    ) : (
+                                      <>
+                                        Còn <b>{checkDateDiff(item?.ngay?.To)}</b>{" "}
+                                        ngày
+                                      </>
+                                    )}
+                                  </div>
+                                  <div className="uppercase font-bold text-[13px] text-primary">
+                                    Chi tiết
+                                  </div>
+                                </div>
                               </div>
-                              <div className="uppercase font-bold text-[13px] text-primary">
-                                Chi tiết
-                              </div>
-                            </div>
-                          </div>
+                            </>
+                          }
+
                         </div>
                       )}
                     </PickerVoucher>
