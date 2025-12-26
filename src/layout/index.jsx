@@ -79,7 +79,7 @@ const SuspensedView = ({ children }) => {
 };
 
 const Layout = () => {
-  const { Ratings } = useLayout()
+  const { Ratings, GlobalConfig } = useLayout()
   return (
     <MasterLayout>
       <AnimationRoutes forceRefresh>
@@ -345,7 +345,7 @@ const Layout = () => {
       </AnimationRoutes>
       <Navigation />
       {
-        Ratings && Ratings.length > 0 && <SheetRating data={Ratings} />
+        GlobalConfig?.IPAD?.openRating && Ratings && Ratings.length > 0 && <SheetRating data={Ratings} />
       }
     </MasterLayout>
   );
