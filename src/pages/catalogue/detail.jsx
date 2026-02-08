@@ -278,7 +278,7 @@ const CatalogueDetailPage = () => {
             </div>
           </form>
         </PullToRefresh>
-        <NavigationOrder item={data?.product} options={data?.options} combo={data?.combos} />
+        <NavigationOrder item={data?.product} options={data?.options2} combo={data?.combos} />
       </FormProvider>
       <ImageViewer
         onClose={() => setVisible(false)}
