@@ -9,7 +9,7 @@ import { openWebview } from "zmp-sdk";
 import { Button, Icon, Page, Sheet, Text, useNavigate, useSnackbar } from "zmp-ui";
 import AuthAPI from "../../api/auth.api";
 import { useLayout } from "../../layout/LayoutProvider";
-import { toAbsolutePath } from "../../utils/assetPath";
+import { toAbsolutePath, toAbsolutePathAPI } from "../../utils/assetPath";
 import { formatArray } from "../../utils/formatArray";
 
 import { Fancybox } from "@fancyapps/ui/dist/fancybox/";
