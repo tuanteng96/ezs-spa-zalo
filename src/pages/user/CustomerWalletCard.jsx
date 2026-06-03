@@ -138,7 +138,7 @@ const CustomerWalletCard = () => {
           activeKey={queryConfig.Type}
           onChange={onChangeTabs}
         >
-          <Tabs.Tab key="Wallet" label="Ví điện thử">
+          <Tabs.Tab key="Wallet" label="Ví điện tử">
             <PullToRefresh className="ezs-ptr" onRefresh={refetchWallet}>
               <div className="h-full flex flex-col">
                 <div className="bg-white min-h-[150px] pt-7 flex flex-col flex-column items-center relative">
