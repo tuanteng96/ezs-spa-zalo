@@ -209,7 +209,7 @@ const UserPage = () => {
           <div className="mb-1 font-semibold text-gray-400 text-[12px]">Tài khoản</div>
           <div className="bg-white rounded-lg p-4 text-sm">
             {
-              !GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+              GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
                 <ProtectedNavLink to="/user/customer-wallet-card">
                   {({ onClick }) => (
                     <div
@@ -227,20 +227,25 @@ const UserPage = () => {
               )
             }
 
-            <ProtectedNavLink to="/user/customer-wallet-card?Type=Card">
-              {({ onClick }) => (
-                <div
-                  className="flex items-center justify-between cursor-pointer border-b last:border-0 pb-3.5 mb-3.5 last:pb-0 last:mb-0"
-                  onClick={onClick}
-                >
-                  <div className="font-medium">Thẻ tiền trả trước</div>
-                  <div className="text-muted flex items-center gap-1">
-                    {Auth && Auth?.Present?.the_tien_kha_dung ? <div className="text-danger font-medium">{formatString.formatVND(Auth?.Present?.the_tien_kha_dung, '')}</div> : <></>}
-                    <Icon icon="zi-chevron-right" />
-                  </div>
-                </div>
-              )}
-            </ProtectedNavLink>
+            {
+              GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+                <ProtectedNavLink to="/user/customer-wallet-card?Type=Card">
+                  {({ onClick }) => (
+                    <div
+                      className="flex items-center justify-between cursor-pointer border-b last:border-0 pb-3.5 mb-3.5 last:pb-0 last:mb-0"
+                      onClick={onClick}
+                    >
+                      <div className="font-medium">Thẻ tiền trả trước</div>
+                      <div className="text-muted flex items-center gap-1">
+                        {Auth && Auth?.Present?.the_tien_kha_dung ? <div className="text-danger font-medium">{formatString.formatVND(Auth?.Present?.the_tien_kha_dung, '')}</div> : <></>}
+                        <Icon icon="zi-chevron-right" />
+                      </div>
+                    </div>
+                  )}
+                </ProtectedNavLink>
+              )
+            }
+
             <ProtectedNavLink to="/user/customer-points-change">
               {({ onClick }) => (
                 <div
