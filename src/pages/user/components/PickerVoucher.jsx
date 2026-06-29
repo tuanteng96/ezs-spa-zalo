@@ -128,16 +128,6 @@ export const PickerVoucher = ({ children, item }) => {
                     </div>
                   </div>
                 )}
-                {item?.aff && (
-                  <div className="border-b p-3 last:border-0">
-                    <div className="text-muted mb-1">
-                      Mã dùng chia sẻ cho bạn bè
-                    </div>
-                    <div className="font-medium">
-                      <BtnAffiliate code={item.ma_chia_se} />
-                    </div>
-                  </div>
-                )}
                 {
                   <div className="border-b p-3 last:border-0">
                     <div className="text-muted mb-1">Điều kiện áp dụng</div>

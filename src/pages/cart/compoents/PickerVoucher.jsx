@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
-import { Button, Icon, Input, Sheet } from "zmp-ui";
+import { Button, Icon, Input, Sheet, useSnackbar } from "zmp-ui";
 import { Controller, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
@@ -20,6 +20,7 @@ const schemaVoucher = yup
   .required();
 
 const SearchVoucher = ({ OrderID, onChange }) => {
+
   const { AccessToken } = useLayout();
   const { handleSubmit, control, setError, reset } = useForm({
     defaultValues: {
@@ -101,7 +102,8 @@ const SearchVoucher = ({ OrderID, onChange }) => {
 };
 
 export const PickerVoucher = ({ children }) => {
-  const { AccessToken, Auth } = useLayout();
+  const { openSnackbar } = useSnackbar();
+  const { AccessToken, Auth, GlobalConfig } = useLayout();
   const { Orders } = useCart();
   const [visible, setVisible] = useState(false);
   const { handleSubmit, control } = useForm({
@@ -120,7 +122,60 @@ export const PickerVoucher = ({ children }) => {
   const queryClient = useQueryClient();
 
   const voucherCartMutation = useMutation({
-    mutationFn: (body) => CartAPI.list(body),
+    mutationFn: async (body) => {
+      let data = null;
+      if (body?.body?.order?.VCode) {
+        if (body?.body?.order?.VCode.includes("-")) {
+          let rs = await CartAPI.orderVdeCode({
+            Code: body?.body?.order?.VCode,
+            Token: AccessToken
+          });
+
+          if (rs?.data?.Item1) {
+            body.body.order.VCode = `${rs?.data?.Item1}-${rs?.data?.Item2}`;
+          } else {
+            data = {
+              error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
+            }
+          }
+        }
+        else {
+          if (Number(GlobalConfig?.Admin?.voucherSkip2) === 1) {
+            let rs = await CartAPI.orderGetCode({
+              Code: body?.body?.order?.VCode,
+              Token: AccessToken
+            });
+            if (rs?.data?.Code && !rs?.data?.Context?.ReCode) {
+            } else {
+              data = {
+                error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
+              }
+            }
+          }
+
+          if (Number(GlobalConfig?.Admin?.voucherSkip2) === 2) {
+            let rs = await CartAPI.orderGetCode({
+              Code: body?.body?.order?.VCode,
+              Token: AccessToken
+            });
+
+            if (rs?.data?.Code) {
+              body.body.order.VCode = rs?.data?.Context?.ReCode || rs?.data?.Code;
+            } else {
+              data = {
+                error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
+              }
+            }
+          }
+        }
+      }
+
+      if (!data?.error) {
+        data = await CartAPI.list(body);
+        await queryClient.invalidateQueries({ queryKey: ["ListsCart"] })
+      }
+      return data;
+    },
   });
 
   const onSubmit = (values) => {
@@ -130,12 +185,17 @@ export const PickerVoucher = ({ children }) => {
         body: values,
       },
       {
-        onSuccess: () => {
-          queryClient
-            .invalidateQueries({ queryKey: ["ListsCart"] })
-            .then(() => {
-              setVisible(false);
+        onSuccess: (data) => {
+          if (data.error) {
+            openSnackbar({
+              text: data.error,
+              type: "error",
+              duration: 2000,
             });
+          }
+          else {
+            setVisible(false);
+          }
         },
       },
     );

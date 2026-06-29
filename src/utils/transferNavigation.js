@@ -95,7 +95,11 @@ export const transferNavigation = ({ navigate, to, useLocation, data, open }) =>
         },
       );
     }
-  } else if (to.includes("/voucher")) {
+  }
+  else if(to.includes("/voucher/change-code")) {
+    navigate("/user/customer-voucher-change");
+  }
+  else if (to.includes("/voucher")) {
     navigate("/user/customer-voucher");
   } else if(to.includes("/points-change")) {
     navigate("/user/customer-points-change");

@@ -21,6 +21,7 @@ const UserPage = lazy(() => import("../pages/user"));
 const CustomerDiary = lazy(() => import("../pages/user/CustomerDiary"));
 const CustomerOrders = lazy(() => import("../pages/user/CustomerOrders"));
 const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
+const CustomerVoucherChange = lazy(() => import("../pages/user/CustomerVoucherChange"));
 const CustomerWalletCard = lazy(
   () => import("../pages/user/CustomerWalletCard"),
 );
@@ -224,6 +225,16 @@ const Layout = () => {
             <ProtectedRoute>
               <SuspensedView>
                 <CustomerVoucher />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-voucher-change"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerVoucherChange />
               </SuspensedView>
             </ProtectedRoute>
           }

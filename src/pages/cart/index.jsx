@@ -47,7 +47,11 @@ const CartPage = () => {
   }, [Auth]);
 
   const submitCartMutation = useMutation({
-    mutationFn: (body) => CartAPI.list(body),
+    mutationFn: async (body) => {
+      let rs = await CartAPI.list(body);
+      await queryClient.invalidateQueries({ queryKey: ["ListsCart"] });
+      return rs
+    },
   });
 
   const onSubmit = ({ SenderOther, SenderAddress }) => {
@@ -110,15 +114,11 @@ const CartPage = () => {
               { token: AccessToken, body: dataPost },
               {
                 onSuccess: ({ data }) => {
-                  queryClient
-                    .invalidateQueries({ queryKey: ["ListsCart"] })
-                    .then(() => {
-                      navigate("/cart/finish", {
-                        state: {
-                          formState: data?.data?.order,
-                        },
-                      });
-                    });
+                  navigate("/cart/finish", {
+                    state: {
+                      formState: data?.data?.order,
+                    },
+                  });
                 },
               },
             );
@@ -134,21 +134,45 @@ const CartPage = () => {
           { token: AccessToken, body: dataPost },
           {
             onSuccess: ({ data }) => {
-              queryClient
-                .invalidateQueries({ queryKey: ["ListsCart"] })
-                .then(() => {
-                  navigate("/cart/finish", {
-                    state: {
-                      formState: data?.data?.order,
-                    },
-                  });
-                });
+              navigate("/cart/finish", {
+                state: {
+                  formState: data?.data?.order,
+                },
+              });
             },
           },
         );
       }
     }
   };
+
+  const onRemoveVoucher = () => {
+    submitCartMutation.mutate(
+      {
+        token: AccessToken,
+        body: {
+          order: {
+            ID: Orders?.order?.ID || 0,
+            SenderID: Auth?.ID,
+            VCode: "",
+          },
+          addProps: "ProdTitle",
+          deleteds: [],
+          edits: [],
+        },
+      },
+      {
+        onSuccess: () => {
+          openSnackbar({
+            text: `Xoá mã giảm giá thành công!`,
+            type: "success",
+            duration: 1000,
+          });
+
+        }
+      }
+    )
+  }
 
   const handleRefresh = () =>
     Promise.all([queryClient.invalidateQueries({ queryKey: ["ListsCart"] })]);
@@ -456,8 +480,12 @@ const CartPage = () => {
             >
               {Orders?.order?.VoucherCode ? (
                 <div className="flex items-center">
-                  <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave uppercase">
+                  <div className="border border-success px-5 bg-success text-white py-px mr-1 text-[12px] mask-wave uppercase relative">
                     {Orders.order.VoucherCode}
+                    <Icon onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveVoucher();
+                    }} className="text-white !text-[20px] absolute -right-[10px]" icon="zi-close" />
                   </div>
                   <Icon className="text-muted" icon="zi-chevron-right" />
                 </div>
