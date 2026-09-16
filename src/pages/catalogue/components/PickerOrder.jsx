@@ -4,13 +4,13 @@ import { Button, Sheet, useNavigate, useSnackbar } from "zmp-ui";
 import { useFieldArray, useFormContext, Controller } from "react-hook-form";
 import { ImageLazy } from "../../../components/ImagesLazy";
 import { toAbsolutePath } from "../../../utils/assetPath";
-import { PriceSaleDetail } from "./PriceSaleDetail";
 import { QuantityPicker } from "./QuantityPicker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import CartAPI from "../../../api/cart.api";
 import { useLayout } from "../../../layout/LayoutProvider";
 import clsx from "clsx";
 import { useLocation } from "react-router";
+import { PriceSaleDetailVAT } from "./PriceSaleDetailVAT";
 
 export const PickerOrder = ({ children, item, options, buttonText }) => {
   const navigate = useNavigate();
@@ -102,7 +102,14 @@ export const PickerOrder = ({ children, item, options, buttonText }) => {
                 </div>
                 <div className="pl-3">
                   <div className="font-semibold mb-2">{CrProduct?.Title}</div>
-                  <PriceSaleDetail product={CrProduct} />
+                  <PriceSaleDetailVAT product={{...CrProduct, PriceProductVAT:
+            typeof CrProduct?.PriceProductVAT === "undefined"
+              ? CrProduct?.PriceProduct
+              : CrProduct?.PriceProductVAT,
+          PriceSaleVAT:
+            typeof CrProduct?.PriceSaleVAT === "undefined"
+              ? CrProduct?.PriceSale
+              : CrProduct?.PriceSaleVAT,}} />
                 </div>
               </div>
               {options && options.length > 0 && (

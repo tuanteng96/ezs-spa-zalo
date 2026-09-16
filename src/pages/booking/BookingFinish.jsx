@@ -1,9 +1,12 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import { useNavigate } from "zmp-ui";
+import { useLayout } from "../../layout/LayoutProvider";
 
 const BookingFinish = () => {
   const navigate = useNavigate();
+
+  const {GlobalConfig} = useLayout()
 
   return (
     <div className="h-full">
@@ -466,11 +469,11 @@ const BookingFinish = () => {
       </svg>
       <div className="text-center px-5">
         <div className="font-bold text-lg mb-2">
-          "Đặt lịch" thành công rồi nhé.
+          "Lịch hẹn" đang chờ xử lý.
         </div>
         <div>
-          Chúng tôi sẽ sớm liên hệ lại cho bạn để nhận đặt lịch. Bạn vui lòng
-          chờ ...{" "}
+        {GlobalConfig?.Admin?.text_dat_lich ||
+            "Chúc mừng bạn đã đặt lịch thành công. Vui lòng chờ đợi. Chúng tôi sẽ phản hồi thông tin sớm nhất ..."}
         </div>
       </div>
       <div className="flex items-center flex-col mt-10">

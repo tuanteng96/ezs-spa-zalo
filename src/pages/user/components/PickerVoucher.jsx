@@ -97,13 +97,13 @@ export const PickerVoucher = ({ children, item }) => {
                   </div>
                   <div className="font-medium">
                     {item?.gioi_han_so_lan_su_dung === -1 ? (
-                      `${item?.so_lan_su_dung} / Không giới hạn`
+                      `${item?.so_lan_su_dung || 0} / Không giới hạn`
                     ) : (
                       <>
                         {Number(item?.gioi_han_so_lan_su_dung) <=
                           Number(item?.so_lan_su_dung)
                           ? "Hết lượt sử dụng"
-                          : `${item?.so_lan_su_dung} / ${item?.gioi_han_so_lan_su_dung} lần`}
+                          : `${item?.so_lan_su_dung || 0} / ${item?.gioi_han_so_lan_su_dung} lần`}
                       </>
                     )}
                   </div>

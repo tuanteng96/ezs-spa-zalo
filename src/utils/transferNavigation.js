@@ -1,7 +1,7 @@
 import { openWebview } from "zmp-sdk";
 import { formatString } from "./formatString";
 
-export const transferNavigation = ({ navigate, to, useLocation, data, open }) => {
+export const transferNavigation = ({ navigate, to, useLocation, data, open, Auth }) => {
   
   let { pathname, search } = useLocation;
   let splitUrl = to.split("/");
@@ -13,6 +13,56 @@ export const transferNavigation = ({ navigate, to, useLocation, data, open }) =>
     else {
       navigate("/user/customer-wallet-card");
     }
+  }
+  else if(to.includes("/vong-quay")) {
+    
+    const parts = to.split("/").filter(Boolean);
+
+    let newUrl = "/minigame/wheel";
+
+    if (parts.length >= 2) {
+      const DepartmentID = parts[1];
+      const EndDate = parts[2];
+
+      const params = new URLSearchParams();
+
+      if (DepartmentID) params.set("DepartmentID", DepartmentID);
+      if (EndDate) params.set("EndDate", EndDate);
+
+      newUrl += `?${params.toString()}`;
+    }
+
+    if(!Auth) {
+      navigate(`/?fromProtected=${newUrl}`);
+      return
+    }
+    navigate(newUrl)
+  }
+  else if(to.includes("/hop-qua-may-man")) {
+    
+    const parts = to.split("/").filter(Boolean);
+
+    let newUrl = "/minigame/gift";
+
+    if (parts.length >= 2) {
+      const DepartmentID = parts[1];
+      const EndDate = parts[2];
+
+      const params = new URLSearchParams();
+
+      if (DepartmentID) params.set("DepartmentID", DepartmentID);
+      if (EndDate) params.set("EndDate", EndDate);
+
+      newUrl += `?${params.toString()}`;
+    }
+    if(!Auth) {
+      navigate(`/?fromProtected=${newUrl}`);
+      return
+    }
+    navigate(newUrl)
+  }
+  else if(to.includes("/member-affiliate")) {
+    navigate("/user/member-affiliate");
   }
   else if(to.includes("/maps/")) {
     navigate("/user/customer-branch");

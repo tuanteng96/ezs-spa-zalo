@@ -14,6 +14,7 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/checkin",
   "/user/profile",
   "/user/customer-diary",
+  "/user/member-affiliate",
   "/user/customer-orders",
   "/user/customer-voucher",
   "/user/customer-wallet-card",
@@ -28,7 +29,8 @@ export const NO_BOTTOM_NAVIGATION_PAGES = [
   "/user/customer-branch",
   "/booking",
   "/search",
-  "/contact"
+  "/contact",
+  "/minigame"
 ];
 
 export const BOTTOM_NAVIGATION_SEARCH_PAGE = ["Type=Finish"];
@@ -71,14 +73,14 @@ export const Navigation = () => {
 
   const onChangePath = ({ Key, Path }) => {
     if (Key === pathname) {
-      navigate(0);
-    } else {
-      navigate(Path ? Path : Key, {
-        state: {
-          prevState: pathname + search,
-        },
-      });
+      return;
     }
+
+    navigate(Path ? Path : Key, {
+      state: {
+        prevState: pathname + search,
+      },
+    });
   };
 
   const openChatScreen = () => {

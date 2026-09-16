@@ -337,6 +337,19 @@ const UserPage = () => {
         <div>
           <div className="mb-1 font-semibold text-gray-400 text-[12px]">Khác</div>
           <div className="bg-white rounded-lg p-4 text-sm">
+            <ProtectedNavLink to="/user/member-affiliate">
+              {({ onClick }) => (
+                <div
+                  className="flex items-center justify-between cursor-pointer border-b last:border-0 pb-3.5 mb-3.5 last:pb-0 last:mb-0"
+                  onClick={onClick}
+                >
+                  <div className="font-medium">Chương trình affiliate</div>
+                  <div className="text-muted ">
+                    <Icon icon="zi-chevron-right" />
+                  </div>
+                </div>
+              )}
+            </ProtectedNavLink>
             <ProtectedNavLink to="/user/customer-diary">
               {({ onClick }) => (
                 <div

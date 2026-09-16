@@ -32,7 +32,7 @@ const CartProvider = ({ children }) => {
       data: [],
     },
   });
-
+  
   return (
     <CartContext.Provider
       value={{

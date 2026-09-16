@@ -78,4 +78,26 @@ export const formatArray = {
         return moment.utc(right.dayFull).diff(moment.utc(left.dayFull));
       });
   },
+  getRandomItemByPercentage: (items, percentages) => {
+    const eligibleIndexes = percentages
+    .map((value, index) => ({ value, index }))
+    .filter((entry) => entry.value > 0);
+
+    if (eligibleIndexes.length === 0) {
+      return items.length - 1;
+    }
+
+    const total = eligibleIndexes.reduce((sum, entry) => sum + entry.value, 0);
+    const randomValue = Math.random() * total;
+
+    let runningSum = 0;
+    for (let i = 0; i < eligibleIndexes.length; i++) {
+      runningSum += eligibleIndexes[i].value;
+      if (randomValue < runningSum) {
+        return eligibleIndexes[i].index;
+      }
+    }
+
+    return eligibleIndexes[eligibleIndexes.length - 1].index;
+  }
 };

@@ -35,7 +35,7 @@ const Banner = () => {
     );
 
   return (
-    <Box className="bg-white aspect-4/5">
+    <Box className="bg-white">
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{
@@ -57,7 +57,7 @@ const Banner = () => {
               >
                 <ImageLazy
                   wrapperClassName="!block"
-                  className="aspect-[5/7] object-cover"
+                  className="object-cover"
                   effect="blur"
                   src={toAbsolutePath(item.FileName)}
                 />

@@ -10,6 +10,7 @@ import clsx from "clsx";
 import { createSearchParams, useLocation } from "react-router-dom";
 import { SheetProvince } from "../../components/sheet-stocks/SheetProvince";
 import { createPortal } from "react-dom";
+import BookingAPI from "../../api/booking.api";
 
 const GroupByCount = (List, Count) => {
   return List.reduce((acc, x, i) => {
@@ -29,7 +30,7 @@ const settings = {
   renderBottomCenterControls: () => false,
   renderCenterLeftControls: null,
   renderCenterRightControls: ({ nextDisabled, nextSlide }) => (
-    <div className="relative font-medium text-sm" onClick={nextSlide}>
+    <div className="relative text-sm font-medium" onClick={nextSlide}>
       <div className="pr-9 text-muted">Chọn khung giờ khác</div>
       <div className="absolute right-0 top-2/4 -translate-y-2/4 text-app">
         <div className="animate-bounceRight">
@@ -71,45 +72,49 @@ const formatTimeOpenClose = ({ Text, InitialTime, Date }) => {
   return Times
 }
 
+const getInitialBookingState = (bookDate) => {
+  if (!bookDate) {
+    return { key: "0", dateChoose: "" };
+  }
+
+  if (
+    moment(bookDate).format("DD-MM-YYYY") === moment().format("DD-MM-YYYY")
+  ) {
+    return { key: "0", dateChoose: "" };
+  }
+
+  if (
+    moment(bookDate).format("DD-MM-YYYY") ===
+    moment().add(1, "days").format("DD-MM-YYYY")
+  ) {
+    return { key: "1", dateChoose: "" };
+  }
+
+  return { key: "2", dateChoose: moment(bookDate).toDate() };
+};
+
 const BookingTime = ({ invisible }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { Stocks, AccessToken, GlobalConfig } = useLayout();
 
-  const [key, setKey] = useState("0");
+  const { watch, control, setValue } = useFormContext();
+  const { StockID, BookDate, DataCheckBand } = watch();
+
+  const initialBookingState = getInitialBookingState(BookDate);
+
+  const [key, setKey] = useState(initialBookingState.key);
   const [ListChoose, setListChoose] = useState([]);
-  const [DateChoose, setDateChoose] = useState();
+  const [DateChoose, setDateChoose] = useState(initialBookingState.dateChoose);
 
   const [open, setOpen] = useState(false);
 
-  const { watch, control, setValue } = useFormContext();
-  const { StockID, BookDate } = watch();
-
   const myRefDate = useRef();
+  const lastGetListChooseKeyRef = useRef("");
 
   const { openSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    if (BookDate) {
-      if (
-        moment(BookDate).format("DD-MM-YYYY") === moment().format("DD-MM-YYYY")
-      ) {
-        setKey("0");
-        setDateChoose("");
-      } else if (
-        moment(BookDate).format("DD-MM-YYYY") ===
-        moment().add(1, "days").format("DD-MM-YYYY")
-      ) {
-        setKey("1");
-        setDateChoose("");
-      } else {
-        setKey("2");
-        setDateChoose(moment(BookDate).toDate());
-      }
-    }
-  }, []);
-
-  const { data: ListLock } = useQuery({
+  const { data: ListLock, isFetched: isListLockFetched } = useQuery({
     queryKey: ["ListDisable"],
     queryFn: async () => {
       const { data } = await ConfigsAPI.getNames("giocam");
@@ -122,12 +127,135 @@ const BookingTime = ({ invisible }) => {
   });
 
   useEffect(() => {
+    if (
+      !GlobalConfig?.APP?.Booking ||
+      !Stocks?.length ||
+      !StockID ||
+      !isListLockFetched
+    ) {
+      return;
+    }
+
+    const nextCallKey = JSON.stringify({
+      key,
+      dateChoose: DateChoose ? moment(DateChoose).format("YYYY-MM-DD") : "",
+      stockId: StockID || "",
+      listLock: ListLock || [],
+      bookingConfig: GlobalConfig.APP.Booking,
+      scheduledMinutes: GlobalConfig?.APP?.ScheduledMinutes || 0,
+      stocksKey: Stocks.map((item) => ({
+        id: item.ID,
+        keySeo: item.KeySEO || "",
+      })),
+    });
+
+    if (lastGetListChooseKeyRef.current === nextCallKey) {
+      return;
+    }
+
+    lastGetListChooseKeyRef.current = nextCallKey;
     getListChoose(DateChoose);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [DateChoose, ListLock, StockID, GlobalConfig]);
+  }, [DateChoose, ListLock, StockID, GlobalConfig, Stocks, isListLockFetched, key]);
 
-  const getListChoose = (DateChoose) => {
+  const getBookCount = (Desc) => {
+    if (!Desc) return 0;
 
+    let descSplit = Desc.split("\n");
+    let AmountPeople = 0;
+    for (let i of descSplit) {
+      if (i.includes("Số lượng khách:")) {
+        let SL = Number(i.match(/\d+/)[0]);
+        AmountPeople = Number(SL);
+      }
+    }
+
+    return AmountPeople;
+  };
+
+  const checkScheduled = (data) => {
+    if (!data || !data?.Configs || data?.Configs.length === 0) {
+      return {
+        isOver: false,
+        MaxBook: 0,
+        RemainBook: 0,
+        CurrentBook: 0,
+        unlimited: true,
+      };
+    }
+
+    let { Configs, Books = [], Date, DateBook } = data;
+
+    if (moment(Date).format("DD/MM/YYYY") !== moment(DateBook).format("DD/MM/YYYY")) {
+      return {
+        isOver: false,
+        MaxBook: 0,
+        RemainBook: 0,
+        CurrentBook: 0,
+        unlimited: true,
+      };
+    }
+
+    const expectedMinutes =
+      GlobalConfig?.Admin?.SettingBookOnlineExpectedMinutes || 60;
+
+    const khoangLui =
+      GlobalConfig?.Admin?.SettingBookOnlineMinutes || 0;
+
+    let newConfigs = Configs.filter((x) =>
+      moment(
+        moment(Date).format("YYYY-MM-DD HH:mm"),
+        "YYYY-MM-DD HH:mm",
+      ).isBetween(
+        moment(x.Config.from, "YYYY-MM-DD HH:mm"),
+        moment(x.Config.to, "YYYY-MM-DD HH:mm"),
+        undefined,
+        "[)",
+      ),
+    );
+
+    if (newConfigs.length === 0) {
+      return {
+        isOver: true,
+        MaxBook: 0,
+        RemainBook: 0,
+        CurrentBook: 0,
+        unlimited: true,
+      };
+    }
+
+    let MaxBook = Math.max(...newConfigs.map((x) => x.Config.MaxBook || 0));
+
+    const newStart = moment(Date, "YYYY-MM-DD HH:mm");
+    const newEnd = newStart.clone().add(expectedMinutes, "minutes");
+
+    const currentUsed = Books.filter((x) => {
+      const oldStart = moment(x.BookDate, "YYYY-MM-DD HH:mm");
+      const oldEnd = oldStart
+        .clone()
+        .add(x.RootMinutes || expectedMinutes, "minutes");
+
+      const overlapStart = moment.max(newStart, oldStart);
+      const overlapEnd = moment.min(newEnd, oldEnd);
+      const overlapMinutes = overlapEnd.diff(overlapStart, "minutes");
+
+      return overlapMinutes > khoangLui;
+    }).length;
+
+    const currentBook = currentUsed + 1;
+    const remainBookBefore = Math.max(0, MaxBook - currentUsed);
+    const overBook = Math.max(0, currentBook - MaxBook);
+
+    return {
+      isOver: currentBook > MaxBook,
+      MaxBook: overBook,
+      RemainBook: remainBookBefore,
+      CurrentBook: currentBook,
+      unlimited: false,
+    };
+  };
+
+  const getListChoose = async (DateChoose) => {
     const { TimeOpenG, TimeCloseG, TimeNext, ScheduledMinutes } = {
       TimeOpenG: GlobalConfig?.APP?.Booking?.TimeOpen || {
         hour: "10",
@@ -145,8 +273,83 @@ const BookingTime = ({ invisible }) => {
       hideNoteTime: true,
     };
 
-    let TimeOpen = TimeOpenG;
-    let TimeClose = TimeCloseG;
+    // Keep the global booking configuration immutable while applying stock hours.
+    let TimeOpen = { ...TimeOpenG };
+    let TimeClose = { ...TimeCloseG };
+
+    let dataCheck = null;
+
+    let DateTimeBook = moment().toDate();
+      if(key === "0") {
+        DateTimeBook = moment().toDate();
+      }
+      if(key === "1") {
+        DateTimeBook = moment().add(1, "days").toDate();
+      }
+      if(key === "2") {
+        DateTimeBook = DateChoose;
+      }
+
+    if(GlobalConfig?.Admin?.SettingBookOnline) {
+
+      let { data: dataConfig } = await BookingAPI.getListBookConfig({
+        StockID: StockID,
+        From: moment(DateTimeBook).format("YYYY-MM-DD"),
+        To: moment(DateTimeBook).format("YYYY-MM-DD"),
+        pi: 1,
+        ps: 1000,
+      });
+
+      let { data: Books } = await BookingAPI.getBooking({
+        From: moment(DateTimeBook).format("YYYY-MM-DD"),
+        To: moment(DateTimeBook).format("YYYY-MM-DD"),
+        MemberID: "",
+        StockID: StockID,
+        Status: "XAC_NHAN,DANG_THUC_HIEN,THUC_HIEN_XONG,CHUA_XAC_NHAN",
+        UserServiceIDs: "",
+        StatusMember: "",
+        StatusBook: "",
+        StatusAtHome: "",
+        Tags: "",
+      });
+
+      let { data: Stafss } = await BookingAPI.getListStaff(
+        StockID,
+      );
+
+      let { books, osList } = Books;
+
+      let newBooks = [
+        ...(books || [])
+          .map((item) => {
+            return {
+              ...item,
+              BookCountNum: getBookCount(item.Desc),
+            };
+          })
+          .flatMap((item) =>
+            Array(item.BookCountNum || 1)
+              .fill(null)
+              .map(() => ({ ...item })),
+          ),
+        ...(osList || []).map((x) => ({
+          ...x,
+          BookDate: x.os.BookDate,
+          RootTitles: x.os.ProdService2 || x.os.ProdService,
+          RootMinutes: x.os.RootMinutes,
+          Member: x.member,
+          Status: x.os.Status,
+        })),
+      ];
+
+      dataCheck = {
+        Configs: dataConfig?.list || [],
+        Books: newBooks,
+        Staffs: Stafss?.data || [],
+      };
+
+      setValue("DataCheckBand", dataCheck)
+    }
 
     let indexStock = Stocks?.findIndex(x => x.ID === StockID)
 
@@ -181,6 +384,7 @@ const BookingTime = ({ invisible }) => {
         TimeClose = TimeCloseG
       }
     }
+
     const newListChoose = [];
     let ListDisable = [];
     if (ListLock && ListLock.length > 0) {
@@ -249,7 +453,17 @@ const BookingTime = ({ invisible }) => {
         }
         newListTime.push({
           Time: datetime,
-          Disable: moment().add(ScheduledMinutes, 'minutes').diff(datetime, "minutes") > 0 || isDayOff,
+          Disable: moment().add(ScheduledMinutes, 'minutes').diff(datetime, "minutes") > 0 || isDayOff || checkScheduled({
+            ...dataCheck,
+            DateBook: DateTimeBook,
+            Date: moment(day)
+              .set({
+                hour: moment(datetime).get("hour"),
+                minute: moment(datetime).get("minute"),
+                second: moment(datetime).get("second"),
+              })
+              .toDate(),
+          }).isOver,
         });
       }
 
@@ -310,9 +524,9 @@ const BookingTime = ({ invisible }) => {
   };
 
   return (
-    <div className="overflow-auto h-full no-scrollbar">
+    <div className="h-full overflow-auto no-scrollbar">
       <div className="bg-white p-3 mt-1.5">
-        <div className="mb-3 uppercase font-semibold text-sm">
+        <div className="mb-3 text-sm font-semibold uppercase">
           1. Chọn cơ sở gần bạn
         </div>
         <div
@@ -380,13 +594,13 @@ const BookingTime = ({ invisible }) => {
           />
         </div>
       </div>
-      <div className="bg-white p-3 border-t">
-        <div className="mb-3 uppercase font-semibold text-sm">
+      <div className="p-3 bg-white border-t">
+        <div className="mb-3 text-sm font-semibold uppercase">
           2. Chọn thời gian
         </div>
         <div className="hidden">
           <DatePicker
-            value={DateChoose || new Date()}
+            value={DateChoose || null}
             mask
             maskClosable
             dateFormat="dd/mm/yyyy"
@@ -460,8 +674,34 @@ const BookingTime = ({ invisible }) => {
                                           "bg-app text-white !border-app",
                                         )}
                                         onClick={() =>
-                                          !time.Disable &&
-                                          field.onChange(time.Time)
+                                          {
+                                            if(!time.Disable) {
+                                              field.onChange(time.Time)
+
+                                              let crDate = moment().toDate();
+                                              if(key === "1") {
+                                                crDate = moment().add(1, "days").toDate();
+                                              }
+                                              if(key === "2") {
+                                                crDate = DateChoose
+                                              }
+
+                                              let maxPeople = checkScheduled({
+                                                ...DataCheckBand,
+                                                DateBook: crDate,
+                                                Date: moment(crDate, "DD/MM/YYYY")
+                                                  .set({
+                                                    hour: moment(moment(time).format("HH:mm"), "HH:mm").get("hour"),
+                                                    minute: moment(moment(time).format("HH:mm"), "HH:mm").get("minute"),
+                                                    second: moment(moment(time).format("HH:mm"), "HH:mm").get("second"),
+                                                  })
+                                                  .toDate(),
+                                              });
+
+                                              setValue("maxPeople", maxPeople)
+                                            }
+                                          
+                                          }
                                         }
                                       >
                                         {moment(time.Time).format("HH:mm A")}
@@ -479,17 +719,17 @@ const BookingTime = ({ invisible }) => {
           )}
         />
       </div>
-      <div className="bg-white text-danger p-3 text-sm border-t mb-2">
+      <div className="p-3 mb-2 text-sm bg-white border-t text-danger">
         (*) Nếu khung giờ bạn chọn đã kín lịch, chúng tôi sẽ liên hệ trực tiếp
         để thông báo.
       </div>
       {
-        !invisible && createPortal(<div className="fixed z-50 bottom-0 left-0 w-full pb-safe-bottom bg-white">
+        !invisible && createPortal(<div className="fixed bottom-0 left-0 z-50 w-full bg-white pb-safe-bottom">
           <div className="h-12">
             <button
               onClick={onNext}
               type="button"
-              className="w-full h-full text-white uppercase font-semibold text-sm bg-app disabled:opacity-60"
+              className="w-full h-full text-sm font-semibold text-white uppercase bg-app disabled:opacity-60"
             >
               Chọn dịch vụ
             </button>

@@ -82,12 +82,12 @@ const News = () => {
                 <NavLink
                   to={"/news/" + item.id}
                   state={{ dataProps: item }}
-                  className="bg-white block aspect-[9/4]"
+                  className="bg-white block"
                 >
                   <div>
                     <ImageLazy
-                      wrapperClassName="aspect-[9/4] !block"
-                      className="aspect-[9/4] object-cover h-full"
+                      wrapperClassName="!block"
+                      className="object-cover w-full"
                       effect="blur"
                       src={toAbsolutePath(item.source.Thumbnail)}
                     />

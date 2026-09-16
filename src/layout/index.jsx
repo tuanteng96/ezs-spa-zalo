@@ -21,7 +21,6 @@ const UserPage = lazy(() => import("../pages/user"));
 const CustomerDiary = lazy(() => import("../pages/user/CustomerDiary"));
 const CustomerOrders = lazy(() => import("../pages/user/CustomerOrders"));
 const CustomerVoucher = lazy(() => import("../pages/user/CustomerVoucher"));
-const CustomerVoucherChange = lazy(() => import("../pages/user/CustomerVoucherChange"));
 const CustomerWalletCard = lazy(
   () => import("../pages/user/CustomerWalletCard"),
 );
@@ -49,8 +48,18 @@ const SearchPage = lazy(() => import("../pages/search"));
 const ContactPage = lazy(() => import("../pages/contact"));
 
 import HomePage from "../pages/home";
+import HomeGoBeautyPage from "../pages/home/indexGoBeauty.jsx";
+
 import { SheetRating } from "../components/SheetRating";
 import { useLayout } from "./LayoutProvider";
+
+const WheelPage = lazy(() => import("../pages/games/Wheel"));
+
+const GiftPage = lazy(() => import("../pages/games/Gift"));
+
+const CustomerMemberChangeCode = lazy(() => import("../pages/user/CustomerMemberChangeCode"));
+
+const CustomerMemberAff = lazy(() => import("../pages/user/CustomerMemberAff"));
 
 const CustomerMemberGroup = lazy(() => import("../pages/user/CustomerMemberGroup"));
 
@@ -81,10 +90,11 @@ const SuspensedView = ({ children }) => {
 
 const Layout = () => {
   const { Ratings, GlobalConfig } = useLayout()
+
   return (
     <MasterLayout>
       <AnimationRoutes forceRefresh>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={GlobalConfig?.DOMAIN_GOBEAUTY ? <HomeGoBeautyPage /> : <HomePage />} />
         <Route
           path="/catalogue"
           element={
@@ -200,6 +210,26 @@ const Layout = () => {
           }
         />
         <Route
+          path="/user/member-affiliate"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerMemberAff />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/user/customer-voucher-change"
+          element={
+            <ProtectedRoute>
+              <SuspensedView>
+                <CustomerMemberChangeCode />
+              </SuspensedView>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/user/customer-service"
           element={
             <ProtectedRoute>
@@ -225,16 +255,6 @@ const Layout = () => {
             <ProtectedRoute>
               <SuspensedView>
                 <CustomerVoucher />
-              </SuspensedView>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user/customer-voucher-change"
-          element={
-            <ProtectedRoute>
-              <SuspensedView>
-                <CustomerVoucherChange />
               </SuspensedView>
             </ProtectedRoute>
           }
@@ -350,6 +370,22 @@ const Layout = () => {
           element={
             <SuspensedView>
               <ContactPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/minigame/wheel"
+          element={
+            <SuspensedView>
+              <WheelPage />
+            </SuspensedView>
+          }
+        />
+        <Route
+          path="/minigame/gift"
+          element={
+            <SuspensedView>
+              <GiftPage />
             </SuspensedView>
           }
         />

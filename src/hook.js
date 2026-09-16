@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
 
 const originalScreenHeight = window.innerHeight;
 
@@ -84,4 +84,15 @@ export function useDrag() {
     position,
     setDragging,
   };
+}
+
+export function usePreviousLocation() {
+  const location = useLocation();
+  const previousLocation = useRef(null);
+  
+  useEffect(() => {
+    previousLocation.current = location;
+  }, [location]);
+
+  return previousLocation.current;
 }

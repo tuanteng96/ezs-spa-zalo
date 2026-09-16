@@ -277,3 +277,369 @@ p:not(:last-child) {
     transform: translateY(0);
   }
 }
+
+/* =========================
+   PRESENT / GIFT BOX
+========================= */
+
+.present {
+  height: 150px;
+  perspective: 600px;
+  position: relative;
+  width: 150px;
+}
+
+.present .instruction {
+  bottom: -100px;
+  left: 0;
+  opacity: 1;
+  position: absolute;
+  text-align: center;
+  transition: opacity 0.5s;
+  width: 100%;
+}
+
+/* =========================
+   ROTATE CONTAINER
+========================= */
+
+.present .rotate-container {
+  animation: present-rotate 30s infinite linear;
+  height: 100%;
+  transform: rotateY(170deg);
+  transform-style: preserve-3d;
+}
+
+@keyframes present-rotate {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* =========================
+   BOX SIDES
+========================= */
+
+.present .bottom,
+.present .front,
+.present .left,
+.present .back,
+.present .right {
+  background-color: #d3d3d3;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.present .bottom {
+  transform: translateY(50%) rotateX(90deg);
+}
+
+.present .front,
+.present .left,
+.present .back,
+.present .right {
+  transition: transform 0.5s;
+  transform-origin: bottom;
+  transform-style: preserve-3d;
+}
+
+/* =========================
+   RIBBON VERTICAL
+========================= */
+
+.present .front::after,
+.present .left::after,
+.present .back::after,
+.present .right::after,
+.present .lid-top::after,
+.present .lid-front::after,
+.present .lid-left::after,
+.present .lid-back::after,
+.present .lid-right::after {
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  content: "";
+  height: 100%;
+  left: calc(50% - 10px);
+  position: absolute;
+  transform: translateZ(0.1px);
+  width: 20px;
+}
+
+/* =========================
+   RIBBON HORIZONTAL TOP
+========================= */
+
+.present .lid-top::before {
+  background-color: #f2e6c0;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  content: "";
+  height: 20px;
+  left: 0;
+  position: absolute;
+  top: calc(50% - 10px);
+  transform: translateZ(0.1px);
+  width: 100%;
+}
+
+/* =========================
+   BOX 3D POSITION
+========================= */
+
+.present .left {
+  transform: translateX(-50%) rotateY(-90deg);
+}
+
+.present .back {
+  transform: translateZ(-75px) rotateY(180deg) rotateX(0deg);
+}
+
+.present .right {
+  transform: translateX(50%) rotateY(90deg);
+}
+
+.present .front {
+  transform: translateZ(75px);
+}
+
+/* =========================
+   LID
+========================= */
+
+.present .lid {
+  animation: lid-animation 3.5s 1s infinite;
+  transform: translate3d(0, 0, 0);
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+@keyframes lid-animation {
+  0% {
+    transform: translate3d(0, 0, 0) rotateX(0deg);
+  }
+
+  5% {
+    transform: translate3d(0, -10px, -5px) rotateX(5deg);
+  }
+
+  10% {
+    transform: translate3d(0, -10px, 5px) rotateX(-5deg);
+  }
+
+  15% {
+    transform: translate3d(0, -10px, -5px) rotateX(5deg);
+  }
+
+  20% {
+    transform: translate3d(0, -10px, 5px) rotateX(-5deg);
+  }
+
+  25% {
+    transform: translate3d(0, -10px, -5px) rotateX(5deg);
+  }
+
+  30%,
+  100% {
+    transform: translate3d(0, 0, 0) rotateX(0deg);
+  }
+}
+
+/* =========================
+   LID SIDES
+========================= */
+
+.present .lid-top,
+.present .lid-left,
+.present .lid-back,
+.present .lid-right,
+.present .lid-front {
+  background-color: #ab035a;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  left: -5px;
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  width: 160px;
+}
+
+.present .lid-top {
+  height: 160px;
+  top: -5px;
+  transform: translateY(-50%) rotateX(90deg);
+  transform-style: preserve-3d;
+}
+
+.present .lid-left,
+.present .lid-back,
+.present .lid-right,
+.present .lid-front {
+  height: 40px;
+  top: -5px;
+  transform-style: preserve-3d;
+}
+
+.present .lid-left {
+  transform: translateX(-50%) rotateY(-90deg);
+}
+
+.present .lid-back {
+  transform: translateZ(-80px) rotateY(180deg);
+}
+
+.present .lid-right {
+  transform: translateX(50%) rotateY(90deg);
+}
+
+.present .lid-front {
+  transform: translateZ(80px);
+}
+
+/* =========================
+   HOVER
+========================= */
+
+.present:hover .lid {
+  animation: none;
+  transform: translate3d(0, -40px, -10px) rotateX(10deg);
+}
+
+/* =========================
+   OPEN STATE
+========================= */
+
+.present.open .name {
+  transform:
+    translate3d(0, -50%, 10px)
+    rotateY(1080deg)
+    rotateX(10deg);
+}
+
+.present.open .instruction {
+  opacity: 0;
+}
+
+.present.open .left {
+  transform:
+    translateX(-50%)
+    rotateY(-90deg)
+    rotateX(-90deg);
+}
+
+.present.open .back {
+  transform:
+    translateZ(-75px)
+    rotateY(180deg)
+    rotateX(-90deg);
+}
+
+.present.open .right {
+  transform:
+    translateX(50%)
+    rotateY(90deg)
+    rotateX(-90deg);
+}
+
+.present.open .front {
+  transform:
+    translateZ(75px)
+    rotateX(-90deg);
+}
+
+.present.open .lid {
+  animation: none;
+  transform:
+    translate3d(0, -120px, -120px)
+    rotateX(50deg);
+}
+
+/* =========================
+   BUTTON GIFT TEXT
+========================= */
+
+.btn-gift span {
+  display: inline-block;
+  transform: scale(0.8);
+}
+
+.btn-gift span:first-child {
+  animation:
+    bop
+    1s
+    cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards
+    infinite
+    alternate;
+}
+
+.btn-gift span:nth-child(2) {
+  animation:
+    bopB
+    1s
+    0.2s
+    cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards
+    infinite
+    alternate;
+}
+
+.btn-gift span:last-child {
+  animation:
+    bopB
+    1s
+    0.4s
+    cubic-bezier(0.175, 0.885, 0.32, 1.275)
+    forwards
+    infinite
+    alternate;
+}
+
+@keyframes bop {
+  0% {
+    transform: scale(0.8);
+  }
+
+  50%,
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bopB {
+  0% {
+    transform: scale(0.8);
+  }
+
+  80%,
+  100% {
+    transform: scale(1) rotateZ(-3deg);
+  }
+}
+
+/* =========================
+   BOUNCE
+========================= */
+
+.animate-bounce2 {
+  animation: bounce2 1.5s infinite;
+}
+
+@keyframes bounce2 {
+  0%,
+  100% {
+    transform: translateY(10px);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}

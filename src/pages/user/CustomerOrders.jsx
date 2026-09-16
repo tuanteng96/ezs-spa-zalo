@@ -59,12 +59,12 @@ const CustomerDiary = () => {
       </div>
       <div className="h-full">
         {
-          TotalNo && (
+          TotalNo ? (
             <div className="h-[48px] bg-white px-4 flex items-center justify-between border-t">
               <div className="font-medium">Tổng Nợ</div>
               <div className="font-semibold text-danger">{formatString.formatVND(TotalNo, '')}</div>
             </div>
-          )
+          ) : <></>
         }
 
         <div className={clsx(TotalNo ? "h-[calc(100%-48px)]" : "h-full")}>

@@ -17,7 +17,7 @@ import { NavLink } from "react-router-dom";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 
 const CatalogueDetailPage = () => {
-  const { Auth, CurrentStocks } = useLayout();
+  const { Auth, CurrentStocks, GlobalConfig } = useLayout();
   const navigate = useNavigate();
   let { id } = useParams();
   let { pathname, search, state } = useLocation();

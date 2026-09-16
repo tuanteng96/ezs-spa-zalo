@@ -8,7 +8,7 @@ export const BtnAffiliate = ({ code }) => {
     <CopyToClipboard
       text={code}
       onCopy={() => {
-        console.log("1");
+
         openSnackbar({
           text: "Đang Copy ...",
           type: "countdown",

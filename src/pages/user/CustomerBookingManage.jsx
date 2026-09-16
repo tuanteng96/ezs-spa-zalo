@@ -41,6 +41,7 @@ const BookingItem = ({ sub, hidden }) => {
         },
       },
       onClose: () => {
+        if (!del) return
         const dataSubmit = {
           deletes: [
             {
@@ -150,8 +151,8 @@ const BookingItem = ({ sub, hidden }) => {
                       </div>
                     </div>
                     {
-                      (subitem?.Status === "XAC_NHAN" ||
-                        subitem?.Status === "CHUA_XAC_NHAN") && (
+                      (item?.Status === "XAC_NHAN" ||
+                        item?.Status === "CHUA_XAC_NHAN") && (
                         <div className="flex">
                           <NavLink
                             to="/booking"
@@ -191,7 +192,8 @@ const CustomerBookingManage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { Auth } = useLayout();
-  const [TabActive, setTabActive] = useState(0);
+  const { state } = useLocation();
+
   const [isPullRefresh, setIsPullRefresh] = useState(false);
 
   const { data, isLoading, isFetching } = useQuery({
@@ -220,17 +222,7 @@ const CustomerBookingManage = () => {
     },
     enabled: Number(Auth?.ID) > -1,
     onSuccess: (data) => {
-      // if (!data || data.length === 0) return;
-      // const index = data.findIndex(
-      //   (x) =>
-      //     moment().format("DD-MM-YYYY") ===
-      //     moment(x.dayFull).format("DD-MM-YYYY"),
-      // );
-      // if (index > -1) {
-      //   setTabActive(data[index].day);
-      // } else {
-      //   setTabActive(data[0].day);
-      // }
+
     },
   });
 
@@ -240,14 +232,13 @@ const CustomerBookingManage = () => {
       queryClient.invalidateQueries({ queryKey: ["BookingList"] }),
     ]).then(() => setIsPullRefresh(false));
   };
-
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white">
         <div className="w-2/3 relative flex items-center h-full pl-10">
           <div
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
-            onClick={() => navigate("/user")}
+            onClick={() => navigate(state?.returnTo === "/" ? "/" : "/user")}
           >
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>

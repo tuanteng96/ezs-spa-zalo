@@ -15,8 +15,9 @@ const AuthAPI = {
   moneyCardHistory: (ID) =>
     http.get(`/api/v3/moneycard?cmd=detail&id_the_tien=${ID}`),
   diary: (token) => http.post(`/app/index.aspx?cmd=noti&token=${token}`),
-  vouchers: (MemberID) =>
-    http.post(`/app/index.aspx?cmd=voucherandaff&mid=${MemberID}`),
+  vouchers: (MemberID) => {
+    return http.post(`/app/index.aspx?cmd=voucherandaff&mid=${MemberID}`)
+  },
   orders: (token = "") =>
     http.get(`/app/index.aspx?cmd=orders&token=${token}&IsUser=0`),
   serviceCard: ({ Token = "", MemberID = "" }) =>
@@ -54,6 +55,62 @@ const AuthAPI = {
     getMemberGroups(body) {
       return http.get(
         `api/v3/membergroup?${new URLSearchParams(body).toString()}`
+      );
+    },
+    getVoucher({AccessToken, MemberID}) {
+      return http.post(`/app/index.aspx?cmd=voucherandaff&mid=${MemberID}`, null, {
+        Authorization: `Bearer ${AccessToken}`,
+      });
+    },
+    getVoucherAff ({AccessToken, ...body}) {
+      return http.post(`/api/v3/voucherApp@GetList`, JSON.stringify(body),  {
+        headers: {
+          Authorization: `Bearer ${AccessToken}`,
+        },
+      });
+    },
+    addDupVoucher({AccessToken, ...data}) {
+      return http.post(`/api/v3/voucherApp@dup`, JSON.stringify(data), {
+        headers: {
+          Authorization: `Bearer ${AccessToken}`,
+        },
+      });
+    },
+    recheckVoucher({code, AccessToken}) {
+      return http.get(`/api/v3/voucherApp@GetVoucher?vcode=${code}`, {
+        headers: {
+          Authorization: `Bearer ${AccessToken}`,
+        },
+      });
+    },
+    getVoucherReCheck({ Code, MemberID, CrMemberID, AccessToken }) {
+      return http.get(
+        `/api/v3/voucherApp@vencode?vcode=${Code}&id1=${MemberID}&id2=${CrMemberID}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        },
+      );
+    },
+    getTopMemberBook({ data, AccessToken }) {
+      return http.post(
+        `/api/v5/Auth@TopMemberBook`, data,
+        {
+          headers: {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        },
+      );
+    },
+    getTopOrderService({ data, AccessToken }) {
+      return http.post(
+        `/api/v5/Auth@TopOrderService`, data,
+        {
+          headers: {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        },
       );
     }
 };

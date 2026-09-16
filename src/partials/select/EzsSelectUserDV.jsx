@@ -38,7 +38,7 @@ const UserItem = ({ user, onChange, checked }) => {
   return (
     <div
       className="py-4 pl-4 pr-8 border-b cursor-pointer relative"
-      onClick={() => onChange(checked ? "" : user.id)}
+      onClick={() => onChange(checked ? "" : user)}
     >
       <div
         className={clsx(
@@ -84,7 +84,7 @@ const EzsSelectUserDV = ({ label, StockID, onChange, value, ...props }) => {
   });
 
   const getValue = () => {
-    let index = data && data.findIndex((x) => x.id === value);
+    let index = data && data.findIndex((x) => x.id === value?.id);
     if (index > -1) {
       return data[index].text;
     }
@@ -96,8 +96,22 @@ const EzsSelectUserDV = ({ label, StockID, onChange, value, ...props }) => {
       {label && <div className="text-[14px] leading-6">{label}</div>}
       <div className="relative" onClick={() => setVisible(true)}>
         <Input {...props} value={getValue(value)} readOnly />
-        <div className="absolute top-2/4 -translate-y-2/4 right-2.5">
-          <Icon icon="zi-chevron-down" />
+        <div className="absolute top-2/4 -translate-y-2/4 h-full flex right-0">
+          {
+            value && (
+              <div onClick={e => {
+                e.stopPropagation();
+                onChange(null);
+              }} className="w-11 flex items-center justify-center relative after:content-[''] after:absolute after:text-[26px] after:bg-[#ccc] after:w-[1px] after:h-[26px] after:right-0 after:top-2/4 after:-translate-y-2/4">
+                <Icon className="!text-[20px]" icon="zi-close" />
+              </div>
+            )
+          }
+
+          <div className="w-11 flex items-center justify-center">
+            <Icon icon="zi-chevron-down" />
+          </div>
+
         </div>
       </div>
       {createPortal(
@@ -121,7 +135,7 @@ const EzsSelectUserDV = ({ label, StockID, onChange, value, ...props }) => {
                   user={user}
                   key={idx}
                   onChange={onChange}
-                  checked={user.id === value}
+                  checked={user.id === value?.id}
                 />
               ))}
           </div>

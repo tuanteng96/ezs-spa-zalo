@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { createSearchParams } from "react-router-dom";
+import { createSearchParams, useLocation } from "react-router-dom";
 import { Icon, Page, Tabs, Text, useNavigate } from "zmp-ui";
 import AuthAPI from "../../api/auth.api";
 import { useQueryParams } from "../../hook";
@@ -25,6 +25,7 @@ const CustomerWalletCard = () => {
   });
 
   const navigate = useNavigate();
+  const { state } = useLocation();
   const { Auth } = useLayout();
 
   const { isLoading: isLoadingWallet, refetch: refetchWallet } = useQuery({
@@ -69,7 +70,7 @@ const CustomerWalletCard = () => {
       search: createSearchParams({
         Type: evt,
       }).toString(),
-    });
+    }, { state });
   };
 
   const VietnamesType = (item) => {
@@ -125,7 +126,7 @@ const CustomerWalletCard = () => {
         <div className="w-2/3 relative flex items-center h-full pl-10">
           <div
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
-            onClick={() => navigate("/user")}
+            onClick={() => navigate(state?.returnTo === "/" ? "/" : "/user")}
           >
             <Icon icon="zi-chevron-left-header" className="text-app" />
           </div>

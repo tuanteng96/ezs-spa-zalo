@@ -1,6 +1,46 @@
 import axios from "axios";
 import { ProcessENV } from "./process";
 
+// class Http {
+//   constructor() {
+//     this.accessToken = "";
+//     this.accessStock = "";
+
+//     this.instance = axios.create({
+//       baseURL: ProcessENV.URL,
+//       timeout: 50000,
+//       headers: {
+//         "content-type": "text/plain",
+//       },
+//     });
+//     this.instance.interceptors.request.use(
+//       (config) => {
+//         if (this.accessToken) {
+//           config.headers.Authorization = "Bearer " + this.accessToken;
+//         }
+//         return config;
+//       },
+//       (error) => {
+//         return Promise.reject(error);
+//       },
+//     );
+//     // Add response interceptor
+//     this.instance.interceptors.response.use(
+//       ({ data, ...response }) => {
+//         return {
+//           data,
+//         };
+//       },
+//       (error) => {
+//         return Promise.reject(error);
+//       },
+//     );
+//   }
+// }
+
+// const http = new Http().instance;
+// export default http;
+
 /*
  *  axios Global
     window.SERVER = Domain
@@ -8,10 +48,18 @@ import { ProcessENV } from "./process";
 
 window.SERVER = ProcessENV.URL
 
-var clientMODE = true;
+const clientMODE = true;
 var clientPROD = false;
 
-var log = true;
+var log = localStorage.getItem('log') == '1' || localStorage.getItem('log') == 'http-common';
+
+// true: hiển thị giá chưa VAT | false: hiển thị giá đã bao gồm VAT
+
+var hasPriceExclVAT = function (VAT) {
+  let isPriceExclVAT = window.GlobalConfig && window.GlobalConfig.Admin.isPriceExclVAT || false;
+
+  return (isPriceExclVAT && VAT !== "" && VAT !== -1 && VAT !== -2 && VAT !== -3)
+}
 
 function GlobalConfigPath(path, fn) {
 
@@ -36,7 +84,7 @@ function GlobalConfigPath(path, fn) {
     }
 
     return GlobalConfig.getPath(path, fn);
-
+   
 }
 function safeBox(fn) {
     try {
@@ -50,57 +98,6 @@ var console2 = {
     log() { }
 };
 
-//console mod
-; (function () {
-    /*
-    var $console = document.createElement('div');
-    document.body.appendChild($console);
-    $console.style.position = 'fixed';
-    $console.style.zIndex = 999999;
-    $console.style.top = '50%';
-    $console.style.background = '#000';
-    $console.style.color = '#fff';
-    $console.style.fontSize = '9px';
-    $console.style.padding = '5px';
-    
-
-    window.console2 = {
-        log() {
-            var arr = [];
-            for (var i = 0; i < arguments.length; i++) {
-                var x = JSON.stringify( arguments[i]);
-                x = x ? x.toString() : '';
-                x = x.substring(x, 200);
-                arr.push(x);
-            }
-            $console.innerHTML =(arr.join('&nbsp;'));
-        },
-        error() {
-            var arr = [];
-            for (var i = 0; i < arguments.length; i++) {
-                var x = JSON.stringify(arguments[i]);
-                x = x ? x.toString() : '';
-                x = x.substring(x, 300);
-                arr.push(x);
-            }
-            $console.innerHTML =(arr.join('&nbsp;'));
-        },
-        clear() {
-            $console.innerHTML = '';
-        }
-    }
-    //*/
-})();
-//
-
-// true: hiển thị giá chưa VAT | false: hiển thị giá đã bao gồm VAT
-
-var hasPriceExclVAT = function (VAT) {
-    let isPriceExclVAT = window.GlobalConfig && window.GlobalConfig.Admin.isPriceExclVAT || false;
-
-    return (isPriceExclVAT && VAT !== "" && VAT !== -1 && VAT !== -2 && VAT !== -3)
-}
-
 function urlParams(url) {
     var search = url.split('?')[1] || '';
     try {
@@ -110,7 +107,7 @@ function urlParams(url) {
     }
 }
 //url handling
-var handlers = [
+const handlers = [
     {
         urls: [
             '/app/index.aspx?cmd=adv&pos=APP.MAIN',
@@ -184,7 +181,7 @@ var handlers = [
             //log && console.log('get', url, t.onCase(url, p));
 
 
-
+           
             return new Promise((resolve, reject) => {
                 ClientZData().then(x => {
                     var caseValue = t.onCase(url, p);
@@ -217,19 +214,18 @@ var handlers = [
 
                             resolve({
                                 data: {
-                                    data: artList.map(a => {
+                                    data: artList.filter(x => x.IsPublic == 1).map(a => {
 
-
+                                      
 
                                         return {
                                             desc: null,
                                             id: a.ID,
                                             photo: a.Thumbnail,
                                             text: a.Title,
-                                            source: a,
-                                            IsPublic: a.IsPublic
+                                            source: a
                                         }
-                                    }).filter(x => x.IsPublic)
+                                    })
                                 }
                             })
                             break;
@@ -239,7 +235,7 @@ var handlers = [
                                 all: x.getType('CategoryEnt').filter(c => c.ApplicationKey == 'kho' && c.IsPublic == 1)
                             }
 
-
+                           
                             resolve({
                                 data: {
                                     data: data
@@ -255,7 +251,7 @@ var handlers = [
                             break;
                         case 6:
 
-
+                             
 
                             fetch(`${SERVER}/api/v3/JsonCache@get?type=ArticleEnt&ids=${p.ids}`, {
                                 credentials: 'same-origin',
@@ -300,9 +296,9 @@ var handlers = [
             //     }
             // }
 
-            // if (url.indexOf('/api/v3/VoucherClient?cmd=precheck&') > -1) {
-            //     return true;
-            // }
+            if (url.indexOf('/api/v3/VoucherClient?cmd=precheck&') > -1) {
+                return true;
+            }
 
 
             if (url.indexOf('/api/v3/app2?get=sv') > -1) {
@@ -323,9 +319,7 @@ var handlers = [
                 }
 
             }
-
-
-            if (url.indexOf('/app/index.aspx?cmd=voucherandaff&') > -1) return true;
+            if (url.indexOf('/app/index.aspx?cmd=voucherandaff&') > -1) return false;
             return false;
         },
         promise(args) {
@@ -334,23 +328,10 @@ var handlers = [
     },
     {
         onUrl(url, p) {
-
-            //var reload = url.indexOf('reload=1') > -1;
-            //if (reload) {
-            //    console.log('noti2 reload');
-            //    return false;
-            //}
-            //var condt = url.indexOf('/api/v3/noti2?cmd=nextoffset') > -1;
-
-            //if (condt) {
-            //    console.log('noti2', url);
-            //    return true;
-            //}
-
-            //if (condt && window.NotiResponseData && p.refresh != '1') {
-            //    console2.log('nextoffset');
-            //    return true;
-            //}
+            if (url.indexOf('/api/v3/noti2?cmd=nextoffset') > -1 && window.NotiResponseData && p.refresh != '1') {
+                console2.log('nextoffset');
+                return true;
+            }
             return false;
         },
         promise(args) {
@@ -367,7 +348,6 @@ var handlers = [
         }
     },
     {
-
         onUrl(url, p) {
             //console.log(url);
             if (url.indexOf('/api/v3/noti2/?cmd=clear2') > -1
@@ -378,82 +358,7 @@ var handlers = [
             return false;
         },
         promise() {
-
             return null;
-        }
-    },
-    {
-
-        onUrl(url, p) {
-            var t = this;
-            //console.log(url);
-            if (
-                url.indexOf('/api/v3/noticlient?cmd=detail&') > -1
-
-            ) {
-                //console.log('noti detail0');
-                if (window.NotiResponseData) {
-                    var arr = window.NotiResponseData.data.data;
-                    if (Array.isArray(arr)) {
-
-                        return true;
-                    }
-                }
-            }
-            return false;
-        },
-        get(url, p) {
-            //var p = urlParams(url);
-            //log && console.log('adv', p.pos);
-            var id = p.ids;
-            return new Promise((resolve, reject) => {
-                var arr = window.NotiResponseData.data.data;
-                if (Array.isArray(arr)) {
-                    var x = arr.filter(z => z.ID == id)[0];
-
-                    console.log('noti detail', x);
-                    function rp() {
-                        resolve({
-                            data: {
-                                data: [
-                                    x
-                                ],
-                                cached: true
-                            }
-                        })
-                    }
-
-
-
-
-                    if (x.NotiCalendarItemID > 0) {
-                        fetch(`${SERVER}/api/v3/NotiClient@NotiCalendarItem?id=${x.NotiCalendarItemID}`)
-                            .then(x => x.json())
-                            .then(rt => {
-                                if (rt) {
-                                    x.Content = rt.Html || '';
-
-                                    function GetThumbnail(Thumbnail) {
-                                        if (!Thumbnail || Thumbnail == "null.gif") return "";
-                                        if (Thumbnail.startsWith("http://")
-                                            || Thumbnail.startsWith("https://")
-                                            || Thumbnail.startsWith("/")
-                                        ) return Thumbnail;
-                                        return SERVER + "/Upload/image/" + Thumbnail;
-                                    }
-
-                                    x.Thumbnail = GetThumbnail(rt.Thumbnail);
-                                    console.log('notii', rt);
-                                    rp();
-                                }
-                            })
-                            .catch(reject);
-                    } else {
-                        rp();
-                    }
-
-                } else reject('not array');
-            })
         }
     },
     {
@@ -469,297 +374,6 @@ var handlers = [
             //    console.log(d);
             //}
         }
-    },
-    {
-        onCase(url) {
-            if (url.indexOf('/api/v3/prod?cmd=roots') > -1) {
-                return 1;
-            }
-            if (url.indexOf('/app/index.aspx?cmd=search_prods') > -1) {
-                return 2;
-            }
-
-            if (url.indexOf('/api/v3/MBookApp?cmd=getbook') > -1) {
-                return 3;
-            }
-
-            //if (url.indexOf('/app/index.aspx?cmd=voucherandaff&') > -1) {
-            //    return 4;
-            //}
-
-            return 0;
-        },
-        onUrl(url, p) {
-            //console.log(url);
-            if (window.old) return false;
-            return this.onCase(url) > 0;
-        },
-        getRoot(url, p) {
-            return new Promise((resolve, reject) => {
-                ClientZData().then(x => {
-                    var prods = x.getType('ProductEnt');
-                    var cates = x.getType('CategoryEnt');
-
-                    var StockID = 0;
-
-
-                    var param = urlParams(url) || {};
-                    StockID = parseInt(param.stockid) || 0;
-                    var lst = [];
-
-                    prods.forEach(p => {
-
-                        if (p.IsService
-                            && p.IsRootPublic
-                            && p.OnStocks
-                            && (!p.Combo || p.Combo == '[]')
-                        ) {
-                            lst.push(p);
-                        }
-                    });
-
-
-
-                    lst = lst.sort((a, b) => {
-                        if (a.RenewDate < b.RenewDate) return 1;
-                        if (a.RenewDate > b.RenewDate) return -1;
-                        if (a.RenewDate == b.RenewDate) {
-                            return b.ID - a.ID;
-                        }
-                    })
-
-                    //fake cau truc cua axios
-                    var response = {
-                        data: {
-                            data: lst.map(p => {
-                                return {
-                                    root: {
-                                        ...p,
-                                        Thumbnail_web: '/upload/image/' + p.Thumbnail,
-                                    },
-                                    cate: cates.filter(c => c.ID == p.Type)[0] || {},
-                                    catePublic: true,
-                                    CurrentStockID: StockID
-                                }
-                            }),
-                            success: true
-                        }
-                    };
-
-                    resolve(response);
-                }).catch(reject);
-            })
-        },
-        searchProds(url, p) {
-
-            //console.log('searchProds', url, p);
-
-            return new Promise((resolve, reject) => {
-                ClientZData().then(x => {
-                    var _data = x;
-                    var prods = x.getType('ProductEnt');
-                    var allCates = x.getType('CategoryEnt');
-
-                    var param = urlParams(url) || {};
-                    var stockid = parseInt(param.stockid) || 0;
-                    var key = param.key || '';
-                    var cates = param.cates || '';
-                    var pi = parseInt(param.pi) || 1;
-                    var ps = parseInt(param.ps) || 10;
-                    var rel = parseInt(param.rel) || 0;
-                    var status = param.status || '';
-
-                    var lst = [];
-
-                    key = friend(key);
-                    var cateList = [];
-
-                    if (cates) {
-                        cateList = new CategoryBLL(allCates).GetTreeChannels(cates);
-
-                    }
-
-                    prods.forEach(p => {
-                        //console.log('p', p.ID);
-
-                        if (p.IsService && !p.Combo) return false;
-
-                        if (key) {
-                            if (p.FriendStr.indexOf(key) == -1) return;
-                        }
-                        if (cateList.length > 0) {
-                            if (cateList.filter(c => c.ID == p.Type).length == 0) return;
-                        }
-
-                        if (stockid) {
-                            if (`${p.OnStocks}`.split(',').filter(s => s == '*' || parseInt(s) == stockid).length == 0) return;
-                        }
-
-                        if (status) {
-                            if (`${p.Status}`.split(',').filter(x => x == status).length == 0) return;
-                        }
-                        //console.log('p add', p.ID);
-                        lst.push(p);
-                    });
-
-
-
-                    lst = lst.sort((a, b) => {
-                        if (a.RenewDate < b.RenewDate) return 1;
-                        if (a.RenewDate > b.RenewDate) return -1;
-                        if (a.RenewDate == b.RenewDate) {
-                            return b.ID - a.ID;
-                        }
-                    })
-
-                    var relList = [];
-
-                    var now = DateTime.Now;
-
-                    function insale(product) {
-
-                        var v =
-                            (product.SaleBegin == null || DateTime.Compare(product.SaleBegin, now) <= 0)
-                            &&
-                            (product.SaleEnd == null || DateTime.Compare(product.SaleEnd, now) >= 0);
-                        return v;
-                    }
-                    
-                    var pgs = paging(lst, pi, ps);
-
-                    var lst2 = pgs.lst.map(p => {
-                        var x = clone(p);
-                        window.Promotion22 && Promotion22.FillBest(x, _data)
-
-                        let price = x.PriceProduct;
-                        let pricesale = insale(x) ? x.PriceSale : 0;
-                        let VAT = x.VAT;
-
-                        if (hasPriceExclVAT(VAT)) {
-                            price = Math.round(price / ((100 + VAT) / 100));
-                            pricesale = Math.round(pricesale / ((100 + VAT) / 100));
-                        }
-
-                        return {
-                            title: x.Title,
-                            photo: x.Thumbnail,
-                            price,
-                            pricesale,
-                            PriceProductVAT: x.PriceProduct,
-                            PriceSaleVAT: insale(x) ? x.PriceSale : 0,
-                            ready: x.IsReady,
-                            srv: x.IsService,
-                            fee: x.IsAddFee,
-                            id: x.ID,
-                            displayPrice: x.IsDisplayPrice,
-                            linktome: x.LinktoMe,
-                            source: {
-                                ...x,
-                                PriceProduct: price,
-                                PriceSale: pricesale,
-                                PriceProductVAT: x.PriceProduct,
-                                PriceSaleVAT: insale(x) ? x.PriceSale : 0,
-                            },
-                            SaleDiscountPercent: x.SaleDiscountPercent,
-                            rel: relList
-                        }
-                    });
-                    //console.log(lst2)
-                    pgs.lst = lst2;
-
-                    if (rel > 0 && pgs.lst.length) {
-
-                    }
-
-                    var response = {
-                        data: {
-                            data: pgs,
-                            success: true
-                        }
-                    };
-
-                    resolve(response);
-                }).catch(reject);
-            })
-        },
-        mbookApp(url, p) {
-            return new Promise((resolve, reject) => {
-                fetch(window.SERVER + url)
-                    .then(x => x.json())
-                    .then(rs => {
-
-                        ClientZData().then(x => {
-                            var prods = x.getType('ProductEnt');
-                            //fill
-                            if (Array.isArray(rs.books)) {
-                                rs.books.forEach(b => {
-                                    `${b.RootIds}`.split(',').map(id => parseInt(id)).filter(id => id).forEach(id => {
-                                        prods.every(p => {
-                                            if (p.ID == id) {
-                                                if (!b.RootMinutes) b.RootMinutes = 0;
-                                                b.RootMinutes += p.ServiceMinutes || 0;
-                                            }
-                                            return true;
-                                        })
-                                    })
-                                })
-                            }
-
-                            var response = {
-                                data: rs
-                            };
-                            console.log('mbookApp', response);
-                            resolve(response);
-                        })
-
-
-                    }).catch(reject)
-            })
-        },
-        //voucher(url, p)
-        //{
-        //    return new Promise((resolve, reject) => {
-        //        var param = urlParams(url) || {};
-        //        var mid = parseInt(param.mid) || 0;
-        //        getVouchers(mid).then(vsLst => {
-
-        //            var response = {
-        //                data: {
-        //                    success: true,
-        //                    data: {
-        //                        danh_sach: [],
-        //                        danh_sach_an: [],
-        //                        tot_nhat: {},
-        //                        khac: null,
-        //                        contactMiniGame: []
-        //                    }
-        //                }
-        //            }
-
-        //            resolve(response);
-
-        //        }).catch(reject);
-        //    })
-        //},
-        get(url, p) {
-            //var p = urlParams(url);
-
-            var t = this;
-
-            var type = t.onCase(url);
-
-            switch (type) {
-                case 2:
-                    return t.searchProds(url, p);
-                case 3:
-                    return t.mbookApp(url, p);
-                //case 4:
-                //    return t.voucher(url, p);
-            }
-
-            return t.getRoot(url, p);
-
-        }
     }
 
 ];
@@ -769,127 +383,46 @@ function clone(x) {
     return JSON.parse(JSON.stringify(x))
 }
 
-let ClientZ = axios.create({
-  baseURL: window.SERVER,
-  headers: {
-      "Content-type": "application/x-www-form-urlencoded",
-      "ISAPP": "1",
-      "ISZALO": "1"
-  }
+window.ClientZ = axios.create({
+    baseURL: window.SERVER,
+    headers: {
+        "Content-type": "application/x-www-form-urlencoded",
+        //"ISZALO": "1"
+    },
 });
 
-window.ClientZ = ClientZ;
 
-// *) Helpers
-function splitUrl(url = "") {
-    const [path, query = ""] = url.split("?");
-    return { path, params: new URLSearchParams(query) };
-}
-function isMatch(rule, url, response) {
-    if (typeof rule.match === "function") {
-        return rule.match(url, response);
-    }
-    if (typeof rule.match === "string") {
-        return url.includes(rule.match);
-    }
-    if (rule.match instanceof RegExp) {
-        return rule.match.test(url);
-    }
-    return false;
-}
-
-
-// *) Hàm apply mapper
-function applyMapper(response) {
-    const url = response?.config?.url || "";
-
-    const rule = responseMappers.find((r) =>
-        isMatch(r, url, response)
-    );
-
-    if (!rule) return response.data;
-
-    try {
-        return rule.map(response.data, response);
-    } catch (e) {
-        console.error("response mapper error:", e);
-        return response.data;
-    }
-}
-
-const responseMappers = [
-    {
-        match: (url) => {
-            const { path, params, id } = splitUrl(url);
-
-            return path.includes("/api/v3/prod") && params.get("cmd") === "getid" && Number(params.get('id')) > 0;
-        },
-        map: (data, response) => {
-            if (!data || typeof data !== "object") return rs;
-
-            if (!data.data || typeof data.data !== "object") return rs;
-
-            if (!data.data.product || typeof data.data.product !== "object") return rs;
-
-            let { applies } = window.Promotion22 && Promotion22.FillBest(data.data.product)
-
-            let PriceProduct = data.data.product.PriceProduct ?? 0;
-            let PriceSale = data.data.product.PriceSale ?? 0;
-            let VAT = data.data.product.VAT ?? "";
-
-            if (hasPriceExclVAT(VAT)) {
-                PriceProduct = Math.round(PriceProduct / ((100 + VAT) / 100));
-                PriceSale = Math.round(PriceSale / ((100 + VAT) / 100));
-            }
-
-            return {
-                ...data,
-                data: {
-                    ...data?.data,
-                    product: {
-                        ...data?.data?.product,
-                        PriceProduct,
-                        PriceSale,
-                        PriceProductVAT: data.data.product.PriceProduct ?? 0,
-                        PriceSaleVAT: data.data.product.PriceSale ?? 0,
-                        SaleBegin: applies[0] && applies[0].p.SaleBegin,
-                        SaleEnd: applies[0] && applies[0].p.SaleEnd
-                    }
-                }
-            };
-        },
-    },
-];
 
 // Add a request interceptor
 ClientZ.interceptors.request.use(
-  config => {
-      return config;
-  },
-  error => {
-      return Promise.reject(error);
-  }
+    config => {
+      if(config.url.indexOf("zalo.me") === -1) {
+        config.headers["ISZALO"] = "1"
+      }
+      return config
+    },
+    error => {
+        return Promise.reject(error)
+    }
 );
 
 // Add a response interceptor
 ClientZ.interceptors.response.use(
-  response => {
-      handlers.forEach(h => {
-          if (typeof h.onResponse == "function") {
-              try {
-                  h.onResponse(response);
-              } catch {
-              }
-          }
-      });
+    response => {
+        handlers.forEach(h => {
+            if (typeof h.onResponse == 'function') {
+                try {
+                    h.onResponse(response);
+                } catch {
 
-      response.data = applyMapper(response);
-
-      return response;
-  },
-  error => {
-      return Promise.reject(error);
-  }
+                }
+            }
+        })
+        return response;
+    },
+    error => {
+        return Promise.reject(error);
+    }
 );
 
 //url mapping
@@ -960,9 +493,7 @@ ClientZ.interceptors.response.use(
                 break;
         }
     })
-    ClientZ = ClientZ2;
-    window.ClientZ = ClientZ;
-
+    window.ClientZ = ClientZ2;
 })();
 //*/
 
@@ -1003,13 +534,13 @@ ClientZ.interceptors.response.use(
                     if (i > -1) {
                         var arr = data[i];
 
-
+                       
 
                         if (Array.isArray(arr)) {
 
                             var lst = [];
                             if (arr.length > 1) {
-                                var props = arr[0];
+                                var props = arr[0]; 
                                 for (var i = 1; i < arr.length; i++) {
                                     var x = {};
                                     props.forEach((p, j) => {
@@ -1021,80 +552,61 @@ ClientZ.interceptors.response.use(
                             // if (name == 'ProductEnt') console.log(name, lst);
                             return lst;
 
-
+                          
 
                         }
 
                     }
                     //loi
                     localStorage.removeItem(key);
-                    console.log(`clientz:${name} error dataText=${dataText}`);
+                    throw new Error(`clientz:${name} error`);
                 }
 
                 data.getId = function (name, id) {
                     return data.getType(name).filter(x => x.ID === id)[0];
                 }
 
-                data.getTree = function (app, rootIds, isPublic) {
-                  var cateList = this.getType('CategoryEnt');
-                  var ids = [];
-                  var filterIds = [];
-              
-                  if (typeof rootIds === 'string') {
-                      filterIds = rootIds.split(',').map(x => parseInt(x) || 0);
-                  }
-                  else if (typeof rootIds == 'number') {
-                      filterIds.push(rootIds);
-                  }
-                  else if (Array.isArray(rootIds)) {
-                      filterIds = rootIds.map(x => parseInt(x) || 0);
-                  }
-              
-                  if (isPublic) {
-                      var newIds = [];
-              
-                      cateList.forEach(c => {
-                          if (
-                              filterIds.indexOf(c.ID) > -1 &&
-                              c.IsPublic
-                          ) {
-                              newIds.push(c.ID);
-                          }
-                      });
-              
-                      filterIds = newIds;
-                  }
-              
-                  while (filterIds.length > 0) {
-                      var pid = filterIds.splice(0, 1)[0];
-              
-                      if (
-                          pid == undefined ||
-                          typeof pid != 'number'
-                      ) {
-                          break;
-                      }
-              
-                      ids.push(pid);
-              
-                      cateList.forEach(c => {
-                          if (
-                              c.ApplicationKey === app &&
-                              c.ParentID == pid
-                          ) {
-                              if (
-                                  isPublic == undefined ||
-                                  isPublic == true
-                              ) {
-                                  filterIds.push(c.ID);
-                                  ids.push(c.ID);
-                              }
-                          }
-                      });
-                  }
-              
-                  return ids;
-              };
+                data.getTree = function (app, rootIds, publicPravite) {
+                    var cateList = this.getType('CategoryEnt');
+                    var ids = [];
+                    var filterIds = [];
+                    if (typeof rootIds === 'string') {
+                        filterIds = rootIds.split(',').map(x => parseInt(x) || 0);
+                    }
+                    else if (typeof rootIds == 'number') {
+                        filterIds.push(rootIds);
+                    }
+                    else if (Array.isArray(rootIds)) {
+                        filterIds = rootIds.map(x => parseInt(x) || 0);
+                    }
+
+                    if (publicPravite) {
+                        var newIds = [];
+                        cateList.forEach(c => {
+                            if (filterIds.indexOf(c.ID) > -1 && c.IsPublic) {
+                                newIds.push(c.ID);
+                            }
+                        });
+                        filterIds = newIds;
+                    }
+
+                    while (filterIds.length > 0) {
+                        var pid = filterIds.splice(0, 1)[0];
+                        if (pid == undefined || typeof (pid) != 'number') break;
+                        ids.push(pid);
+                        cateList.forEach(c => {
+                            if (c.ApplicationKey === app && c.ParentID == pid) {
+                                if (publicPravite == undefined || publicPravite == true) {
+                                    filterIds.push(c.ID);
+                                    ids.push(c.ID);
+                                }
+
+                            }
+                        })
+                    }
+
+                    return ids;
+                }
 
 
 
@@ -1211,7 +723,7 @@ ClientZ.interceptors.response.use(
                 //console.log(rs);
                 if (rs.status == 200) {
                     try {
-                        //localStorage.setItem(key, rs.data);
+                        localStorage.setItem(key, rs.data);
                     } catch (e) {
                         log && console.log('Over quota Storage');
 
@@ -1332,12 +844,12 @@ function friend(input) {
 }
 
 function paging(lst, pi, ps) {
-  
+
     pi = pi <= 1 ? 1 : pi;
     ps = ps <= 0 ? 10 : ps;
-    let total = lst?.length || 0;
+    let total = lst.length;
     var pcount = ps == 0 ? 0 : Math.ceil(total / ps);
-    
+
     return {
         lst: lst.filter((x, i) => {
             return i >= (pi - 1) * ps && i < pi * ps;
@@ -1403,8 +915,7 @@ function paging(lst, pi, ps) {
             ProdType: p.Type || 0,
             ProdManu: p.Manu || 0,
 
-            ProdThumb: p.Thumbnail,
-            KpiType: p.KpiType
+            ProdThumb: p.Thumbnail
         }
     }
 
@@ -1467,10 +978,7 @@ function paging(lst, pi, ps) {
 
     function validApply(vEnt, oi, inCase) {
         if (!vEnt || !oi) return;
-        if (!vEnt.Apply) {
-            console.log('!vEnt.Apply', vEnt);
-            return;
-        }
+
         var a = !vEnt.Apply;
         var b = vEnt.Apply == "NG,KM";
         var c = (vEnt.Apply.indexOf("KM") == -1 && (!oi.PP_ID && !oi.PP2_ID && oi.PriceOrder == oi.Price));
@@ -1649,22 +1157,14 @@ function paging(lst, pi, ps) {
             })
 
 
-            //console.log('best', best);
-
 
             if (best.length > 0) {
                 var valueList = best.map(x => x.Value || 0).sort();
-                //var v = valueList[valueList.length - 1] || 0; ??
-                var v = valueList[0] || 0;
-
-                console.log('best valueList', valueList);
-
-                best.forEach((k, ki) => {
+                var v = valueList[valueList.length - 1] || 0;
+                best.forEach(k => {
                     if (k.Value == v) {
 
                         //log && console.log(' oi.PriceOrder3', oi.PriceOrder, k.Value);
-
-                        console.log('best', ki, v);
 
                         oi.PriceOrder = k.Value;
                         var suff = k.Key.Item.PriceSale <= 100 ? `(Giảm ${k.Key.Item.PriceSale}%)` : "";
@@ -1781,7 +1281,8 @@ function paging(lst, pi, ps) {
         try {
             return JSON.parse(json);
         }
-        catch {
+        catch
+        {
 
         }
         return null;
@@ -2026,8 +1527,7 @@ function paging(lst, pi, ps) {
             }
 
         },
-        FillBest(product, _data) {
-            if (_data) data = _data;
+        FillBest(product) {
             var lst = Array.isArray(product) ? product : [product];
 
             lst.forEach(p => { ResetSale(p) });
@@ -2128,7 +1628,7 @@ function paging(lst, pi, ps) {
 
     function getMember() {
         try {
-            var m = window.Member;
+            var m = JSON.parse(localStorage.getItem('user'));
             if (!m) m = { acc_id: 0 };
             return m;
         } catch {
@@ -2320,8 +1820,6 @@ function paging(lst, pi, ps) {
         },
         search_prods(url, opt, p) {
 
-            console.log('search_prods', p);
-
             var cates = p.cates;
             var key = p.key || '';
             var pi = Math.max(1, parseInt(p.pi));
@@ -2339,7 +1837,6 @@ function paging(lst, pi, ps) {
 
             var pg = paging(prods.filter(p => {
 
-                //if (p.IsService && !p.Combo) return false;
                 if (Array.isArray(cateIds) && cateIds.indexOf(p.Type) == -1) return false;
                 if (key) {
                     if (p.DynamicID.indexOf(key) == -1
@@ -2594,7 +2091,6 @@ function paging(lst, pi, ps) {
                 }
                 var coThe = false;
                 prodInRoot(x.ID).forEach(x2 => {
-
                     coThe = true;
                     var IsOptPublic = isOptPublic(x2.DynamicID);
 
@@ -2607,27 +2103,15 @@ function paging(lst, pi, ps) {
                     }
 
                     if (!x2.IsInStockID(StockID)) return;
-
-                    let PriceProduct = x2.PriceProduct ?? 0;
-                    let PriceSale = x2.PriceSale ?? 0;
-                    let VAT = x2.VAT ?? "";
-
-                    if (hasPriceExclVAT(VAT)) {
-                        PriceProduct = Math.round(PriceProduct / ((100 + VAT) / 100));
-                        PriceSale = Math.round(PriceSale / ((100 + VAT) / 100));
-                    }
-
                     z.items.push(
                         {
                             ID: x2.ID,
                             Title: x2.Title,
                             Desc: x2.Desc,
                             Detail: x2.Detail,
-                            PriceProduct,
+                            PriceProduct: x2.PriceProduct,
                             Thumbnail: x2.Thumbnail,
-                            PriceSale,
-                            PriceProductVAT: x2.PriceProduct,
-                            PriceSaleVAT: x2.PriceSale,
+                            PriceSale: x2.PriceSale,
                             SaleBegin: x2.SaleBegin,
                             SaleEnd: x2.SaleEnd,
                             IsDisplayPrice: x2.IsDisplayPrice,
@@ -2636,8 +2120,7 @@ function paging(lst, pi, ps) {
                             IsOptPublic: IsOptPublic,
                             OnStocks: x2.OnStocks,
                             Status: x2.Status,
-                            IsRootPublic: x2.IsRootPublic,
-                            VAT: x2.VAT
+                            IsRootPublic: x2.IsRootPublic
                         });
                 })
                 if (coThe && z.items.Count == 0) continue;
@@ -2648,6 +2131,8 @@ function paging(lst, pi, ps) {
 
             var pg = paging(lst, pi, ps);
             pg.MemberSelectStockID = 0;
+
+            //log && console.log('get_sv', lst);
 
             return new Promise((resolve) => {
                 fetch(`${SERVER}/api/v3/JsonCache@get?type=ProductEnt&ids=${p.rootIds}`, {
@@ -2667,7 +2152,7 @@ function paging(lst, pi, ps) {
                             })
 
                         })
-
+                        
 
                         resolve({
                             data: pg
@@ -2685,50 +2170,8 @@ function paging(lst, pi, ps) {
     }
 
 
-  
-
-    function getVoucherFilter(arr) {
-        var gioi_thieu_khach_moi = GlobalConfigPath('$.Admin.gioi_thieu_khach_moi', v => v === true);
-        if (gioi_thieu_khach_moi) {
-
-            var m = getMember();
-            var don_hang = m.Present ? m.Present.don_hang : 0;
-            console.log('don_hang', don_hang, m.Present);
-            arr = arr.filter(v => {
-                var perc = 0;
-                if (v.Meta) {
-                    try {
-                        var vMeta = JSON.parse(v.Meta);
-                        perc = vMeta ? parseFloat(vMeta.Perc) || 0 : 0;
-                        perc = isNaN(perc) ? 0 : perc;
-                    } catch {
-
-                    }
-                }
-
-                //console.log('perc', v, perc);
-
-                if (v.SkipNewMember == 1) return true;
-
-                if (perc) {
-                    if (don_hang > 0) {
-                        //mess = "Chỉ áp dụng cho đơn hàng đầu **";
-                        return false;
-                    }
-                } else {
-                    //normal
-                }
-
-                return true;
-            })
-        }
-        console.log('filter', arr);
-        return arr;
-    }
-
     function getVoucherForOrder() {
         var rs = voucherCont;
-        
         var arr = [];
         if (rs && Array.isArray(rs.danh_sach) && data) {
             var prods = data.getType('ProductEnt');
@@ -2772,55 +2215,30 @@ function paging(lst, pi, ps) {
                         pass = true;
                     }
 
-                    if (forMe || v.ForAll) {
+                    if (forMe ||  v.ForAll) {
                         pass = true;
                     } else {
                         invalidCase += '1';
                         //pass = false;
                     }
-
-                    if (v.ForProds || v.ForCates) {
-
-                        var vfp = v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) > -1;
-                        var vfc = v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) > -1;
-
-                        if (!vfp && !vfc) {
-                            if (vfp) {
-                                v.invalid = true;
-                                invalidCase += '2';
-                                pass = false;
-                                vo.invalid = true;
-                            } else {
-                                v.invalid = true;
-                                invalidCase += '3';
-                                pass = false;
-                                vo.invalid = true;
-                            }
-                        }
-
-                        //console.log('vv', [vfp, vfc], v);
-
+                    if (v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) == -1) {
+                        v.invalid = true;
+                        invalidCase += '2';
+                        pass = false;
+                        vo.invalid = true;
                     }
 
+                    log && console.log(['ForCates 1', v.ForCates, data.getTree('type', v.ForCates).indexOf(oi.ProdType), pass]);
 
-                    //if (v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) == -1) {
-                    //    v.invalid = true;
-                    //    invalidCase += '2';
-                    //    pass = false;
-                    //    vo.invalid = true;
-                    //}
+                    if ( v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) == -1) {
+                        v.invalid = true;
+                        invalidCase += '3';
+                        pass = false;
+                        vo.invalid = true;
+                    }
 
-                    //log && console.log(['ForCates 1', v.ForCates, data.getTree('type', v.ForCates).indexOf(oi.ProdType), pass]);
-
-                    //if (v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) == -1) {
-                    //    v.invalid = true;
-                    //    invalidCase += '3';
-                    //    pass = false;
-                    //    vo.invalid = true;
-                    //}
-
-                    //log && console.log(['ForCates 12', pass]);
-
+                    log && console.log(['ForCates 12', pass]);
+                    
 
                     //console.log(vo.Code, v.OrderItemQtyMax, oi.Qty, pass);
 
@@ -2865,7 +2283,7 @@ function paging(lst, pi, ps) {
 
                     //console.log(vo.Code, OrderQtyCount, pass, oi);
 
-                    //log && console.log('pass:' + vo.Code, pass, invalidCase);
+                    log && console.log('pass:' + vo.Code, pass, invalidCase);
 
                 });
 
@@ -2884,9 +2302,7 @@ function paging(lst, pi, ps) {
                 }
             })
         }
-
-
-        return getVoucherFilter(arr);
+        return arr;
     }
 
 
@@ -2909,7 +2325,7 @@ function paging(lst, pi, ps) {
 
         //console.log(voucherCont);
 
-
+        
 
         if (order.VCode) {
 
@@ -2963,66 +2379,7 @@ function paging(lst, pi, ps) {
             // console.log(vEnt, vcode);
             if (vEnt) {
                 vEnt.AffID = vAffid;
-
-                //2026/06/17
-                vEnt = getVoucherFilter([vEnt])[0];
-                if (!vEnt) console.log('calc voucher filter');
             }
-            console.log('window.VoucherInput', window.VoucherInput, vEnt);
-            if (window.VoucherInput) {
-                
-                vEnt = null;
-                var vi = window.VoucherInput;
-                var pass1 = true;
-                if (vi.Context && vi.Context.gioi_thieu_khach_moi) {
-                    var m = getMember();
-                    var don_hang = m.Present ? m.Present.don_hang : 0;
-                    var perc = 0;
-                    if (vi.Meta) {
-                        try {
-                            var vMeta = JSON.parse(vi.Meta);
-                            perc = vMeta ? parseFloat(vMeta.Perc) || 0 : 0;
-                            perc = isNaN(perc) ? 0 : perc;
-                        } catch {
-
-                        }
-                    }
-
-                    if (vi.SkipNewMember != 1) {
-                        if (perc) {
-                            if (don_hang > 0) {
-                                //mess = "Chỉ áp dụng cho đơn hàng đầu **";
-                                console.log('VoucherInput Chỉ áp dụng cho đơn hàng đầu **')
-                                pass1= false;
-                            }
-                        } else {
-                            //normal
-                        }
-                    }
-
-                    console.log('pass1', perc, pass1, don_hang, m)
-                    
-                }
-
-                var diffMemberID2 = window.VoucherInput
-                    && window.VoucherInput.Context
-                    && window.VoucherInput.Context.MemberID2 > 0
-                    && window.VoucherInput.Context.MemberID2 != order.SenderID;
-               
-                //console.log('VoucherInput', VoucherInput, !diffMemberID2, 'gioi_thieu_khach_moi=');
-
-                if (pass1 &&!diffMemberID2) {
-                    vEnt = window.VoucherInput;
-                    if (vEnt.Context && vEnt.Context.ReCode) {
-                        order.VCode = vEnt.Context.ReCode;
-                    }
-                }
-
-                
-            }
-
-
-
             //console.log(vEnt);
             if (!vEnt) {
                 order.VCode = "";
@@ -3044,7 +2401,7 @@ function paging(lst, pi, ps) {
             function _2(x) {
                 return x < 10 ? '0' + x : x;
             }
-            //log && console.log('DenyDay - DenyHour', vEnt.DenyDay, vEnt.DenyHour);
+            log && console.log('DenyDay - DenyHour', vEnt.DenyDay, vEnt.DenyHour);
             if (vEnt.DenyDay) {
 
                 var invalidDay = null;
@@ -3140,7 +2497,7 @@ function paging(lst, pi, ps) {
 
                     var tod = `${_2(d.getHours())}:${_2(d.getMinutes())}`;
 
-
+                   
 
                     if (tod >= from && tod <= to) {
                         invalidHour = seg;
@@ -3182,7 +2539,7 @@ function paging(lst, pi, ps) {
 
             }
         }
-        //log && console.log('vPerc', vPerc);
+        log && console.log('vPerc', vPerc);
 
         while (i < items.length) {
             var oi = items[i];
@@ -3232,38 +2589,16 @@ function paging(lst, pi, ps) {
                 if (v.ForAll) {
                     pass = true;
                 }
-                //if (v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) == -1) {
-                //    pass = false;
-                //}
-
-
-
-                //if (v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) == -1) {
-                //    pass = false;
-                //}
-                if (v.ForProds || v.ForCates) {
-
-                    var vfp = v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) > -1;
-                    var vfc = v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) > -1;
-
-                    if (!vfp && !vfc) {
-                        if (vfp) {
-                            v.invalid = true;
-                            invalidCase += '2';
-                            pass = false;
-                            vo.invalid = true;
-                        } else {
-                            v.invalid = true;
-                            invalidCase += '3';
-                            pass = false;
-                            vo.invalid = true;
-                        }
-                    }
-
-
-
+                if (v.ForProds && `,${v.ForProds},`.indexOf(`,${oi.ProdID},`) == -1) {
+                    pass = false;
                 }
-                //console.log('vv hasVoucher', [vfp, vfc], v);
+
+                log && console.log([v.ForCates, data.getTree('type', v.ForCates).indexOf(oi.ProdType)]);
+
+
+                if ( v.ForCates && data.getTree('type', v.ForCates).indexOf(oi.ProdType) == -1) {
+                    pass = false;
+                }
 
 
 
@@ -3481,7 +2816,7 @@ function paging(lst, pi, ps) {
         //log && console.log('voucherInvalid', voucherInvalid);
 
         var _ToPay = order.ToPay;
-
+      
         log && console.log('_ToPay', _ToPay);
 
         if (vEnt && vEnt.OrderItemQtyMin) {
@@ -3492,14 +2827,14 @@ function paging(lst, pi, ps) {
 
             items.forEach(oi => {
                 if (
-                    !vEnt.ForProds && !vEnt.ForCates
+                    !vEnt.ForProds && !vEnt.ForCates 
                     || vEnt.ForProds && `${vEnt.ForProds}`.split(',').filter(v => v == `${oi.ProdID}`).length
                     || vEnt.ForCates && `${vEnt.ForCates}`.split(',').filter(v => v == `${oi.ProdType}`).length) {
                     totalForVMin += oi.Qty || 0;
                 }
             })
 
-
+           
             if (totalForVMin < vEnt.OrderItemQtyMin && vEnt.OrderItemQtyMin > 0) {
                 voucherInvalid = true;
                 hasMinError = true;
@@ -3582,7 +2917,7 @@ function paging(lst, pi, ps) {
             member.AFFMemberID = vAffid;
             var user = getMember();
             user.AFFMemberID = vAffid;
-            // localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('user', JSON.stringify(user));
         }
     }
 
@@ -3591,9 +2926,8 @@ function paging(lst, pi, ps) {
         time: null
     }
 
-    function getServerVouchers(vcodeInput) {
-        //console.log('getServerVouchers');
-        return new Promise((resolve, reject) => {
+    function getServerVouchers() {
+        return new Promise((resolve) => {
             var opt = {
                 baseURL: window.SERVER,
                 headers: {
@@ -3601,7 +2935,6 @@ function paging(lst, pi, ps) {
                 },
                 //timeout:1,
             };
-            
             if (recentvoucherandaff.time && new Date().getTime() - recentvoucherandaff.time < 1000) {
                 voucherCont = recentvoucherandaff.data;
                 window.VoucherInfo = recentvoucherandaff.data;
@@ -3612,7 +2945,6 @@ function paging(lst, pi, ps) {
 
             }
 
-            /*
             var x = axios.create(opt);
             x.get(`/app/index.aspx?cmd=voucherandaff&mid=${member.ID}&a=1`)
                 .then(rs => {
@@ -3629,44 +2961,6 @@ function paging(lst, pi, ps) {
                     //voucherCont.tot_nhat = null;
                     resolve();
                 })
-
-            //*/
-
-            //console.log('window.old before');
-            if (window.old) {
-                var x = axios.create(opt);
-                x.get(`/app/index.aspx?cmd=voucherandaff&mid=${member.ID}&a=1`)
-                    .then(rs => {
-                        //console.log(rs);
-                        voucherCont = rs.data.data;
-                        window.VoucherInfo = rs.data.data;
-
-                        recentvoucherandaff.data = rs.data.data;
-                        recentvoucherandaff.time = new Date().getTime();
-
-                        resolve();
-                    }).catch(e => {
-                        //voucherCont.danh_sach.length = 0;
-                        //voucherCont.tot_nhat = null;
-                        resolve();
-                    })
-            }
-            else {
-                GetVouchers(member.ID, vcodeInput)
-                    .then(rs => {
-                        console.log('GetVouchers Result', rs);
-                        voucherCont = rs.data.data;
-                        window.VoucherInfo = rs.data.data;
-
-                        recentvoucherandaff.data = rs.data.data;
-                        recentvoucherandaff.time = new Date().getTime();
-
-                        resolve();
-                    }).catch(reject)
-            }
-
-
-
         })
     }
     function reset() {
@@ -3709,15 +3003,14 @@ function paging(lst, pi, ps) {
             calcLog.length = 0;
 
             ClientZData().then(_data => {
-                //log && console.log('_data',_data);
-
+                console.log('_data',_data);
                 try {
                     data = _data;
 
                     var url = args[0];
                     var opt = args[1] || {};
                     var Param = urlParams(url);
-                    log && console.log('input', opt, Param);
+                    //log && console.log('input', opt, Param);
                     window.url = url;
 
                     MemberGroups = null;
@@ -3736,13 +3029,13 @@ function paging(lst, pi, ps) {
                         }
 
                         if (Param.get == 'sv') {
-                            ProductBLL.get_sv(url, opt, Param).then(rs => {
 
+                            ProductBLL.get_sv(url, opt, Param).then(rs => {
                                 resolve(rs);
                             })
 
-
-
+                            
+                           
                             return;
                         }
 
@@ -3754,7 +3047,7 @@ function paging(lst, pi, ps) {
                     var mem = getMember();
                     member = mem;
                     member.ID = mem.acc_id;
-                    
+
                     if (Param.cmd == "voucherandaff") {
                         getServerVouchers().then(() => {
                             resolve({
@@ -3766,7 +3059,7 @@ function paging(lst, pi, ps) {
                         })
                         return;
                     }
-                    
+
                     if (order.SenderID != member.ID) {
                         reset();
                     }
@@ -3779,8 +3072,6 @@ function paging(lst, pi, ps) {
                     var od = opt.order || {};
                     var isSend = false;
                     var voucherChange = opt.voucherForOrder === true ? true : false;
-
-
 
                     if (typeof od === 'object') {
                         for (var k in od) {
@@ -3803,21 +3094,16 @@ function paging(lst, pi, ps) {
                         }
                     }
 
-                    var vcodeInput = undefined;
 
                     if (Param.cmd === 'precheck') {
                         var vinput = Param.vcode;
-                        vcodeInput = vinput;
                         voucherChange = true;
                         order.VCode = vinput;
-                        delete window.VoucherInput;
                         //log && console.log('vinput', vinput);
                     }
 
 
                     function output(isend) {
-
-
                         order.VoucherCode = order.VCode;
                         var result = {
                             data: {
@@ -3834,26 +3120,25 @@ function paging(lst, pi, ps) {
 
                         if (isend) {
                             reset();
-                            // localStorage.removeItem('orderz');
+                            localStorage.removeItem('orderz');
                         } else {
-                            // localStorage.setItem('orderz', JSON.stringify([order, items]));
+                            localStorage.setItem('orderz', JSON.stringify([order, items]));
                         }
-                        console.log('output', result, order.VoucherCode);
-                        resolve(result);
-
+                        log && console.log('output', result, order.VoucherCode);
+                        resolve(result)
                     }
 
-                    var CurrentStockID = parseInt(window.StockID);
+                    var CurrentStockID = parseInt(localStorage.getItem('CurrentStockID'));
                     function fn() {
                         order.SenderAddress = member.HomeAddress || '';
                         order.SenderName = member.FullName || '';
                         order.SenderPhone = member.MobilePhone || '';
                         order.SenderEmail = member.Email || '';
 
-                        //log && console.log('member.AFFMemberID', [member.AFFMemberID, order.AffId, GlobalConfigPath('$.Admin.maff', v => v == true)])
+                        log && console.log('member.AFFMemberID', [member.AFFMemberID, order.AffId, GlobalConfigPath('$.Admin.maff', v => v == true)])
 
                         if (member.AFFMemberID && !order.AffId && GlobalConfigPath('$.Admin.maff', v => v == true)) {
-                            // order.AffId = member.AFFMemberID;
+                           // order.AffId = member.AFFMemberID;
                         }
 
                         //log && console.log('VCode',order.VCode);
@@ -3862,7 +3147,7 @@ function paging(lst, pi, ps) {
                             //opt= {"order":{"ID":0,"SenderID":32870,...},"adds":[{"ProdID":17597,"Qty":1}]}
                             opt.adds.forEach(add => {
 
-
+                               
 
                                 var _prod = prods.filter(p => p.ID == add.ProdID)[0];
 
@@ -3923,8 +3208,8 @@ function paging(lst, pi, ps) {
                     }
 
                     if (isSend) {
-                      
-                        rawAxios().post(`/api/v3/orderclient24@Send?token=${Member.token}`, {
+
+                        rawAxios().post(`/api/v3/orderclient24@Send?token=${localStorage.getItem('token')}`, {
                             client: {
                                 items: items,
                                 order: order,
@@ -3956,7 +3241,7 @@ function paging(lst, pi, ps) {
                                 Order: rs.data.Order,
                                 action: 'ORDER_NEW'
                             })
-
+                          
 
                         }).catch(e => {
                             //reject(e);
@@ -3977,14 +3262,17 @@ function paging(lst, pi, ps) {
 
                         }
                     }
-                    
+
+
+
+
                     if (voucherChange) {
                         if (order.VCode == '' && !opt.voucherForOrder) {
                             order.Voucher = null;
                             fn();
                         } else {
-                            //log && console.log('getServerVouchers');
-                            getServerVouchers(vcodeInput).then(fn);
+                            //console.log('getServerVouchers');
+                            getServerVouchers().then(fn);
                         }
 
                     } else {
@@ -4008,901 +3296,7 @@ function paging(lst, pi, ps) {
         })
     }
 
-    window.Promotion22 = Promotion22;
-    window.DateTime = DateTime;
 })();
 
-class CategoryBLL {
-    #cates = [];
-
-    constructor(cateList) {
-        if (Array.isArray(cateList)) {
-            this.#cates = cateList;
-        }
-    }
-    GetParentID(pid) {
-        var t = this;
-        var lst = [];
-        t.#cates.forEach(cate => {
-            if (cate.ParentID == pid) {
-                var x = clone(cate);
-                lst.push(x);
-
-            }
-        })
-        return lst;
-    }
-    GetTree(rid) {
-        var t = this;
-        var lst = [];
-
-        function deep(pid) {
-            var sub = [];
-            t.GetParentID(pid).forEach(c => {
-                sub.push(c);
-                sub = sub.concat(deep(c.ID));
-            })
-            return sub;
-        }
-
-        t.#cates.forEach(cate => {
-            if (cate.ID == rid) {
-                var c = clone(cate);
-                lst.push(c);
-                lst = lst.concat(deep(c.ID));
-            }
-        })
-        return lst;
-    }
-    GetID(id) {
-        var t = this;
-        var z = null;
-        t.#cates.forEach(cate => {
-            if (cate.ID == id) {
-                var x = clone(cate);
-                z = x;
-            }
-        })
-        return z;
-    }
-    GetTreeChannels(cates) {
-        var lst = [];
-        var t = this;
-        `${cates}`.split(',').forEach(x => {
-            var id = parseInt(x);
-            if (id) {
-                lst = lst.concat(t.GetTree(id));
-            }
-        })
-
-        return lst;
-    }
-}
-
-
-function GetMember() {
-    try {
-        var m = window.Member;
-        if (!m) m = { acc_id: 0 };
-        return m;
-    } catch {
-
-    }
-    return {
-        acc_id: 0
-    };
-}
-function getAuthenForFirst() {
-    //console.log('getAuthenForFirst');
-    return new Promise((rs, rj) => {
-
-        // function fn() {
-
-
-
-        //     try {
-        //         var gioi_thieu_khach_moi = GlobalConfigPath('$.Admin.gioi_thieu_khach_moi', v => v === true)
-
-        //         var m = getMember();
-        //         if (gioi_thieu_khach_moi) {
-        //             console.log('getAuthenForFirst server');
-        //             fetch(`${(window.SERVER || '')}/app/index.aspx?cmd=authen&token=${m.token}&deviceid=&v=`)
-        //                 .then(x => x.json())
-        //                 .then(m => {
-        //                     localStorage.setItem('user', JSON.stringify(m));
-        //                     rs(m)
-        //                 })
-        //                 .catch(rj);
-        //         } else {
-        //             rs(m);
-        //         }
-        //     } catch (e) {
-        //         rj(e);
-        //     }
-        // }
-
-        // fn();
-
-        // ko con su dung
-        rs();
-
-    })
-
-}
-function GetVouchers(mid, vcodeInput) {
-    console.log('GetVouchers');
-    return new Promise((resolve, reject) => {
-      console.log('window.Member', window.Member)
-        var m = GetMember();
-
-        console.log('m', m);
-
-        function perc(v) {
-            try {
-                var v = JSON.parse(v);
-                return v.Perc;
-            } catch {
-                return {}
-            }
-        }
-        function struct(source) {
-            var vsLst = [];
-
-            if (Array.isArray(source)) {
-
-                var remove = [];
-                source.forEach((v, vindex) => {
-
-
-
-                    //console.log('vi', v);
-                    if (Array.isArray(v) && v.length > 0) {
-
-                        var props = Array.isArray(v[0]) ? v[0] : [];
-
-                        for (var i = 1; i < v.length; i++) {
-                            var x = {};
-                            var any = false;
-                            var arr = v[i];
-                            if (Array.isArray(arr)) {
-
-                                for (var j = 0; j < arr.length; j++) {
-                                    var p = props[j];
-                                    if (p) {
-                                        x[p] = arr[j];
-                                        any = true;
-                                    }
-                                }
-
-                            }
-
-                            if (x && x.Meta) {
-                                try {
-                                    var meta = JSON.parse(x.Meta);
-                                    if (meta && meta.Perc != 0) continue;
-                                } catch(e) {
-
-                                }
-                            }
-
-                            //console.log('v', x, any);
-                            if (any) {
-
-                                var now = new Date().getTime();
-                                //select condt
-                                if (x.BeginDate) {
-                                    var d = new Date(x.BeginDate);
-                                    if (d.getTime() > now) {
-                                        console.log('v', 1);
-                                        continue;
-                                    }
-                                }
-                                if (x.EndDate) {
-                                    var d = new Date(x.EndDate);
-                                    if (d.getTime() < now) {
-                                        remove.push({
-                                            ID: x.ID,
-                                            MemberID: x.MemberID
-                                        });
-                                        console.log('v', 2);
-                                        continue;
-                                    }
-                                }
-
-                                if (!x.IsPublic) {
-                                    console.log('v', 3, x);
-                                    continue;
-                                }
-
-                                if (
-                                    (
-                                        x.MemberID == 0
-                                        || x.MemberID == mid
-                                        || (x.MemberID > 0 && perc(x.Meta) > 0)
-                                    )
-                                ) {
-
-                                } else {
-                                    console.log('v', 4);
-                                    continue;
-                                }
-
-                                if (vsLst.filter(v => v.Code == x.Code).length == 0)
-                                {
-                                    vsLst.push(x);
-                                }
-
-                              
-                            }
-
-                        }
-                    }
-                })
-
-                if (remove.length > 0) {
-                    fetch(`${SERVER}/api/v3/VoucherApp@remove?MemberID=${mid}`, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            remove: remove
-                        })
-                    })
-                }
-            }
-            //console.log('voucherList', vsLst);
-
-            function callback() {
-
-                var IgnoreIsVisibled = false;// only on app
-
-                function _callback(vAdd) {
-                    ClientZData().then(data => {
-                        var categories = data.getType('CategoryEnt');
-                        var products = data.getType('ProductEnt');
-                        var memberGroups = data.getType('MemberGroupEnt');
-
-                        //fill (products, categories, memberGroups)
-
-                        function fill(vm) {
-                            if (vm.filled) return;
-                            vm.filled = true;
-
-                            if (vm.Voucher.ForProds) {
-                                var ids = vm.Voucher.ForProds.split(',').map(x => parseInt(x));
-                                if (!Array.isArray(vm.dieu_Kien.san_pham)) vm.dieu_Kien.san_pham = [];
-
-                                products.forEach(p => {
-                                    if (ids.indexOf(p.ID) > -1) {
-                                        vm.dieu_Kien.san_pham.push({
-                                            ID: p.ID,
-                                            Title: p.Title
-                                        });
-                                    }
-                                })
-                            }
-
-                            if (vm.Voucher.ForCates) {
-                                var ids = vm.Voucher.ForCates.split(',').map(x => parseInt(x));
-                                if (!Array.isArray(vm.dieu_Kien.danh_muc)) vm.dieu_Kien.danh_muc = [];
-
-                                categories.forEach(c => {
-                                    if (ids.indexOf(c.ID) > -1) {
-                                        vm.dieu_Kien.danh_muc.push({
-                                            ID: c.ID,
-                                            Title: c.Title
-                                        });
-                                    }
-                                })
-                            }
-
-                            if (vm.Voucher.ForMemberGroupID) {
-                                var gr = memberGroups.filter(g => g.ID == vm.Voucher.ForMemberGroupID)[0];
-                                if (gr) {
-                                    vm.nhom = {
-                                        ID: gr.ID,
-                                        Title: gr.Title
-                                    }
-                                }
-                            }
-
-                            if (vm.dieu_Kien.danh_muc == null) vm.dieu_Kien.danh_muc = [];
-                            if (vm.dieu_Kien.san_pham == null) vm.dieu_Kien.san_pham = [];
-
-                        }
-
-                        function getMetaPerc(v) {
-                            try {
-                                var x = JSON.parse(v.Meta);
-                                return x || {};
-                            } catch {
-
-                            }
-                            return {};
-                        }
-
-                        var rs = {
-                            data: {
-                                success: true,
-                                data: {
-                                    danh_sach: [],
-                                    danh_sach_an: [],
-                                    tot_nhat: null,
-                                    khac: null,
-                                    contactMiniGame: []
-                                }
-                            }
-                        }
-                        //console.log('vAdd', vAdd);
-                        if (vAdd) rs.data.data.danh_sach_an.push(vAdd);
-
-                        var lst = vsLst;
-                        var chkBest = false;
-                        if (lst.length) {
-                            for (var i = 0; i < lst.length; i++) {
-                                var x = lst[i];
-                                var v = x;
-                                var vm = {
-                                    nhom: null,
-                                    ngay: v.BeginDate != null || v.EndDate != null ? { From: v.BeginDate, To: v.EndDate } : null,
-                                    ma: v.Code,
-                                    gia_tri: {
-                                        Phan_tram: v.isPercent == 1 ? v.Discount : 0,
-                                        Tien: v.isPercent != 1 ? v.Discount : 0
-                                    },
-                                    dieu_Kien: {
-                                        ap_dung_sp_km: v.ForAll,
-                                        danh_muc: null,
-                                        san_pham: null,
-                                        ap_dung: v.Apply
-                                    },
-                                    gioi_han_so_lan_su_dung: v.NMax,
-                                    so_lan_su_dung: v.NUse,
-                                    so_luong_mua_tung_don: v.OrderQtyMax || 0,
-                                    so_luong_mua_tung_san_pham: v.OrderItemQtyMax || 0,
-                                    Voucher: x,
-                                    aff: false,
-                                    ma_chia_se: ''
-                                };
-                                vm.ma_chia_se = `${x.Code}-${mid}`;
-
-                                if (x.ForMemberGroupID) {
-                                    var passGroup = false
-                                    try {
-                                        var mgs = JSON.parse(m.GroupJSON);
-                                        passGroup = Array.isArray(mgs) && mgs.filter(g => g.ID == x.ForMemberGroupID).length > 0;
-                                    } catch {
-
-                                    }
-                                    //console.log('passGroup',x, passGroup);
-                                    if (!passGroup) continue;
-
-                                }
-
-                                if (x.Other) {
-                                    if (!rs.data.data.khac) rs.data.data.khac = [];
-                                    fill(vm);
-                                    rs.data.data.khac.push(vm);
-                                    continue;
-                                }
-                                if (vm.Voucher.MemberID == mid) {
-                                    //if (rs.ca_nhan == null) rs.ca_nhan = new List<VoucherForMember>();
-                                    //rs.ca_nhan.Add((VoucherForMember)x);
-                                    chkBest = true;
-                                }
-
-                                chkBest = true;
-
-                                var MetaPerc = getMetaPerc(x).Perc || 0;
-
-                                if (!x.VoucherMeta) {
-                                    x.VoucherMeta = getMetaPerc(x);
-                                }
-
-                                //console.log('MetaPerc', MetaPerc);
-
-                                if (MetaPerc > 0 && m.IsAff == 1) {
-                                    if (x.ForMemberGroupID == 0) {
-
-                                        //if (rs.aff == null) rs.aff = new List<VoucherForMember>();
-                                        //rs.aff.Add(vm);
-                                        chkBest = true;
-                                        vm.aff = true;
-                                    }
-                                }
-                                if (x.MemberID <= 0) {
-                                    chkBest = true;
-                                }
-
-                                if (vm.Voucher.IsVisibled != true && !IgnoreIsVisibled) {
-                                    fill(vm);
-                                    rs.data.data.danh_sach_an.push(vm);
-                                    chkBest = false;
-                                }
-
-                                if (chkBest) {
-                                    fill(vm);
-                                    if (rs.data.data.danh_sach == null) rs.data.data.danh_sach = [];
-                                    rs.data.data.danh_sach.push(vm);
-
-                                    if (rs.data.data.tot_nhat == null) rs.data.data.tot_nhat = vm;
-                                    else if (rs.data.data.tot_nhat.Voucher.Discount > 1000 && x.Discount > 1000 && x.Discount > rs.data.data.tot_nhat.Voucher.Discount) rs.data.data.tot_nhat = vm;
-                                    else if (x.Discount <= 100 && (rs.data.data.tot_nhat.Voucher.Discount > 1000 || rs.data.data.tot_nhat.Voucher.Discount < x.Discount)) rs.data.data.tot_nhat = vm;
-                                }
-                            }
-                        }
-
-                        //console.log('voucherandaff*', rs);
-
-                        //contactMiniGame
-
-                        var ver = '';
-                        var preDataMiniGame = [];
-                        var d = localStorage.getItem('contactMiniGame');
-                        if (d) {
-                            try {
-                                var arr = JSON.parse(d);
-                                arr = Array.isArray(arr) ? arr : [];
-                                preDataMiniGame = arr[0];
-                                if (arr.length > 1) {
-                                    ver = arr[arr.length - 1];
-                                }
-                                // struct(arr);
-                                // return;
-                            } catch {
-
-                            }
-                        }
-
-                        fetch(`${window.SERVER || ''}/api/v3/VoucherApp@GetContact?MemberID=${mid}&ver=${ver}`)
-                            .then(x => {
-                                if (x.status == 204) {
-
-                                    rs.data.data.contactMiniGame = preDataMiniGame;
-                                    resolve(rs);
-                                    return;
-                                }
-                                return x.json();
-
-                            }).then(arr => {
-                                //localStorage.setItem('contactMiniGame', JSON.stringify(arr));
-                                rs.data.data.contactMiniGame = arr[0];
-
-                                resolve(rs);
-                            }).catch(e => {
-                                resolve(rs);
-                            })
-
-
-
-                    }).catch(reject);
-                }
-
-                if (vcodeInput) {
-                    fetch(`${window.SERVER}/api/v3/voucherApp@GetCode?vcode=${vcodeInput}${(window.voucherSkip2 ? '&voucherSkip2=' + window.voucherSkip2 : '')}&mid=${(m.ID)}`)
-                        .then(x => x.json())
-                        .then(rs => {
-                            console.log('vcodeInput getserver', rs);
-                            if (rs.error) reject(rs.error);
-                            else {
-                                var v = rs.Voucher;
-                                window.VoucherInput = v;
-                                _callback(v);
-                            }
-                            
-                        })
-                        .catch(reject)
-                } else {
-                    _callback();
-                }
-            }
-
-
-            var nmax = [];
-            vsLst.forEach(v => {
-                if (v.NMax > 0 || v.MemberUseMax > 0) {
-                    //console.log('nmax', v);
-                    nmax.push(v.ID)
-                }
-            });
-
-            //console.log('nmax', nmax);
-
-            if (nmax.length > 0) {
-
-
-                function arrDeep(arr) {
-
-                    // console.log('arrD', arr);
-
-                    if (Array.isArray(arr) && arr.length > 0) {
-                        var x = arr[0];
-                        if (typeof x == 'number') {
-                            //[vid, senderid, orderid]
-                            var vid = arr[0] || 0;
-                            var _mid = arr[1] || 0;
-                            var oid = arr[2] || 0;
-
-                            vsLst.every(v => {
-                                if (v.ID == vid) {
-                                    if (!v.countUsed) v.countUsed = 0;
-                                    v.countUsed++;
-                                    if (_mid == mid) {
-                                        if (!v.countMUsed) v.countMUsed = 0;
-                                        v.countMUsed++;
-                                    }
-                                    //console.log('v', v);
-                                }
-
-
-                                return v.ID != vid;
-                            })
-
-                        } else {
-                            arr.forEach(a1 => arrDeep(a1));
-                        }
-                    }
-                }
-
-                fetch(`${SERVER}/api/v3/VoucherApp@CountUsed`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        ids: nmax
-                    })
-                })
-                    .then(x => x.json())
-                    .then(rs => {
-
-
-                        arrDeep(rs);
-
-                        vsLst = vsLst.filter(v => {
-                            if (v.NMax > -1) {
-                                if (v.NMax <= v.countUsed) return false
-                            }
-
-                            if (v.MemberUseMax > -1) {
-                                if (v.MemberUseMax <= v.countMUsed) return false;
-                            }
-
-                            return true;
-                        });
-
-                        callback();
-                    }).catch(reject)
-                //callback();
-            } else {
-                callback();
-            }
-        }
-
-        var from = new Date().getTime();
-        var keyLocalStorage = 'voucherData';
-
-        function fn() {
-
-            var ver = '';
-            var preData = [];
-            var d = localStorage.getItem(keyLocalStorage);
-            if (d) {
-                try {
-                    var arr = JSON.parse(d);
-                    arr = Array.isArray(arr) ? arr : [];
-                    preData = arr;
-                    if (arr.length > 2) {
-                        ver = arr[arr.length - 1];
-                    }
-                    // struct(arr);
-                    // return;
-                } catch {
-
-                }
-            }
-
-
-            fetch(`${SERVER}/api/v3/VoucherApp@get?MemberID=${mid}&ver=${ver}`, {
-                method: 'GET',
-                credentials: 'same-origin',
-            }).then(x => {
-
-                if (x.status == 204) {
-                    //console.log('predata', preData);
-                    struct(preData);
-
-
-                    return;
-                }
-
-                //console.log('get voucher', x.headers);
-                return x.json()
-
-            }).then(rt => {
-
-                if (!rt) {
-                    //ko ro ly do
-                    // khi x.status == 204, struct() call fetch lai nhay vao day voi rt = undefined
-                    return;
-                }
-
-                if (rt.error) {
-                    reject(rt.error);
-                } else {
-                    if (Array.isArray(rt)) {
-
-                        //localStorage.setItem(keyLocalStorage, JSON.stringify(rt));
-
-                        var arr = rt;
-                        if (arr[0] === true || arr[1] === true) {
-                            // pending
-
-                            var now = new Date().getTime();
-                            if (now - from > 100 * 1000) {
-
-                                reject('timeout');
-                                return;
-                            }
-
-                            setTimeout(fn, 200);
-                        } else {
-
-
-                            struct(arr);
-                        }
-                    } else {
-                        reject('Không phải mảng voucher');
-                    }
-                }
-            }).catch(reject);
-        }
-
-
-        
-
-        //fn();
-        getAuthenForFirst().then(fn).catch(fn);
-    });
-}
-
-//XPrint
-
-function XPrint(_opt) {
-    var opt = {
-        print: {
-            Path: '',
-            Title: ''
-        },
-        printParams: '',
-        osid: 0,
-        orderid: 0,
-        importexportid: 0,
-
-        imageWidth: 400,
-        imageExt: 'png',
-        imageQuality: 1,
-        process() {
-
-        },
-        error() {
-
-        },
-        ipAddress: '192.168.1.251',
-    };
-
-    opt = Object.assign(opt, _opt);
-
-    var Param = '';
-    if (opt.osid) {
-        Param = 'osid=' + opt.osid;
-    }
-    else if (opt.orderid) {
-        Param = 'orderid=' + opt.orderid;
-    }
-    else if (opt.importexportid) {
-        Param = 'importexportid=' + opt.importexportid;
-    }
-    var url = `${window.SERVER || ''}/-as-image-${opt.imageExt}-${opt.imageWidth}-${opt.imageQuality}/${opt.print.Path}?${Param}&print=1&printParams=${opt.printParams}`;
-    fetch(url, {
-        method: 'GET',
-        credentials: 'same-origin'
-    }).catch(e => {
-        opt.error(e);
-    }).then(t => t.text()).then(txt => {
-        if (txt.indexOf('https://') == 0 || txt.indexOf('http://') == 0 || txt.indexOf('/') == 0) {
-            var imageServerPath = txt;
-            opt.process(imageServerPath, 0);
-
-            var imageUrl = txt.indexOf('https://') == 0 || txt.indexOf('http://') == 0 ? txt : `${window.SERVER}${imageServerPath}`;
-
-            var p = {
-                ipAddress: opt.ipAddress,
-                param: {
-                    feedLine: true,
-                    cutHalfAndFeed: 1,
-                    cutPaper: true,
-                    items: [
-
-                        {
-                            imageUrl: imageUrl,
-                            alignment: 1,
-                            width: parseInt(opt.imageWidth) || 0,
-                            model: 0
-                        },
-
-                    ]
-                }
-            }
-            app21.prom('XPRINT', JSON.stringify(p)).then(rs => {
-                // btn.innerHTML = 'print:success';
-                // log && console.log('done');
-                opt.process('In thành công', 1);
-            }).catch(e => {
-                //console.error(e);
-                opt.error(e, 1);
-                //btn.innerHTML = 'print:' + e;
-            })
-
-        } else {
-            opt.error(txt)
-        }
-    })
-}
-
-function XPrintClear() {
-    return new Promise(rs => {
-        app21.prom('XPRINT_CLEAR').then(rs => {
-            // btn.innerHTML = 'print:success';
-            // log && console.log('done');
-            rs();
-        }).catch(e => {
-            rs();
-        })
-    })
-}
-function STORE_TEXT(name, value) {
-    return new Promise((resolve, reject) => {
-        var p = {
-            name: name,
-            value: value
-        }
-
-        if (value == undefined) delete p.value;
-
-        app21.prom('STORE_TEXT', JSON.stringify(p)).then(rs => {
-            resolve(rs.data);
-        }).catch(e => {
-            reject(e);
-        })
-    });
-}
-
-function GET_OR_CACHED(url, type, returnType) {
-    return new Promise((resolve, reject) => {
-        var p = {
-            url: url,
-            type: type,
-            returnType: returnType
-        }
-
-        app21.prom('GET_OR_CACHED', JSON.stringify(p)).then(rs => {
-            resolve(rs.data);
-        }).catch(e => {
-            reject(e);
-        })
-    });
-}
-
-
-function demo1(type, returnType) {
-    //type:
-    //0: get and cached
-    //1: cached if not get
-    //2: only get
-    //3: only cached
-    //4: delete cached
-
-    //returnType:
-    //0: file://
-    //1: string
-
-    GET_OR_CACHED(`${window.SERVER}/Admin/ReactCDN/axios.min.js`, type || 0, returnType || 0).then(x => {
-        console.log(x);
-    }).catch(e => {
-        console.error(e);
-    })
-}
-
-function Subscribe(args) {
-
-    /*
-    var DM = location.host.toUpperCase();
-
-    var user = {
-        acc_id: 0,
-        acc_type: 'M',
-        MemberGroups: null
-    };
-
-    var topics = [];
-    if (typeof args == 'string') {
-        topics = args;
-    } else if (typeof args == "object") {
-        //args = {}
-        user = args;
-    } else {
-        //underfine
-        try {
-            var _user = JSON.parse(localStorage.getItem('user') || '{}');
-            if (typeof _user == 'object') {
-                user = _user;
-            }
-        } catch {
-
-        }
-    }
-
-    if (user.acc_id) {
-
-        if (user.acc_type == 'M') {
-            topics.push(`${DM}-${user.acc_type}-0`);// tat ca
-            topics.push(`${DM}-${user.acc_type}-S-${user.ByStockID}`);
-            if (user.MemberGroups && Array.isArray(user.MemberGroups)) {
-                user.MemberGroups.forEach(mg => {
-                    topics.push(`${DM}-${user.acc_type}-${mg.ID}`);
-                    topics.push(`${DM}-${user.acc_type}-S-${user.ByStockID}-${mg.ID}`);
-                })
-            }
-        }
-
-        if (user.acc_type == 'U') {
-            topics.push(`${DM}-${user.acc_type}-0`);// tat ca
-            topics.push(`${DM}-${user.acc_type}-S-${user.StockID}`);
-
-            if (user.Info && Array.isArray(user.Info.Groups)) {
-                user.Info.Groups.forEach(gr => {
-                    topics.push(`${DM}-${user.acc_type}-${gr.ID}`);
-                    topics.push(`${DM}-${user.acc_type}-S-${user.StockID}-${gr.ID}`);
-                })
-            }
-
-            
-        }
-
-        
-    }
-
-
-
-    app_request("subscribe", topics.join(','));
-    //*/
-    console.log("subscribed by server not at client");
-
-}
-
-function UnSubscribe() {
-    //app_request("unsubscribe");
-    log && console.log('unsubscribed by server not at client')
-}
-
-function GetPrinter() {
-    return new Promise((rs, rj) => {
-        ClientZData().then(_data => {
-            var configs = _data.getType('ConfigEnt');
-            var lst = [];
-            Array.isArray(configs) && configs.every(cf => {
-
-                if (cf.Name == 'printer_config') {
-                    var arr = JSON.parse(cf.Value);
-                    Array.isArray(arr) && arr.forEach(x => {
-                        lst.push(x);
-                    })
-                }
-
-                return cf.Name != 'printer_config'
-            });
-            rs(lst);
-
-        }).catch(rj);
-    })
-}
-
-let http = ClientZ;
-
-export default http;
+let http = ClientZ
+export default http

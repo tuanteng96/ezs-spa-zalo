@@ -1,17 +1,19 @@
 import React from "react";
 import { useLocation } from "react-router";
 import { useNavigate } from "zmp-ui";
+import { useLayout } from "../../layout/LayoutProvider";
 import { transferNavigation } from "../../utils/transferNavigation";
-import {PickerContact} from "../PickerContact/PickerContact"
+import { PickerContact } from "../PickerContact/PickerContact"
 
 const NavLinkAdv = ({ children, to, data, ...props }) => {
+  const { Auth } = useLayout()
   const navigate = useNavigate();
   let { pathname, search } = useLocation();
 
   return (
     <PickerContact initialValues={data}>
       {
-        ({open}) => (
+        ({ open }) => (
           <div
             {...props}
             data-href={to}
@@ -21,7 +23,8 @@ const NavLinkAdv = ({ children, to, data, ...props }) => {
                 to,
                 navigate,
                 data,
-                open
+                open,
+                Auth
               })
             }
           >
@@ -29,7 +32,7 @@ const NavLinkAdv = ({ children, to, data, ...props }) => {
           </div>
         )
       }
-      
+
     </PickerContact>
   );
 };

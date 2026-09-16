@@ -2,21 +2,11 @@ import React from "react";
 import { useLayout } from "../../../layout/LayoutProvider";
 import { formatString } from "../../../utils/formatString";
 
-export const PriceSaleDetail = ({ product }) => {
+export const PriceSaleDetailVAT = ({ product }) => {
   const { GlobalConfig } = useLayout();
 
-  const { PriceSale, PriceProduct, SaleBegin, SaleEnd, IsDisplayPrice } =
+  const { PriceSale, PriceProduct, SaleBegin, SaleEnd, IsDisplayPrice, PriceSaleVAT, PriceProductVAT } =
     product;
-  
-  const hasPriceExclVAT = (VAT) => {
-      let isPriceExclVAT =
-        (GlobalConfig && GlobalConfig.Admin.isPriceExclVAT) ||
-        false;
-  
-      return (
-        isPriceExclVAT && VAT !== "" && VAT !== -1 && VAT !== -2 && VAT !== -3
-      );
-  };
 
   const isSale =
     SaleBegin &&
@@ -32,7 +22,7 @@ export const PriceSaleDetail = ({ product }) => {
       <div className="text-danger font-semibold">
         {IsDisplayPrice !== 0
           ? <>
-            {formatString.formatVND(isSale ? PriceSale : PriceProduct)}
+            {formatString.formatVND(isSale ? PriceSaleVAT : PriceProductVAT)}
           </>
           : "Liên hệ"}
       </div>
@@ -49,9 +39,9 @@ export const PriceSaleDetail = ({ product }) => {
         </div>
       )}
       {
-        IsDisplayPrice !== 0 && hasPriceExclVAT(product.VAT) && (
+        GlobalConfig?.Admin?.isPriceExclVAT && (
           <div className="mt-1.5 text-warning">
-            (Giá chưa bao gồm {product?.VAT}% VAT)
+            (Giá đã bao gồm {product?.VAT}% VAT)
           </div>
         )
       }

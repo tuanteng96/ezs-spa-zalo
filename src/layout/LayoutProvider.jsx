@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import React, { useEffect } from "react";
 import { createContext, useContext, useState } from "react";
 
@@ -9,9 +10,10 @@ import {
   removeStorage,
   setStorage,
 } from "zmp-sdk";
-import { useSnackbar } from "zmp-ui";
+import { Spinner, useSnackbar } from "zmp-ui";
 import AuthAPI from "../api/auth.api";
 import ConfigsAPI from "../api/configs.api";
+import { ProcessENV } from "../utils/process";
 
 if (getSystemInfo().platform === "android") {
   const androidSafeTop = Math.round(
@@ -25,6 +27,12 @@ if (getSystemInfo().platform === "android") {
 }
 
 const LayoutContext = createContext();
+
+// Fast Refresh preserves React Query's cache. Give this query a fresh key in
+// development so changes to its queryFn are evaluated on every HMR update.
+const globalConfigQueryKey = import.meta.hot
+  ? ["GlobalConfig", Date.now()]
+  : ["GlobalConfig"];
 
 const useLayout = () => {
   return useContext(LayoutContext);
@@ -42,13 +50,77 @@ const LayoutProvider = ({ children }) => {
 
   const { openSnackbar } = useSnackbar();
 
+  const {
+    isSuccess: isGlobalConfigLoaded,
+  } = useQuery({
+    queryKey: globalConfigQueryKey,
+    queryFn: async () => {
+      const rs = await ConfigsAPI.global();
+      // let isGoBeauty = true;
+      // let DOMAIN = "";
+
+      // try {
+      //   const response = await axios.get(
+      //     `${ProcessENV.URL}/app2021/index.aspx`,
+      //     {
+      //       responseType: "text",
+      //       timeout: 5000,
+      //     },
+      //   );
+
+      //   DOMAIN =
+      //     response?.data?.match(/window\.DOMAIN\s*=\s*['"]([^'"]*)['"]/)?.[1] || null;
+
+      //   const domainMatch = response?.data?.match(
+      //     /window\.DOMAIN_GOBEAUTY\s*=\s*\(\s*window\.DOMAIN\s*===?\s*['"]([^'"]+)['"]\s*\)/
+      //   );
+
+      //   const DOMAIN_GOBEAUTY = domainMatch?.[1] || null;
+
+      //   isGoBeauty = DOMAIN === DOMAIN_GOBEAUTY;
+      // } catch (error) {
+      //   // This endpoint is cross-origin. Its failure must not leave the app
+      //   // permanently on the loading screen while developing (or when offline).
+      //   console.warn("Unable to resolve DOMAIN_GOBEAUTY", error);
+      // }
+
+      return {
+        ...rs,
+        data: {
+          ...rs?.data,
+          //DOMAIN
+        }
+      };
+    },
+    onSuccess: ({ data }) => {
+      window.DOMAIN_GOBEAUTY = data?.DOMAIN_GOBEAUTY === ProcessENV.URL || false;
+      window.GlobalConfig = data;
+      if (data && data.APP && data.APP.Css) {
+        for (const key in data.APP.Css) {
+          document.documentElement.style.setProperty(key, data.APP.Css[key]);
+        }
+      }
+      if (data.APP.FontSize && data.APP.FontSize.length > 0) {
+        for (let key of data.APP.FontSize) {
+          document.documentElement.style.setProperty(key.name, key.size);
+        }
+      }
+      setGlobalConfig({
+        ...data,
+        DOMAIN_GOBEAUTY: data?.DOMAIN_GOBEAUTY === ProcessENV.URL,
+      });
+    },
+  });
+
+  const isGlobalConfigReady = isGlobalConfigLoaded && !!GlobalConfig;
+
   useQuery({
     queryKey: ["Authen"],
     queryFn: async () => {
       return null;
     },
     onSuccess: (data) => {
-      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQ0ODgxIiwiVG9rZW5JZCI6IjEyMTc4MTA0ODU3MDAxNzciLCJuYmYiOjE3ODI2NTk3NzcsImV4cCI6MTg2OTA1OTc3NywiaWF0IjoxNzgyNjU5Nzc3fQ.k5A6l4FUqfSfNGRt6XFw5lbSfVW35upYjd9zKyb5fiE" })
+      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQ1Mzc2IiwiVG9rZW5JZCI6IjEyMjMwMDgyOTIyMDAwMTAiLCJuYmYiOjE3ODc4ODQ5MDgsImV4cCI6MTg3NDI4NDkwOCwiaWF0IjoxNzg3ODg0OTA4fQ.jUtfe6cuDbu5QY8cPfVzqRTlGfU0_HOYcjaY5oAtLi0" })
       //   .then(({ data }) => {
       //     if (!data?.error) {
       //       onSaveAuth(data);
@@ -100,7 +172,8 @@ const LayoutProvider = ({ children }) => {
           console.log(error);
         },
       });
-    }
+    },
+    enabled: isGlobalConfigReady,
   });
 
   useEffect(() => {
@@ -128,15 +201,7 @@ const LayoutProvider = ({ children }) => {
     onSuccess: (data) => {
       setRatings(data)
     },
-    enabled: Number(Auth?.ID) > -1,
-  });
-
-  useQuery({
-    queryKey: ["GlobalConfig"],
-    queryFn: () => ConfigsAPI.global(),
-    onSuccess: ({ data }) => {
-      setGlobalConfig(data);
-    },
+    enabled: isGlobalConfigReady && Number(Auth?.ID) > -1,
   });
 
   const onOpenActionStocks = () => {
@@ -177,8 +242,10 @@ const LayoutProvider = ({ children }) => {
         }
         : null,
     );
+    window.StockID = value?.ByStockID || null
     setAccessToken(value?.token);
     setAuth(value);
+    window.Member = value
     setStorage({
       data: {
         AccessToken: value?.token,
@@ -212,10 +279,17 @@ const LayoutProvider = ({ children }) => {
         isLoadingRatings,
         onLogout,
         splashScreen,
-        GlobalConfig
+        GlobalConfig,
+        isGlobalConfigReady,
       }}
     >
-      {children}
+      {isGlobalConfigReady ? (
+        children
+      ) : (
+        <div className="fixed top-0 left-0 z-[10001] flex h-full w-full items-center justify-center bg-white">
+          <Spinner visible />
+        </div>
+      )}
     </LayoutContext.Provider>
   );
 };

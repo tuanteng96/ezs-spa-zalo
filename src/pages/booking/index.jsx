@@ -58,7 +58,7 @@ const BookingPage = () => {
   const { state } = useLocation();
 
   const queryParams = useQueryParams();
-  let queryKey = queryParams?.Type || "Service";
+  let queryKey = queryParams?.Type || "Time";
 
   const methods = useForm({
     defaultValues: !state?.formState
@@ -86,7 +86,7 @@ const BookingPage = () => {
         UserServiceIDs:
           state?.formState?.UserServices &&
             state?.formState?.UserServices.length > 0
-            ? state?.formState.UserServices[0].ID
+            ? state?.formState.UserServices[0]
             : "",
         PrevBook: state?.formState
       },
@@ -147,7 +147,7 @@ const BookingPage = () => {
 
     let newDesc =
       GlobalConfig?.APP?.SL_khach && values?.AmountPeople
-        ? `Số lượng khách: ${values?.AmountPeople
+        ? `Số lượng khách: ${GlobalConfig?.Admin?.isMultipleMembersBook ? 1 : values?.AmountPeople
         }. \nTags: ${Tags.toString()} \nGhi chú: ${(values.Desc ? values.Desc.replaceAll("\n", "</br>") : "") +
         (values?.PrevBook
           ? ` (Thay đổi từ ${values?.PrevBook?.RootTitles} - ${moment(
@@ -171,10 +171,56 @@ const BookingPage = () => {
             ? moment(values?.BookDate).format("YYYY-MM-DD HH:mm")
             : "",
           StockID: values?.StockID || 0,
-          Desc: newDesc
+          Desc: newDesc,
+          UserServiceIDs: values?.UserServiceIDs?.value || "",
+          InfoMore: {
+            Member: {
+              ID: Auth.ID,
+              FullName: Auth.FullName,
+              MobilePhone: Auth.MobilePhone,
+            },
+            Roots: values?.RootIdS
+              ? values?.RootIdS.map((x) => ({
+                ID: x.ID,
+                Title: x.Title,
+              }))
+              : null,
+          }
         },
       ],
     };
+
+    if (GlobalConfig?.Admin?.isMultipleMembersBook) {
+      let Clients = (values?.MultipleMembers || []).flatMap(
+        (x) => x?.Items || [],
+      ).map((x) => ({
+        Index: x.Index,
+        RootIdS: x.RootIdS
+          ? {
+            label: x?.RootIdS?.Title,
+            value: x?.RootIdS?.ID,
+          }
+          : null,
+        UserServiceIDs: x?.UserServiceIDs?.id
+          ? [{
+            label: x?.UserServiceIDs?.text,
+            value: x?.UserServiceIDs?.id,
+          }]
+          : [],
+        Room: "",
+      }));
+
+      const userServiceIDs = [
+        ...new Map(
+          Clients.flatMap(
+            (item) => item.UserServiceIDs,
+          ).map((item) => [item.value, item]),
+        ).values(),
+      ];
+
+      dataSubmit.booking[0].InfoMore["Clients"] = Clients;
+      dataSubmit.booking[0]["UserServiceIDs"] = userServiceIDs ? userServiceIDs.map(x => x.value).toString() : "";
+    }
 
     if (values?.ID) {
       dataSubmit.deletes = [{ ID: values?.ID }];

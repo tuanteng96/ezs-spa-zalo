@@ -8,8 +8,8 @@ import { NavLinkAdv } from "../../../components/NavLinkAdv";
 import { useLayout } from "../../../layout/LayoutProvider";
 import NewsAPI from "../../../api/news.api";
 
-const SalesBanner = ({ WrapClass }) => {
-  let { GlobalConfig } = useLayout();
+const SalesBanner = () => {
+  let { GlobalConfig, Auth } = useLayout();
 
   const getRandomImage = () => {
     const IconsRandom = GlobalConfig?.APP?.IconsRandom;
@@ -51,8 +51,8 @@ const SalesBanner = ({ WrapClass }) => {
 
   if (isLoading)
     return (
-      <div className="bg-white">
-        <div className={WrapClass}>
+      <div>
+        <div>
           <div className="animate-pulse h-[90px] rounded">
             <div className="flex items-center justify-center w-full h-full bg-gray-300">
               <svg
@@ -107,8 +107,9 @@ const SalesBanner = ({ WrapClass }) => {
   if (!data || data.length === 0) return <></>
 
   return (
-    <div className="bg-white">
-      <div className={WrapClass}>
+    <div>
+
+      <div>
         <Swiper
           modules={[Autoplay]}
           pagination={{
@@ -126,19 +127,13 @@ const SalesBanner = ({ WrapClass }) => {
                 return (
                   <SwiperSlide key={index}>
                     <NavLinkAdv
-                      className="cursor-pointer block relative rounded overflow-hidden h-[90px]"
+                      className="cursor-pointer block relative rounded-xl overflow-hidden p-3 bg-[#fff1f2] border border-[#fecdd3] border-dashed"
                       data={item}
                       to={stripHtml(item.source.Desc)}
                     >
-                      <div
-                        className="absolute w-full h-full top-0 right-0"
-                        style={{
-                          background: getColor(index, data),
-                        }}
-                      ></div>
-                      <div className="flex z-10 relative h-full">
+                      <div className="flex z-10 relative h-full gap-3">
                         <div
-                          className="aspect-square"
+                          className="aspect-square w-[60px] h-[60px] bg-[#f43f5e] rounded-xl"
                         >
                           <img
                             className="w-full h-full object-cover rounded-lg"
@@ -154,12 +149,12 @@ const SalesBanner = ({ WrapClass }) => {
                         </div>
                         <div className="flex-1 flex flex-col justify-center">
                           <div
-                            className="text-white font-medium text-base"
+                            className="text-[#9f1239] font-medium text-base"
                           >
                             {item?.text?.split(";")?.[0] || ""}
                           </div>
                           <div
-                            className="text-white text-sm opacity-80"
+                            className="text-[#db2e54] text-sm opacity-80"
                             dangerouslySetInnerHTML={{
                               __html: item?.text?.split(";")?.[1] || "",
                             }}
@@ -173,48 +168,42 @@ const SalesBanner = ({ WrapClass }) => {
               return (
                 <SwiperSlide key={index}>
                   <NavLinkAdv
-                    className="cursor-pointer block relative rounded overflow-hidden h-[90px]"
+                    className="cursor-pointer block relative rounded-xl overflow-hidden p-3 bg-[#fff1f2] border border-[#fecdd3] border-dashed"
                     data={item}
                     to={item.Link}
                   >
                     <div
-                      className="absolute w-full h-full top-0 right-0"
-                      style={{
-                        background: getColor(index, data),
-                      }}
-                    ></div>
-                    <div
-                      className="flex z-10 relative h-full"
+                      className="flex z-10 relative h-full gap-3"
                     >
                       <div
-                        className="p-4 aspect-square"
+                        className="aspect-square w-[60px] h-[60px] bg-[#f43f5e] rounded-xl p-2"
                       >
                         <img
-                          className="w-full h-full object-cover rounded-lg"
+                          className="object-cover rounded-lg"
                           src={item.FileName ? toAbsolutePath(item.FileName) : getRandomImage()}
                           alt=""
                         />
                       </div>
                       <div className="flex-1 flex flex-col justify-center">
                         <div
-                          className="text-white font-medium text-base"
+                          className="text-[#9f1239] font-medium text-base"
                         >
                           {item.Title}
                         </div>
                         <div
-                          className="text-white text-sm opacity-80"
+                          className="text-[#db2e54] text-sm opacity-80"
                           dangerouslySetInnerHTML={{
                             __html: item.Desc,
                           }}
                         ></div>
                       </div>
-                      <div className="w-12 flex justify-end items-center pr-4">
+                      <div className="flex justify-end items-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth="1.5"
-                          stroke="#fff"
+                          stroke="#f43f5e"
                           style={{
                             width: "20px",
                           }}
@@ -240,10 +229,10 @@ const SalesBanner = ({ WrapClass }) => {
   );
 };
 
-const SalesService = ({ WrapClass = "px-3 pt-3" }) => {
+const SalesServiceGoBeauty = () => {
   return (
-    <SalesBanner WrapClass={WrapClass} />
+    <SalesBanner />
   );
 };
 
-export { SalesService };
+export { SalesServiceGoBeauty };
