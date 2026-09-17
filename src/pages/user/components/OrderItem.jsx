@@ -110,7 +110,7 @@ export const OrderItem = ({ item }) => {
           )}
         </div>
         {
-          !GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+          GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
             <PickerOrderPayted item={item} TotalDebt={TotalDebt}>
               {({ open }) => (
                 <button

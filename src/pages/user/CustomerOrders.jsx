@@ -126,7 +126,7 @@ const CustomerDiary = () => {
                         <div className="h-3 bg-gray-200 w-32"></div>
                       </div>
                       {
-                        !GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+                        GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
                           <button
                             className="bg-app text-white h-11 px-4 rounded opacity-50"
                             type="button"
