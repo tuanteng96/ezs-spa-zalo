@@ -11,7 +11,7 @@ import { OrderItem } from "./components/OrderItem";
 
 const CustomerDiary = () => {
   const navigate = useNavigate();
-  const { Auth, AccessToken } = useLayout();
+  const { Auth, AccessToken, GlobalConfig } = useLayout();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["VouchersList", AccessToken],
@@ -125,13 +125,18 @@ const CustomerDiary = () => {
                       <div className="text-sm">
                         <div className="h-3 bg-gray-200 w-32"></div>
                       </div>
-                      <button
-                        className="bg-app text-white h-11 px-4 rounded opacity-50"
-                        type="button"
-                        disabled
-                      >
-                        Thanh toán
-                      </button>
+                      {
+                        !GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+                          <button
+                            className="bg-app text-white h-11 px-4 rounded opacity-50"
+                            type="button"
+                            disabled
+                          >
+                            Thanh toán
+                          </button>
+                        )
+                      }
+
                     </div>
                   </div>
                 ))}

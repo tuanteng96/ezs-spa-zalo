@@ -8,8 +8,11 @@ import { formatString } from "../../../utils/formatString";
 import { Icon } from "zmp-ui";
 import { PickerOrder } from "./PickerOrder";
 import { PickerOrderPayted } from "./PickerOrderPayted";
+import { useLayout } from "../../../layout/LayoutProvider";
 
 export const OrderItem = ({ item }) => {
+  const { Auth, AccessToken, GlobalConfig } = useLayout();
+
   const checkStatus = (item) => {
     if (item.Status === "finish") {
       return "success";
@@ -25,9 +28,9 @@ export const OrderItem = ({ item }) => {
 
   let TotalDebt = Math.abs(
     item.thanhtoan?.tong_gia_tri_dh -
-      item.thanhtoan?.thanh_toan_tien -
-      item.thanhtoan?.thanh_toan_vi -
-      item.thanhtoan?.thanh_toan_ao,
+    item.thanhtoan?.thanh_toan_tien -
+    item.thanhtoan?.thanh_toan_vi -
+    item.thanhtoan?.thanh_toan_ao,
   );
 
   let TotalProd =
@@ -106,21 +109,27 @@ export const OrderItem = ({ item }) => {
             <span className="text-muted">Thanh toán thành công</span>
           )}
         </div>
-        <PickerOrderPayted item={item} TotalDebt={TotalDebt}>
-          {({ open }) => (
-            <button
-              onClick={open}
-              className={clsx(
-                "bg-app text-white h-11 px-4 rounded",
-                !(item.Status !== "cancel" && TotalDebt > 0) && "opacity-50",
+        {
+          !GlobalConfig?.ZALO?.VisibleCheckOutSDK && (
+            <PickerOrderPayted item={item} TotalDebt={TotalDebt}>
+              {({ open }) => (
+                <button
+                  onClick={open}
+                  className={clsx(
+                    "bg-app text-white h-11 px-4 rounded",
+                    !(item.Status !== "cancel" && TotalDebt > 0) && "opacity-50",
+                  )}
+                  type="button"
+                  disabled={!(item.Status !== "cancel" && TotalDebt > 0)}
+                >
+                  Thanh toán
+                </button>
               )}
-              type="button"
-              disabled={!(item.Status !== "cancel" && TotalDebt > 0)}
-            >
-              Thanh toán
-            </button>
-          )}
-        </PickerOrderPayted>
+            </PickerOrderPayted>
+          )
+        }
+
+
       </div>
     </div>
   );
