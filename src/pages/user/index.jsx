@@ -104,7 +104,7 @@ const UserPage = () => {
     openSnackbar({
       text: `Thực hiện lấy mã định danh OTP sau 5s ...`,
       type: "countdown",
-      duration: 5000,
+      duration: 3000,
       action: {
         text: "Hủy",
         close: true,
