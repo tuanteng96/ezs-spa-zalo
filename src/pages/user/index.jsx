@@ -8,11 +8,11 @@ import { formatString } from "../../utils/formatString";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import ProtectedNavLink from "../../layout/_core/ProtectedNavLink";
 import ConfigsAPI from "../../api/configs.api";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import AuthAPI from "../../api/auth.api";
 
 const UserPage = () => {
-  const { Auth, onLogout, GlobalConfig } = useLayout();
+  const { Auth, onLogout, GlobalConfig, AccessToken } = useLayout();
   const { ZaloInfo } = useConfigs();
   const navigate = useNavigate();
 
@@ -90,6 +90,76 @@ const UserPage = () => {
     },
     enabled: Boolean(Number(Auth?.ID) && !GlobalConfig?.Admin?.an_sap_len_cap),
   });
+
+  const sendOTPMutation = useMutation({
+    mutationFn: async (body) => {
+      let rs = await AuthAPI.getTranOTP(body);
+      return rs
+    },
+  });
+
+  const getUserOTP = () => {
+    let del = true
+
+    openSnackbar({
+      text: `Thực hiện lấy mã định danh OTP sau 5s ...`,
+      type: "countdown",
+      duration: 5000,
+      action: {
+        text: "Hủy",
+        close: true,
+        onClick: () => {
+          del = false;
+        },
+      },
+      onClose: () => {
+        if (!del) return
+
+        let obj = {
+          data: {
+            TranOTP: {
+              MemberID: Auth?.ID,
+              IsNoti: true,
+              IsZALOZNS: false,
+              IsSMS: false,
+            },
+            viewCode: true,
+          },
+          AccessToken
+        };
+
+        sendOTPMutation.mutate(obj, {
+          onSuccess: (rs) => {
+            if (rs?.data?.result?.SecureCode) {
+              openSnackbar({
+                text: `Mã OTP định danh của bạn là ${rs?.data?.result?.SecureCode}`,
+                type: "success",
+                action: {
+                  text: "Copy",
+                  close: true,
+                  onClick: async () => {
+                    await copyText(rs?.data?.to?.Code)
+                    openSnackbar({
+                      text: "Đã Copy mã OTP định danh.",
+                      type: "success",
+                    })
+                  }
+                },
+                duration: 5000
+              });
+            }
+            else {
+              openSnackbar({
+                text: "Không thể thấy được OTP định danh.",
+                type: "error",
+              })
+            }
+
+          },
+        });
+      },
+    });
+  }
 
   return (
     <Page className="page" hideScrollbar>
@@ -190,6 +260,24 @@ const UserPage = () => {
               </div>
             )}
           </ProtectedNavLink>
+
+          <div
+            className="flex items-center justify-between cursor-pointer border-b last:border-0 pb-3.5 mb-3.5 last:pb-0 last:mb-0"
+            onClick={() => {
+              if (Auth?.ID) {
+                getUserOTP()
+              }
+              else {
+                navigate(`${pathname}?fromProtected=${pathname}`)
+              }
+            }}
+          >
+            <div className="font-medium">OTP định danh</div>
+            <div className="text-muted">
+              <Icon icon="zi-chevron-right" />
+            </div>
+          </div>
+
           <ProtectedNavLink to="/user/customer-rating">
             {({ onClick }) => (
               <div

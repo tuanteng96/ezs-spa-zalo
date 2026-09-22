@@ -112,6 +112,16 @@ const AuthAPI = {
           },
         },
       );
+    },
+    getTranOTP({ data, AccessToken }) {
+      return http.post(
+        `/api/v3/TranOTP@Send`, JSON.stringify(data),
+        {
+          headers: {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        },
+      );
     }
 };
 
