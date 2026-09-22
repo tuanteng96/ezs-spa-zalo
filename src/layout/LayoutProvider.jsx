@@ -120,15 +120,15 @@ const LayoutProvider = ({ children }) => {
       return null;
     },
     onSuccess: (data) => {
-      AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQ1Mzc2IiwiVG9rZW5JZCI6IjEyMjMwMDgyOTIyMDAwMTAiLCJuYmYiOjE3ODc4ODQ5MDgsImV4cCI6MTg3NDI4NDkwOCwiaWF0IjoxNzg3ODg0OTA4fQ.jUtfe6cuDbu5QY8cPfVzqRTlGfU0_HOYcjaY5oAtLi0" })
-        .then(({ data }) => {
-          if (!data?.error) {
-            onSaveAuth(data);
-          } else {
-            onLogout();
-          }
-        })
-        .catch((error) => console.log(error));
+      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQ1Mzc2IiwiVG9rZW5JZCI6IjEyMjMwMDgyOTIyMDAwMTAiLCJuYmYiOjE3ODc4ODQ5MDgsImV4cCI6MTg3NDI4NDkwOCwiaWF0IjoxNzg3ODg0OTA4fQ.jUtfe6cuDbu5QY8cPfVzqRTlGfU0_HOYcjaY5oAtLi0" })
+      //   .then(({ data }) => {
+      //     if (!data?.error) {
+      //       onSaveAuth(data);
+      //     } else {
+      //       onLogout();
+      //     }
+      //   })
+      //   .catch((error) => console.log(error));
 
       getStorage({
         keys: ["AccessToken"],
