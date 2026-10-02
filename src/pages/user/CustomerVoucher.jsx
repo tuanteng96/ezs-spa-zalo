@@ -19,11 +19,11 @@ const CustomerVoucher = () => {
     queryKey: ["VouchersList", AccessToken],
     queryFn: async () => {
       const { data } = await AuthAPI.vouchers(Auth?.ID);
-      
+
       return [...(data?.data?.danh_sach ? data?.data?.danh_sach.filter(x => !(
         x?.Voucher?.VoucherMeta?.Perc > 0 &&
         x?.Voucher?.VoucherMeta?.MemberID > 0
-      )).reverse() : []), ...(data?.data?.contactMiniGame || []).filter((x) => x.Status !== 3)];
+      )).reverse() : []), ...(data?.data?.contactMiniGame || []).filter((x) => x.Status !== 3 && x.EndDate)];
     },
     enabled: Number(Auth?.ID) > 0,
   });

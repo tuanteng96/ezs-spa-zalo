@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getStorage, setStorage, removeStorage } from "zmp-sdk";
 import { ProcessENV } from "./process";
 
 /*
@@ -12,6 +13,46 @@ var clientMODE = true;
 var clientPROD = false;
 
 var log = true;
+
+// true: zmp-sdk storage; false: browser localStorage.
+const USE_ZMP_STORAGE = false;
+
+// Serialize saves/removals so an older save cannot restore a sent cart.
+let storageUpdates = Promise.resolve();
+
+async function getStoredValue(key) {
+    try {
+        await storageUpdates;
+        if (!USE_ZMP_STORAGE) return localStorage.getItem(key);
+        const values = await getStorage({ keys: [key] });
+        return values[key];
+    } catch (error) {
+        console.warn(`Unable to read storage: ${key}`, error);
+        return undefined;
+    }
+}
+
+function updateStoredValue(key, value, remove = false) {
+    storageUpdates = storageUpdates.then(() => {
+        if (USE_ZMP_STORAGE) {
+            return remove
+                ? removeStorage({ keys: [key] })
+                : setStorage({ data: { [key]: value } });
+        }
+        if (remove) {
+            localStorage.removeItem(key);
+        } else {
+            localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+        }
+    }).catch(error => {
+        console.warn(`Unable to update storage: ${key}`, error);
+    });
+    return storageUpdates;
+}
+
+function parseStoredValue(value) {
+    return typeof value === 'string' ? JSON.parse(value) : value;
+}
 
 function GlobalConfigPath(path, fn) {
 
@@ -290,19 +331,19 @@ var handlers = [
     {
         onUrl(url) {
 
-            // if (url.indexOf('api/v3/orderclient?') > -1) {
-            //     var p = urlParams(url) || {};
-            //     switch (p.cmd) {
-            //         case 'get':
-            //             //log && console.log('orderclient');
-            //             return true;
+            if (url.indexOf('/api/v3/orderclient?') > -1) {
+                var p = urlParams(url) || {};
+                switch (p.cmd) {
+                    case 'get':
+                        //log && console.log('orderclient');
+                        return true;
 
-            //     }
-            // }
+                }
+            }
 
-            // if (url.indexOf('/api/v3/VoucherClient?cmd=precheck&') > -1) {
-            //     return true;
-            // }
+            if (url.indexOf('/api/v3/VoucherClient?cmd=precheck&') > -1) {
+                return true;
+            }
 
 
             if (url.indexOf('/api/v3/app2?get=sv') > -1) {
@@ -1027,7 +1068,7 @@ ClientZ.interceptors.response.use(
 
                     }
                     //loi
-                    localStorage.removeItem(key);
+                    updateStoredValue(key, undefined, true);
                     console.log(`clientz:${name} error dataText=${dataText}`);
                 }
 
@@ -1164,104 +1205,102 @@ ClientZ.interceptors.response.use(
                 return;
             }
             busy = true;
-            try {
+            const request = async () => {
+                try {
 
-                if (memoryData) {
-                    var raw = memoryData;
-                    version = raw.version;
-                    data = raw.data;
-                    if (version) {
-                        timeout = timeoutHasData;
-                    }
-                    log && console.log('has memoryData **')
-                }
-                else {
-                    var lc = localStorage.getItem(key);
-                    if (lc) {
-                        var raw = getRawData(lc);
+                    if (memoryData) {
+                        var raw = memoryData;
                         version = raw.version;
                         data = raw.data;
                         if (version) {
                             timeout = timeoutHasData;
                         }
+                        log && console.log('has memoryData **')
                     }
-                }
-
-            } catch {
-
-            }
-
-            var opt = {
-                baseURL: window.SERVER,
-                headers: {
-                    "Content-type": "application/x-www-form-urlencoded"
-                }
-            };
-
-            if (timeout) opt.timeout = timeout;
-
-
-
-            var x = axios.create(opt);
-
-
-            x.get(`/clientz?v=${version}&includes=${includes}`).then(rs => {
-
-
-                //console.log(rs);
-                if (rs.status == 200) {
-                    try {
-                        //localStorage.setItem(key, rs.data);
-                    } catch (e) {
-                        log && console.log('Over quota Storage');
-
+                    else {
+                        var lc = await getStoredValue(key);
+                        if (lc) {
+                            var raw = getRawData(lc);
+                            version = raw.version;
+                            data = raw.data;
+                            if (version) {
+                                timeout = timeoutHasData;
+                            }
+                        }
                     }
 
-                    var raw = getRawData(rs.data);
-                    memoryData = raw;
-                    data = raw.data;
-                    version = raw.version;
-                    //resolve(raw.data);
-                    //callPending(true, raw.data);
+                } catch {
+
+                }
+
+                var opt = {
+                    baseURL: window.SERVER,
+                    headers: {
+                        "Content-type": "application/x-www-form-urlencoded"
+                    }
+                };
+
+                if (timeout) opt.timeout = timeout;
 
 
-                } else {
-                    if (data) {
-                        data.cachedBy = '' + rs.status;
-                        //resolve(data);
-                        //callPending(true, data);
+
+                var x = axios.create(opt);
+
+
+                return x.get(`/clientz?v=${version}&includes=${includes}`).then(async rs => {
+
+
+                    //console.log(rs);
+                    if (rs.status == 200) {
+                        var raw = getRawData(rs.data);
+                        memoryData = raw;
+                        data = raw.data;
+                        version = raw.version;
+                        if (data) await updateStoredValue(key, rs.data);
+                        //resolve(raw.data);
+                        //callPending(true, raw.data);
+
 
                     } else {
-                        data = null;
-                        //reject(e);
-                        //callPending(false, e);
+                        if (data) {
+                            data.cachedBy = '' + rs.status;
+                            //resolve(data);
+                            //callPending(true, data);
+
+                        } else {
+                            data = null;
+                            //reject(e);
+                            //callPending(false, e);
+                        }
                     }
-                }
-                if (data) {
-                    resolve(data);
-                    callPending(true, data);
-                    recent = {
-                        success: true,
-                        arg: data
+                    if (data) {
+                        resolve(data);
+                        callPending(true, data);
+                        recent = {
+                            success: true,
+                            arg: data
+                        }
+                    } else {
+                        reject(rs);
+                        callPending(false, rs);
+                        recent = {
+                            success: true,
+                            arg: rs
+                        }
                     }
-                } else {
-                    reject(rs);
-                    callPending(false, rs);
-                    recent = {
-                        success: true,
-                        arg: rs
-                    }
-                }
-                busy = false;
+                    busy = false;
 
-                //delay 1000s,chong lap lai api, trong thoi gian ngan
-                setTimeout(() => {
-                    recent = null;
-                }, 1000)
+                    //delay 1000s,chong lap lai api, trong thoi gian ngan
+                    setTimeout(() => {
+                        recent = null;
+                    }, 1000)
 
 
 
-            }).catch(e => {
+                });
+            };
+
+            request().catch(e => {
                 //console.error('ClientZData', e);
                 busy = false;
                 if (data) {
@@ -2037,7 +2076,7 @@ function paging(lst, pi, ps) {
                 promNames: [],
                 applies: [],
                 nons: [],
-                stockID: parseInt(localStorage.getItem('CurrentStockID')),
+                stockID: parseInt(window.StockID ?? storedStockID) || 0,
                 memberID: parseInt(user.acc_id)
             };
 
@@ -2127,16 +2166,7 @@ function paging(lst, pi, ps) {
     };
 
     function getMember() {
-        try {
-            var m = window.Member;
-            if (!m) m = { acc_id: 0 };
-            return m;
-        } catch {
-
-        }
-        return {
-            acc_id: 0
-        };
+        return GetMember();
     }
 
     var Options = [];
@@ -3582,7 +3612,7 @@ function paging(lst, pi, ps) {
             member.AFFMemberID = vAffid;
             var user = getMember();
             user.AFFMemberID = vAffid;
-            // localStorage.setItem('user', JSON.stringify(user));
+            // updateStoredValue('user', user);
         }
     }
 
@@ -3671,6 +3701,7 @@ function paging(lst, pi, ps) {
     }
     function reset() {
         items.length = 0;
+        
         for (var k in order) {
             switch (typeof order[k]) {
                 case 'number':
@@ -3690,17 +3721,25 @@ function paging(lst, pi, ps) {
         }
     }
 
-    //only one first
-    var orderz = localStorage.getItem('orderz');
-    if (orderz) {
-        try {
-            var arr = JSON.parse(orderz);
+    var storedStockID = 0;
+    // Restore once before any request can mutate the cart.
+    const orderReady = Promise.all([
+        getStoredValue('orderz'),
+        getStoredValue('CurrentStockID'),
+    ]).then(([savedOrder, savedStock]) => {
+        const stock = parseStoredValue(savedStock);
+        storedStockID = parseInt(stock?.ID ?? stock) || 0;
+        if (!savedOrder) return;
+        const arr = parseStoredValue(savedOrder);
+        if (Array.isArray(arr) && arr[0] && typeof arr[0] === 'object' && Array.isArray(arr[1])) {
             order = arr[0];
             items = arr[1];
-        } catch {
-
+            id = Math.max(id, (Number(order.ID) || 0) + 1,
+                ...items.map(item => (Number(item.ID) || 0) + 1));
         }
-    }
+    }).catch(error => {
+        console.warn('Unable to restore cart', error);
+    });
 
     window.OrderClient = function () {
         var args = arguments;
@@ -3708,7 +3747,7 @@ function paging(lst, pi, ps) {
 
             calcLog.length = 0;
 
-            ClientZData().then(_data => {
+            Promise.all([orderReady, ClientZData()]).then(([, _data]) => {
                 //log && console.log('_data',_data);
 
                 try {
@@ -3716,10 +3755,11 @@ function paging(lst, pi, ps) {
 
                     var url = args[0];
                     var opt = args[1] || {};
+                    if (typeof opt === 'string') opt = JSON.parse(opt);
                     var Param = urlParams(url);
-                    log && console.log('input', opt, Param);
+                    //log && console.log('input', opt, Param);
                     window.url = url;
-
+                    
                     MemberGroups = null;
                     CurrentMemberID = null;
 
@@ -3763,15 +3803,15 @@ function paging(lst, pi, ps) {
                                     data: voucherCont
                                 }
                             });
-                        })
+                        }).catch(reject)
                         return;
                     }
-                    
+                        
                     if (order.SenderID != member.ID) {
                         reset();
                     }
 
-
+                    
                     //log && console.log('vinput', Param, Param.cmd, opt);
 
 
@@ -3779,7 +3819,6 @@ function paging(lst, pi, ps) {
                     var od = opt.order || {};
                     var isSend = false;
                     var voucherChange = opt.voucherForOrder === true ? true : false;
-
 
 
                     if (typeof od === 'object') {
@@ -3793,7 +3832,7 @@ function paging(lst, pi, ps) {
                             order[k] = od[k];
                         }
                     }
-
+                    
                     if (opt && opt.forceStockID) {
                         var stockID = parseInt(opt.forceStockID) || 0;
                         if (order.StockID != stockID) {
@@ -3817,7 +3856,7 @@ function paging(lst, pi, ps) {
 
                     function output(isend) {
 
-
+                        console.log("items", items)
                         order.VoucherCode = order.VCode;
                         var result = {
                             data: {
@@ -3832,18 +3871,19 @@ function paging(lst, pi, ps) {
                             }
                         }
 
+                        let saved;
                         if (isend) {
                             reset();
-                            // localStorage.removeItem('orderz');
+                            saved = updateStoredValue('orderz', undefined, true);
                         } else {
-                            // localStorage.setItem('orderz', JSON.stringify([order, items]));
+                            saved = updateStoredValue('orderz', [result.data.data.order, result.data.data.items]);
                         }
                         console.log('output', result, order.VoucherCode);
-                        resolve(result);
+                        saved.then(() => resolve(result));
 
                     }
 
-                    var CurrentStockID = parseInt(window.StockID);
+                    var CurrentStockID = parseInt(window.StockID ?? storedStockID);
                     function fn() {
                         order.SenderAddress = member.HomeAddress || '';
                         order.SenderName = member.FullName || '';
@@ -3857,7 +3897,7 @@ function paging(lst, pi, ps) {
                         }
 
                         //log && console.log('VCode',order.VCode);
-
+                        
                         if (Array.isArray(opt.adds)) {
                             //opt= {"order":{"ID":0,"SenderID":32870,...},"adds":[{"ProdID":17597,"Qty":1}]}
                             opt.adds.forEach(add => {
@@ -3902,7 +3942,7 @@ function paging(lst, pi, ps) {
                                 isCalc = true;
                             });
                         }
-
+                        
                         if (CurrentStockID && CurrentStockID != order.StockID) {
                             log && console.log('isCalc by #stocks');
                             order.StockID = CurrentStockID;
@@ -3913,7 +3953,7 @@ function paging(lst, pi, ps) {
                         }
 
                         //log && console.log('Vcode', order.VCode);
-
+                        
                         if (isCalc) {
                             log && console.log('calc');
                             calc();
@@ -3921,15 +3961,15 @@ function paging(lst, pi, ps) {
 
                         output();
                     }
-
+                    
                     if (isSend) {
                       
-                        rawAxios().post(`/api/v3/orderclient24@Send?token=${Member.token}`, {
+                        rawAxios().post(`/api/v3/orderclient24@Send?token=${member.token || Param.token || ''}`, JSON.stringify({
                             client: {
                                 items: items,
                                 order: order,
                             }
-                        }).then(rs => {
+                        })).then(rs => {
                             log && console.log('rs', rs);
                             if (rs.data.errors) {
                                 order.Status = '';
@@ -3959,7 +3999,8 @@ function paging(lst, pi, ps) {
 
 
                         }).catch(e => {
-                            //reject(e);
+                            order.Status = '';
+                            reject(e);
                             console.error(e);
                         });
 
@@ -3968,7 +4009,7 @@ function paging(lst, pi, ps) {
 
                     isCalc = voucherChange ? true : isCalc;
 
-                    log && console.log('isCalc', isCalc);
+                    //log && console.log('isCalc', isCalc);
 
                     if (!isCalc) {
 
@@ -3977,21 +4018,19 @@ function paging(lst, pi, ps) {
 
                         }
                     }
-                    
+                        
                     if (voucherChange) {
                         if (order.VCode == '' && !opt.voucherForOrder) {
                             order.Voucher = null;
                             fn();
                         } else {
                             //log && console.log('getServerVouchers');
-                            getServerVouchers(vcodeInput).then(fn);
+                            getServerVouchers(vcodeInput).then(fn).catch(reject);
                         }
 
                     } else {
                         fn();
                     }
-
-
 
                 } catch (e) {
                     reject({
@@ -4082,9 +4121,8 @@ class CategoryBLL {
 
 function GetMember() {
     try {
-        var m = window.Member;
-        if (!m) m = { acc_id: 0 };
-        return m;
+        var m = window.Member || {};
+        return { ...m, acc_id: m.acc_id ?? m.ID ?? 0 };
     } catch {
 
     }
@@ -4109,7 +4147,7 @@ function getAuthenForFirst() {
         //             fetch(`${(window.SERVER || '')}/app/index.aspx?cmd=authen&token=${m.token}&deviceid=&v=`)
         //                 .then(x => x.json())
         //                 .then(m => {
-        //                     localStorage.setItem('user', JSON.stringify(m));
+        //                     updateStoredValue('user', m);
         //                     rs(m)
         //                 })
         //                 .catch(rj);
@@ -4130,12 +4168,12 @@ function getAuthenForFirst() {
 
 }
 function GetVouchers(mid, vcodeInput) {
-    console.log('GetVouchers');
+    //console.log('GetVouchers');
     return new Promise((resolve, reject) => {
-      console.log('window.Member', window.Member)
+      //console.log('window.Member', window.Member)
         var m = GetMember();
 
-        console.log('m', m);
+        //console.log('m', m);
 
         function perc(v) {
             try {
@@ -4255,7 +4293,7 @@ function GetVouchers(mid, vcodeInput) {
                 var IgnoreIsVisibled = false;// only on app
 
                 function _callback(vAdd) {
-                    ClientZData().then(data => {
+                    ClientZData().then(async data => {
                         var categories = data.getType('CategoryEnt');
                         var products = data.getType('ProductEnt');
                         var memberGroups = data.getType('MemberGroupEnt');
@@ -4436,10 +4474,10 @@ function GetVouchers(mid, vcodeInput) {
 
                         var ver = '';
                         var preDataMiniGame = [];
-                        var d = localStorage.getItem('contactMiniGame');
+                        var d = await getStoredValue('contactMiniGame');
                         if (d) {
                             try {
-                                var arr = JSON.parse(d);
+                                var arr = parseStoredValue(d);
                                 arr = Array.isArray(arr) ? arr : [];
                                 preDataMiniGame = arr[0];
                                 if (arr.length > 1) {
@@ -4462,8 +4500,9 @@ function GetVouchers(mid, vcodeInput) {
                                 }
                                 return x.json();
 
-                            }).then(arr => {
-                                //localStorage.setItem('contactMiniGame', JSON.stringify(arr));
+                            }).then(async arr => {
+                                if (!arr) return;
+                                await updateStoredValue('contactMiniGame', arr);
                                 rs.data.data.contactMiniGame = arr[0];
 
                                 resolve(rs);
@@ -4575,16 +4614,16 @@ function GetVouchers(mid, vcodeInput) {
         }
 
         var from = new Date().getTime();
-        var keyLocalStorage = 'voucherData';
+        var voucherStorageKey = 'voucherData';
 
-        function fn() {
+        async function fn() {
 
             var ver = '';
             var preData = [];
-            var d = localStorage.getItem(keyLocalStorage);
+            var d = await getStoredValue(voucherStorageKey);
             if (d) {
                 try {
-                    var arr = JSON.parse(d);
+                    var arr = parseStoredValue(d);
                     arr = Array.isArray(arr) ? arr : [];
                     preData = arr;
                     if (arr.length > 2) {
@@ -4614,7 +4653,7 @@ function GetVouchers(mid, vcodeInput) {
                 //console.log('get voucher', x.headers);
                 return x.json()
 
-            }).then(rt => {
+            }).then(async rt => {
 
                 if (!rt) {
                     //ko ro ly do
@@ -4627,7 +4666,7 @@ function GetVouchers(mid, vcodeInput) {
                 } else {
                     if (Array.isArray(rt)) {
 
-                        //localStorage.setItem(keyLocalStorage, JSON.stringify(rt));
+                        await updateStoredValue(voucherStorageKey, rt);
 
                         var arr = rt;
                         if (arr[0] === true || arr[1] === true) {
@@ -4829,7 +4868,7 @@ function Subscribe(args) {
     } else {
         //underfine
         try {
-            var _user = JSON.parse(localStorage.getItem('user') || '{}');
+            var _user = GetMember();
             if (typeof _user == 'object') {
                 user = _user;
             }

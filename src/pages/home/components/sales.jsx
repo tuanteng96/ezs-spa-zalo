@@ -11,7 +11,7 @@ const SalesBanner = ({ data }) => {
   return (
     <div className="pb-3">
       <Swiper
-        className="aspect-square"
+        //className="aspect-square"
         modules={[Pagination, Autoplay]}
         pagination={{
           clickable: true,
@@ -31,8 +31,8 @@ const SalesBanner = ({ data }) => {
                 to={item.Link}
               >
                 <ImageLazy
-                  wrapperClassName="aspect-square !block"
-                  className="aspect-square w-full object-cover rounded-sm"
+                  wrapperClassName="!block"
+                  className="w-full object-cover rounded-sm"
                   effect="blur"
                   src={toAbsolutePath(item.FileName)}
                 />

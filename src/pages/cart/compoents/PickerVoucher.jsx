@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button, Icon, Input, Sheet, useSnackbar } from "zmp-ui";
 import { Controller, useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { useLayout } from "../../../layout/LayoutProvider";
 import CartAPI from "../../../api/cart.api";
@@ -12,6 +12,7 @@ import { formatString } from "../../../utils/formatString";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { checkDateDiff } from "../../../utils/date";
+import AuthAPI from "../../../api/auth.api";
 
 const schemaVoucher = yup
   .object({
@@ -106,12 +107,13 @@ export const PickerVoucher = ({ children }) => {
   const { AccessToken, Auth, GlobalConfig } = useLayout();
   const { Orders } = useCart();
   const [visible, setVisible] = useState(false);
-  const { handleSubmit, control } = useForm({
+
+  const { handleSubmit, control, reset } = useForm({
     defaultValues: {
       order: {
         ID: 0,
         SenderID: Auth?.ID,
-        VCode: Orders?.order?.VCode,
+        VCode: Orders?.order?.VCode || "",
       },
       addProps: "ProdTitle",
       deleteds: [],
@@ -119,61 +121,62 @@ export const PickerVoucher = ({ children }) => {
     },
   });
 
+  useEffect(() => {
+    reset({
+      order: {
+        ID: 0,
+        SenderID: Auth?.ID,
+        VCode: Orders?.order?.VCode || "",
+      },
+      addProps: "ProdTitle",
+      deleteds: [],
+      edits: [],
+    })
+  }, [visible])
+
+  const { data } = useQuery({
+    queryKey: ["OrderVouchers", Auth, AccessToken],
+    queryFn: async () => {
+      let params = {
+        order: {
+          ID: 0,
+          SenderID: Auth?.ID,
+          VCode: null,
+        },
+        addProps: "ProdTitle",
+        voucherForOrder: true,
+      };
+
+      const minigame = await AuthAPI.getVoucher({
+        AccessToken, MemberID: Auth?.ID
+      })
+      const rs = await CartAPI.list({
+        token: AccessToken,
+        body: params,
+      });
+
+      let contactMiniGame = minigame?.data?.data?.contactMiniGame ? minigame?.data?.data?.contactMiniGame.filter(x => x.Status !== 3 && x.EndDate) : []
+
+      let vouchers = rs?.data?.data?.vouchers;
+
+      vouchers = Array.isArray(vouchers) ? [...vouchers].filter((x) => !(
+        x?.Voucher?.VoucherMeta?.Perc > 0 &&
+        x?.Voucher?.VoucherMeta?.MemberID > 0
+      )).reverse() : []
+
+      vouchers = contactMiniGame.concat(vouchers)
+
+      return vouchers;
+    },
+    enabled: visible && !!AccessToken && Number(Auth?.ID) > 0,
+  });
+
   const queryClient = useQueryClient();
 
   const voucherCartMutation = useMutation({
     mutationFn: async (body) => {
-      let data = null;
-      if (body?.body?.order?.VCode) {
-        if (body?.body?.order?.VCode.includes("-")) {
-          let rs = await CartAPI.orderVdeCode({
-            Code: body?.body?.order?.VCode,
-            Token: AccessToken
-          });
-
-          if (rs?.data?.Item1) {
-            body.body.order.VCode = `${rs?.data?.Item1}-${rs?.data?.Item2}`;
-          } else {
-            data = {
-              error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
-            }
-          }
-        }
-        else {
-          if (Number(GlobalConfig?.Admin?.voucherSkip2) === 1) {
-            let rs = await CartAPI.orderGetCode({
-              Code: body?.body?.order?.VCode,
-              Token: AccessToken
-            });
-            if (rs?.data?.Code && !rs?.data?.Context?.ReCode) {
-            } else {
-              data = {
-                error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
-              }
-            }
-          }
-
-          if (Number(GlobalConfig?.Admin?.voucherSkip2) === 2) {
-            let rs = await CartAPI.orderGetCode({
-              Code: body?.body?.order?.VCode,
-              Token: AccessToken
-            });
-
-            if (rs?.data?.Code) {
-              body.body.order.VCode = rs?.data?.Context?.ReCode || rs?.data?.Code;
-            } else {
-              data = {
-                error: "Mã giảm giá không hợp lệ hoặc đã hết hạn."
-              }
-            }
-          }
-        }
-      }
-
-      if (!data?.error) {
-        data = await CartAPI.list(body);
-        await queryClient.invalidateQueries({ queryKey: ["ListsCart"] })
-      }
+      let data = await CartAPI.list(body);
+      await queryClient.invalidateQueries({ queryKey: ["ListsCart"] })
       return data;
     },
   });
@@ -241,8 +244,8 @@ export const PickerVoucher = ({ children }) => {
                 control={control}
                 render={({ field: { ref, ...field }, fieldState }) => (
                   <>
-                    {!Orders?.vouchers ||
-                      (Orders?.vouchers.length === 0 && (
+                    {!data ||
+                      (data.length === 0 && (
                         <div className="flex flex-col items-center px-5 py-12">
                           <svg
                             className="w-16 mb-5"
@@ -282,95 +285,188 @@ export const PickerVoucher = ({ children }) => {
                           </div>
                         </div>
                       ))}
-                    {Orders?.vouchers &&
-                      Orders.vouchers.map((item, index) => (
-                        <div
-                          className="border shadow-3xl border-l-0 rounded-sm overflow-hidden flex mb-3 last:mb-0"
-                          key={index}
-                          onClick={() =>
-                            field.onChange(
-                              field.value === item.Code ? "" : item.Code,
-                            )
-                          }
-                        >
-                          <div className="w-[6.625rem] h-[6.625rem] relative">
+                    {data &&
+                      data.map((item, index) => {
+                        if (item.Type === "contact") {
+                          return (
                             <div
-                              style={{
-                                background:
-                                  "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
-                                borderBottom:
-                                  "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
-                                borderBottomLeftRadius: "0.125rem",
-                                borderTop: "0.0625rem solid #70000A",
-                                borderTopLeftRadius: "0.125rem",
-                                height: "100%",
-                                left: 0,
-                                overflow: "hidden",
-                                position: "absolute",
-                                top: 0,
-                                width: "100%",
+                              className="border shadow-3xl border-l-0 rounded-sm overflow-hidden flex mb-3 last:mb-0"
+                              key={index}
+                              onClick={() => {
+                                openSnackbar({
+                                  text: "Liên hệ để sử dụng Voucher này.",
+                                  type: "warning",
+                                  duration: 2000,
+                                });
                               }}
                             >
+                              <div className="w-[6.625rem] h-[6.625rem] relative">
+                                <div
+                                  style={{
+                                    background:
+                                      "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
+                                    borderBottom:
+                                      "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
+                                    borderBottomLeftRadius: "0.125rem",
+                                    borderTop: "0.0625rem solid #70000A",
+                                    borderTopLeftRadius: "0.125rem",
+                                    height: "100%",
+                                    left: 0,
+                                    overflow: "hidden",
+                                    position: "absolute",
+                                    top: 0,
+                                    width: "100%",
+                                  }}
+                                >
+                                  <div
+                                    className="flex items-center justify-center"
+                                    style={{
+                                      background:
+                                        "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
+                                      bottom: "calc(0.25rem - 0.0625rem)",
+                                      position: "absolute",
+                                      top: "calc(0.25rem - 0.0625rem)",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <img
+                                      className="aspect-square w-14"
+                                      src={GiftSVG}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="px-4 py-3 flex-1">
+                                <div className="text-lg font-bold mb-2 text-app">
+                                  {item.Title}
+                                </div>
+                                <div className="font-semibold">
+                                  {item.Content}
+                                </div>
+                                <div className="text-sm text-gray-600">
+
+                                  {!item.EndDate ? (
+                                    "Hạn sử dụng vĩnh viễn"
+                                  ) : (
+                                    <>
+                                      Sử dụng đến {moment(item.EndDate).format("HH:mm DD-MM-YYYY")}
+                                    </>
+                                  )}
+
+                                </div>
+                              </div>
+                              <div className="pr-4 flex items-center">
+                                <div
+                                  className={clsx(
+                                    "w-5 h-5 rounded-full border shadow-3xl relative transition",
+                                    field.value === item.Code
+                                      ? "border-app bg-app"
+                                      : "border-gray-500",
+                                  )}
+                                >
+                                  <Icon
+                                    className={clsx(
+                                      "text-white !absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 !text-[16px]",
+                                      field.value === item.Code
+                                        ? "opacity-100"
+                                        : "opacity-0",
+                                    )}
+                                    icon="zi-check"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return (
+                          <div
+                            className="border shadow-3xl border-l-0 rounded-sm overflow-hidden flex mb-3 last:mb-0"
+                            key={index}
+                            onClick={() =>
+                              field.onChange(
+                                field.value === item.Code ? "" : item.Code,
+                              )
+                            }
+                          >
+                            <div className="w-[6.625rem] h-[6.625rem] relative">
                               <div
-                                className="flex items-center justify-center"
                                 style={{
                                   background:
-                                    "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
-                                  bottom: "calc(0.25rem - 0.0625rem)",
+                                    "linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - 0.25rem),#70000A calc(100% - 0.25rem)) 0 0 /0.0625rem 100% no-repeat,linear-gradient(180deg,#70000A 0.25rem,transparent 0,transparent calc(100% - var(--vc-card-sawtooth-margin, .25rem)),#70000A calc(100% - 0.25rem)) 0 0/100% 100% no-repeat",
+                                  borderBottom:
+                                    "0.0625rem solid var(--vc-card-left-border-color,#e8e8e8)",
+                                  borderBottomLeftRadius: "0.125rem",
+                                  borderTop: "0.0625rem solid #70000A",
+                                  borderTopLeftRadius: "0.125rem",
+                                  height: "100%",
+                                  left: 0,
+                                  overflow: "hidden",
                                   position: "absolute",
-                                  top: "calc(0.25rem - 0.0625rem)",
+                                  top: 0,
                                   width: "100%",
                                 }}
                               >
-                                <img
-                                  className="aspect-square w-14"
-                                  src={GiftSVG}
+                                <div
+                                  className="flex items-center justify-center"
+                                  style={{
+                                    background:
+                                      "linear-gradient(180deg,transparent calc(0.1875rem*2),#70000A 0) 0 0.0625rem /0.0625rem calc(0.1875rem*2 + 0.0625rem) repeat-y,radial-gradient(circle at 0 0.1875rem,transparent 0,transparent calc(0.1875rem - 0.0625rem),#70000A 0,#70000A 0.1875rem,#70000A 0) 0 0.0625rem /100% calc(0.1875rem*2 + 0.0625rem) repeat-y",
+                                    bottom: "calc(0.25rem - 0.0625rem)",
+                                    position: "absolute",
+                                    top: "calc(0.25rem - 0.0625rem)",
+                                    width: "100%",
+                                  }}
+                                >
+                                  <img
+                                    className="aspect-square w-14"
+                                    src={GiftSVG}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                            <div className="px-4 py-3 flex-1">
+                              <div className="text-lg font-bold mb-2 text-app">
+                                Mã {item.Code}
+                              </div>
+                              <div className="font-semibold">
+                                Ưu đãi
+                                <span className="pl-1">
+                                  {item.Discount > 100
+                                    ? formatString.formatVND(item.Discount)
+                                    : item.Discount + "%"}
+                                </span>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                {item.EndDate === null
+                                  ? "Hạn sử dụng vĩnh viễn"
+                                  : `Hạn sử dụng còn ${checkDateDiff(
+                                    item.EndDate,
+                                  )} ngày`}
+                              </div>
+                            </div>
+                            <div className="pr-4 flex items-center">
+                              <div
+                                className={clsx(
+                                  "w-5 h-5 rounded-full border shadow-3xl relative transition",
+                                  field.value === item.Code
+                                    ? "border-app bg-app"
+                                    : "border-gray-500",
+                                )}
+                              >
+                                <Icon
+                                  className={clsx(
+                                    "text-white !absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 !text-[16px]",
+                                    field.value === item.Code
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                  icon="zi-check"
                                 />
                               </div>
                             </div>
                           </div>
-                          <div className="px-4 py-3 flex-1">
-                            <div className="text-lg font-bold mb-2 text-app">
-                              Mã {item.Code}
-                            </div>
-                            <div className="font-semibold">
-                              Ưu đãi
-                              <span className="pl-1">
-                                {item.Discount > 100
-                                  ? formatString.formatVND(item.Discount)
-                                  : item.Discount + "%"}
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {item.EndDate === null
-                                ? "Hạn sử dụng vĩnh viễn"
-                                : `Hạn sử dụng còn ${checkDateDiff(
-                                  item.EndDate,
-                                )} ngày`}
-                            </div>
-                          </div>
-                          <div className="pr-4 flex items-center">
-                            <div
-                              className={clsx(
-                                "w-5 h-5 rounded-full border shadow-3xl relative transition",
-                                field.value === item.Code
-                                  ? "border-app bg-app"
-                                  : "border-gray-500",
-                              )}
-                            >
-                              <Icon
-                                className={clsx(
-                                  "text-white !absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 !text-[16px]",
-                                  field.value === item.Code
-                                    ? "opacity-100"
-                                    : "opacity-0",
-                                )}
-                                icon="zi-check"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                   </>
                 )}
               />
