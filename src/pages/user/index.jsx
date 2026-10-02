@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Icon, Page, Text, Modal, useSnackbar } from "zmp-ui";
 import { useLayout } from "../../layout/LayoutProvider";
@@ -10,11 +10,14 @@ import ProtectedNavLink from "../../layout/_core/ProtectedNavLink";
 import ConfigsAPI from "../../api/configs.api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import AuthAPI from "../../api/auth.api";
+import PickerOTP from "./components/PickerOTP";
 
 const UserPage = () => {
   const { Auth, onLogout, GlobalConfig, AccessToken } = useLayout();
   const { ZaloInfo } = useConfigs();
   const navigate = useNavigate();
+
+  const otpRef = useRef()
 
   const { openSnackbar } = useSnackbar();
 
@@ -102,7 +105,7 @@ const UserPage = () => {
     let del = true
 
     openSnackbar({
-      text: `Thực hiện lấy mã định danh OTP sau 5s ...`,
+      text: `Thực hiện lấy mã định danh OTP sau 3s ...`,
       type: "countdown",
       duration: 3000,
       action: {
@@ -131,6 +134,7 @@ const UserPage = () => {
         sendOTPMutation.mutate(obj, {
           onSuccess: (rs) => {
             if (rs?.data?.result?.SecureCode) {
+              otpRef?.current?.open(rs?.data?.result?.SecureCode)
               openSnackbar({
                 text: `Mã OTP định danh của bạn là ${rs?.data?.result?.SecureCode}`,
                 type: "success",
@@ -267,6 +271,7 @@ const UserPage = () => {
           </ProtectedNavLink>
           {
             showOTP && (
+              <>
               <div
                 className="flex items-center justify-between cursor-pointer border-b last:border-0 pb-3.5 mb-3.5 last:pb-0 last:mb-0"
                 onClick={() => {
@@ -283,6 +288,8 @@ const UserPage = () => {
                   <Icon icon="zi-chevron-right" />
                 </div>
               </div>
+              <PickerOTP ref={otpRef} />
+              </>
             )
           }
           {
