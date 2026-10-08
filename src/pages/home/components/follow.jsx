@@ -33,7 +33,7 @@ const Follow = () => {
       <div className="w-14 relative">
         <img
           className="rounded-full aspect-square shadow-4xl border border-white"
-          src={toAbsolutePathAPI("/app2021/images/icon-zalo-oa.jpg")}
+          src={toAbsolutePathAPI("/brand/icon-zalo-oa.jpg")}
         />
         <div className="absolute text-primary left-2/4 -bottom-[10px] -translate-x-2/4 bg-white rounded-full w-6 h-6">
           <div className="absolute">
