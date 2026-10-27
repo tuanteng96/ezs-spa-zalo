@@ -103,8 +103,8 @@ export const NavigationOrder = ({ item, options, combo }) => {
         {item.IsService === 1 && <Link to={`/booking?prevState=${pathname}&initialValues=${JSON.stringify({
           RootIdS: [
             {
-              Title: combo[0].Product.Title,
-              ID: combo[0].Product.ID
+              Title: combo?.[0]?.Product?.Title || item?.Title,
+              ID: combo?.[0]?.Product?.ID || item?.ID
             }
           ]
         })}`} className={clsx("flex-1 text-white relative text-center flex items-center justify-center", (item.IsService === 1 ? (!GlobalConfig?.APP?.Services?.HideButtonOrder && item.IsDisplayPrice !== 0) : item.IsService !== 1) ? "bg-success" : "bg-app")}>

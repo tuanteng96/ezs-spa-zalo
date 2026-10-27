@@ -120,7 +120,7 @@ const LayoutProvider = ({ children }) => {
       return null;
     },
     onSuccess: (data) => {
-      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJNZW1iZXJFbnQiLCJJRCI6IjQ1Mzc2IiwiVG9rZW5JZCI6IjEyMjMwMDgyOTIyMDAwMTAiLCJuYmYiOjE3OTA5MzY2NjYsImV4cCI6MTg3NzMzNjY2NiwiaWF0IjoxNzkwOTM2NjY2fQ.sTNUtjDebMa9eqDAAolTcQX5PjE6hOJyznJRzmAje6c" })
+      // AuthAPI.authen({ token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBdXRoMlR5cGUiOiJVc2VyRW50IiwiSUQiOiIxIiwiVG9rZW5JZCI6IjEyMjk0MTAyMTE3MDA5OTYiLCJuYmYiOjE3OTI3NDI2NTIsImV4cCI6MTg3OTE0MjY1MiwiaWF0IjoxNzkyNzQyNjUyfQ.YrM6JBQNqkZwPDeH0u_3gRTejXNpq7GJAVnW7ZyZ4bg" })
       //   .then(({ data }) => {
       //     if (!data?.error) {
       //       onSaveAuth(data);
