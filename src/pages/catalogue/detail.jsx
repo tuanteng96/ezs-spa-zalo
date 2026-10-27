@@ -222,7 +222,7 @@ const CatalogueDetailPage = () => {
                   <div className="grid grid-cols-4 gap-3">
                     {data.combos.map((combo, i) => (
                       <NavLink
-                        to={`/catalogue/${combo.Product.ID}`}
+                        //to={`/catalogue/${combo.Product.ID}`}
                         state={{
                           prevState: pathname + search,
                         }}
