@@ -88,7 +88,8 @@ const BookingPage = () => {
             state?.formState?.UserServices.length > 0
             ? state?.formState.UserServices[0]
             : "",
-        PrevBook: state?.formState
+        PrevBook: state?.formState,
+        UserID: GlobalConfig?.Admin?.fwf_doi_dat_lich_giu_user ? state?.formState?.UserID : ""
       },
   });
   const { handleSubmit, setValue, reset, watch } = methods;
@@ -119,31 +120,6 @@ const BookingPage = () => {
 
   const onSubmit = (values) => {
     let Tags = [];
-
-    if (values.RootIdS && values.RootIdS.length > 0) {
-      if (
-        values.RootIdS.some(
-          (item) =>
-            item.OsBook > 0 ||
-            item.OsDoing > 0 ||
-            item.OsNew > 0 ||
-            item.OsBH > 0
-        )
-      ) {
-        Tags.push("Có thẻ");
-      }
-      if (
-        values.RootIdS.some(
-          (item) =>
-            item.OsBook === 0 &&
-            item.OsDoing === 0 &&
-            item.OsNew === 0 &&
-            item.OsBH === 0
-        )
-      ) {
-        Tags.push("Không thẻ");
-      }
-    }
 
     let newDesc =
       GlobalConfig?.APP?.SL_khach && values?.AmountPeople
