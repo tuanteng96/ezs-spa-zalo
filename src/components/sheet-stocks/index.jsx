@@ -26,8 +26,10 @@ const SheetStocks = () => {
     queryFn: async () => {
       const { data } = await MoreAPI.getStocks();
 
+      const StocksNotBook = GlobalConfig?.StocksNotBook || "";
+
       return data?.data?.all
-        ? data?.data?.all.filter((x) => x.ParentID !== 0)
+        ? data?.data?.all.filter((x) => x.ParentID !== 0 && !StocksNotBook?.includes(x.ID))
         : [];
     },
     onSuccess: (data) => {

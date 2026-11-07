@@ -32,7 +32,9 @@ const CustomerBranch = () => {
   let [ActiveDistricts, setActiveDistricts] = useState(null);
 
   useEffect(() => {
-    setListStocks((prevState) => [...prevState, ...Stocks]);
+    const StocksNotBook = GlobalConfig?.StocksNotBook || "";
+
+    setListStocks((prevState) => [...prevState, ...Stocks].filter(o => !StocksNotBook?.includes(o.ID)));
     if (Stocks && Stocks.length > 0) {
       setCrStock(Stocks[0]);
     }
