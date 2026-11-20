@@ -1,3 +1,5 @@
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
   purge: {
     enabled: true,
@@ -34,7 +36,7 @@ module.exports = {
         cate: "2px_0px_0px_2px_#e4ad2f",
       },
       fontFamily: {
-        cherry: ["Cherry Bomb One"],
+        sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
       aspectRatio: {
         "0/6": "0.6",

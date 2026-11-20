@@ -1,56 +1,61 @@
-import { TruckIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import moment from "moment";
 import React, { useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PullToRefresh from "react-simple-pull-to-refresh";
-import { Icon, Page, Text, useNavigate } from "zmp-ui";
-import AuthAPI from "../../api/auth.api";
+import { useSearchParams } from "react-router-dom";
+import { Page, Text, useNavigate } from "zmp-ui";
 import { useLayout } from "../../layout/LayoutProvider";
-import { formatArray } from "../../utils/formatArray";
+import RewardStar from "./components/RewardStar";
+import { getPointHistory, useStarExchange } from "./rewardHistory";
+
+const signedStars = new Intl.NumberFormat("vi-VN", { signDisplay: "always" });
 
 const CustomerPoints = () => {
   const navigate = useNavigate();
   const { Auth, AccessToken } = useLayout();
+  const [searchParams] = useSearchParams();
+  const isStars = searchParams.get("Sao") === "1";
+  const MemberID = Auth?.ID;
+  const enabled = Number(MemberID) > 0 && !!AccessToken;
 
   const elRoot = useRef();
 
-  const { data, fetchNextPage, isLoading, hasNextPage, isFetching, refetch } =
-    useInfiniteQuery({
-      queryKey: ["Points", { AccessToken }],
-      queryFn: async ({ pageParam = 1 }) => {
-        const { data } = await AuthAPI.points({
-          Token: AccessToken,
-          data: { "StockID": "", "DateStart": "", "DateEnd": "", "Pi": pageParam, "Ps": 10, "Order": "ID desc", "MemberID": Auth?.ID }
-        });
-        return data || [];
-      },
-      getNextPageParam: (lastPage) => {
-        return lastPage.Pi === lastPage.PCount || !lastPage.PCount
-          ? undefined
-          : lastPage.Pi + 1;
-      },
-      enabled: Number(Auth?.ID) > -1,
-    });
+  const points = useInfiniteQuery({
+    queryKey: ["Points", MemberID, AccessToken],
+    queryFn: ({ pageParam = 1 }) =>
+      getPointHistory({ MemberID, Token: AccessToken, Pi: pageParam }),
+    getNextPageParam: (lastPage, pages) => {
+      const page = Number(lastPage.Pi) || pages.length;
+      return page < Number(lastPage.PCount) ? page + 1 : undefined;
+    },
+    enabled: enabled && !isStars,
+  });
+  const stars = useStarExchange({
+    MemberID,
+    Token: AccessToken,
+    enabled: enabled && isStars,
+    includeHistory: true,
+  });
 
-  const List = formatArray.useInfiniteQuery(data?.pages, "lst");
+  const { isLoading, isError, refetch } = isStars ? stars : points;
+  const unit = isStars ? "sao" : "điểm";
+  const List = points.data?.pages.flatMap((page) => page.lst ?? []) ?? [];
 
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white border-b">
-        <div className="w-2/3 relative flex items-center h-full pl-10">
-          <div
+        <div className="relative flex items-center h-full pl-10 pr-4">
+          <button
+            type="button"
+            aria-label="Quay lại"
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
             onClick={() => navigate(-1)}
           >
-            <Icon icon="zi-chevron-left-header" className="text-app" />
-          </div>
-          <Text.Title className="text-app">
-            Tích điểm
-            {/* {data?.pages && data.pages.length > 0 && data.pages[0].TotalPoint > 0 && (
-              <span className="pl-1">({data.pages && data.pages.length > 0 && data.pages[0].TotalPoint} điểm)</span>
-            )} */}
-          </Text.Title>
+            <ChevronLeftIcon className="w-5 h-5" aria-hidden="true" />
+          </button>
+          <Text.Title className="text-gray-900">Lịch sử đổi {unit}</Text.Title>
         </div>
       </div>
       <>
@@ -77,7 +82,13 @@ const CustomerPoints = () => {
         {!isLoading && (
           <PullToRefresh className="ezs-ptr" onRefresh={refetch}>
             <div className="h-full overflow-auto no-scrollbar bg-white" id="scrollablePoints" ref={elRoot}>
-              {(!List || List.length === 0) && (
+              {isError && (
+                <div className="px-4 py-8 text-center" role="status">
+                  Không tải được lịch sử đổi {unit}.{" "}
+                  <button type="button" className="text-primary underline" onClick={() => refetch()}>Thử lại</button>
+                </div>
+              )}
+              {!isError && (isStars ? stars.history.length === 0 : !List?.length) && (
                 <div className="flex flex-col items-center px-5 py-12">
                   <svg
                     className="w-16 mb-5"
@@ -109,18 +120,34 @@ const CustomerPoints = () => {
                     </g>
                   </svg>
                   <div className="font-bold text-lg mb-px">
-                    "Hổng" có dữ liệu nào ?
+                    Chưa có lịch sử
                   </div>
                   <div className="text-center">
-                    Không tìm thấy dữ liệu tích điểm của bạn ...
+                    Bạn chưa có giao dịch {unit} trong lịch sử.
                   </div>
                 </div>
               )}
-              {List && List.length > 0 && (
+              {isStars && stars.history.map((item) => (
+                <div className="p-4 border-b last:border-0" key={`${item.type}-${item.id}`}>
+                  <div className="flex justify-between gap-2 mb-2.5 text-[15px] font-medium">
+                    <div>
+                      {item.date ? moment(item.date).format("DD/MM/YYYY") : "—"}
+                      <span className="px-1">-</span>#{item.id ?? "—"}
+                    </div>
+                    <div className={`whitespace-nowrap tabular-nums ${item.stars == null ? "" : item.type === "exchange" ? "text-danger" : "text-success"}`}>
+                      {item.stars == null ? "—" : signedStars.format(item.stars)} <RewardStar />
+                    </div>
+                  </div>
+                  <div className="text-gray-600 break-words" translate="no">{item.detail || "—"}</div>
+                </div>
+              ))}
+              {!isStars && List?.length > 0 && (
                 <InfiniteScroll
                   dataLength={List.length}
-                  next={fetchNextPage}
-                  hasMore={hasNextPage}
+                  next={() => {
+                    if (!points.isFetching) points.fetchNextPage();
+                  }}
+                  hasMore={!!points.hasNextPage && !isError}
                   loader={
                     <div className="px-3 py-3.5 rounded-sm cursor-pointer bg-white border-b">
                       <div className="h-3.5 bg-gray-200 rounded-full w-full animate-pulse"></div>
@@ -153,10 +180,10 @@ const CustomerPoints = () => {
                   }
                 >
                   <div className="grid grid-cols-1">
-                    {List.map((item, index) => (
+                    {List.map((item) => (
                       <div
                         className="flex flex-col p-4 border-b last:border-0"
-                        key={index}
+                        key={item.ID}
                       >
                         <div className="flex justify-between mb-2.5">
                           <div
@@ -174,7 +201,7 @@ const CustomerPoints = () => {
                               fontWeight: "500",
                             }}
                           >
-                            Điểm : {item.Point}
+                            Điểm <span className={item.Point < 0 ? "text-danger" : "text-success"}>{item.Point}</span>
                           </div>
                         </div>
                         <div className="text-gray-600">

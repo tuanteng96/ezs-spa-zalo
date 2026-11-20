@@ -35,6 +35,11 @@ const AuthAPI = {
     changePointVoucher(body) {
       return http.post(`/api/v4/gift@swap`, JSON.stringify(body));
     },
+    getListVoucherExchange({ Token, data }) {
+      return http.post("/apia/khach-hang/ma-giam-gia", JSON.stringify(data), {
+        headers: { Authorization: `Bearer ${Token}` },
+      });
+    },
     getAffs({data, Token = ''}) {
       return http.post(
         `/api/v3/member23@MemberByAffMemberID`, JSON.stringify(data), {

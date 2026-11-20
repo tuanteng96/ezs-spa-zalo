@@ -1,21 +1,23 @@
 
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useInfiniteQuery, useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { NavLink } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 import PullToRefresh from "react-simple-pull-to-refresh";
 import { openWebview } from "zmp-sdk";
-import { Button, Icon, Page, Sheet, Text, useNavigate, useSnackbar } from "zmp-ui";
+import { Button, Modal, Page, Sheet, Text, useNavigate, useSnackbar } from "zmp-ui";
 import AuthAPI from "../../api/auth.api";
 import { useLayout } from "../../layout/LayoutProvider";
 import { toAbsolutePath, toAbsolutePathAPI } from "../../utils/assetPath";
-import { formatArray } from "../../utils/formatArray";
 
 import { Fancybox } from "@fancyapps/ui/dist/fancybox/";
 
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { formatString } from "../../utils/formatString";
+import RewardStar from "./components/RewardStar";
+import { getPointHistory, rewardNumber, useStarExchange } from "./rewardHistory";
 
 const checkImageProduct = (src) => {
   if (src === "null.gif" || src === "") {
@@ -25,61 +27,70 @@ const checkImageProduct = (src) => {
   }
 };
 
-const PickerViewPoint = ({ children, data, disabled }) => {
-  let [visible, setVisible] = useState(false)
+const serializeVoucherIds = (value) => {
+  if (Array.isArray(value)) return value.map((item) => item.ID).join(",");
+  return typeof value === "string" ? value : "";
+};
+
+const PickerViewPoint = ({ children, data, unit, unavailable, insufficient, onRedeemed }) => {
+  const [visible, setVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const submitting = useRef(false);
 
   const { Auth } = useLayout();
   const { openSnackbar } = useSnackbar();
 
   const queryClient = useQueryClient();
 
-  const close = () => setVisible(false)
+  const close = () => {
+    if (!submitting.current) setVisible(false);
+  };
 
   const changeMutation = useMutation({
+    mutationKey: ["RedeemReward"],
     mutationFn: async (body) => {
-      let rs = await AuthAPI.changePointVoucher(body);
-      await queryClient.invalidateQueries({ queryKey: ["MemberCheckGroups"] });
-      await queryClient.invalidateQueries({ queryKey: ["Authen"] });
-
-      return rs
+      const { data } = await AuthAPI.changePointVoucher(body);
+      if (!data?.mp) {
+        throw new Error(data?.error || `Không đủ ${unit} để đổi quà`);
+      }
+    },
+    onSuccess: async () => {
+      setConfirmVisible(false);
+      setVisible(false);
+      onRedeemed();
+      await Promise.all(
+        ["PointsVoucher", "Points", "RewardPointBalance", "StarExchange", "VouchersList", "MemberCheckGroups", "Authen"]
+          .map((key) => queryClient.invalidateQueries({ queryKey: [key] }))
+      );
+    },
+    onError: (error) => {
+      setConfirmVisible(false);
+      openSnackbar({
+        text: error.response?.data?.error || (error.isAxiosError
+          ? "Đổi quà không thành công. Vui lòng thử lại."
+          : error.message),
+        type: "error",
+      });
+    },
+    onSettled: () => {
+      submitting.current = false;
     },
   });
 
   const onChange = () => {
-    let dataPost = {
+    if (unavailable || insufficient || submitting.current) return;
+    submitting.current = true;
+    changeMutation.mutate({
       MemberID: Auth?.ID,
-      GiftID: data?.ID,
-      Voucher: null,
-    };
-    if (data?.Data) {
-      dataPost.Voucher = {
+      GiftID: data.ID,
+      Voucher: data.Data ? {
         ...data.Data,
-        ForCates: data.Data?.ForCates
-          ? data.Data?.ForCates.map((x) => x.ID).toString()
-          : "",
-        ForProds: data.Data?.ForProds
-          ? data.Data?.ForProds.map((x) => x.ID).toString()
-          : "",
-      };
-    }
-    changeMutation.mutate(dataPost, {
-      onSuccess: (rs) => {
-
-        if (rs?.data?.mp) {
-          openSnackbar({
-            text: "Đổi voucher thành công",
-            type: "success",
-          });
-          close()
-        } else {
-          openSnackbar({
-            text: rs?.data?.error || "Đổi voucher không thành công",
-            type: "error",
-          });
-        }
-      }
-    })
-  }
+        Desc: `Đổi ${unit} (${data.Point || 0})`,
+        ForCates: serializeVoucherIds(data.Data.ForCates),
+        ForProds: serializeVoucherIds(data.Data.ForProds),
+      } : null,
+    });
+  };
 
   return <>
     {children({
@@ -87,15 +98,16 @@ const PickerViewPoint = ({ children, data, disabled }) => {
       close: close,
     })}
     {createPortal(
-      <Sheet visible={visible} onClose={() => setVisible(false)} height="90%">
+      <Sheet visible={visible} onClose={close} height="90%" unmountOnClose>
         <div
           className="flex flex-col h-[calc(100%-24px)]"
         >
-          <div className="p-4 grow overflow-auto">
+          <div className="p-4 grow overflow-auto overscroll-contain">
             <div>
-              <img
-                className="w-full rounded"
-                src={checkImageProduct(data?.Photo)}
+              <button
+                type="button"
+                aria-label="Phóng to ảnh quà"
+                className="block w-full"
                 onClick={() => {
                   Fancybox.show(
                     [
@@ -138,7 +150,9 @@ const PickerViewPoint = ({ children, data, disabled }) => {
                     }
                   );
                 }}
-              />
+              >
+                <img className="w-full rounded" src={checkImageProduct(data?.Photo)} alt="" />
+              </button>
             </div>
             <div className="pt-4">
               <div
@@ -156,7 +170,7 @@ const PickerViewPoint = ({ children, data, disabled }) => {
                   {data?.Title}
                 </div>
                 <div className="text-danger font-semibold">
-                  {data?.Point} điểm
+                  {data?.Point} {unit === "sao" ? <RewardStar /> : unit}
                 </div>
               </div>
               <div
@@ -184,21 +198,38 @@ const PickerViewPoint = ({ children, data, disabled }) => {
             </div>
           </div>
           <div className="p-4 border-t flex gap-3">
-            <div className="cursor-pointer w-12 flex items-center justify-center border rounded-lg" onClick={close}>
-              <Icon icon="zi-chevron-left" />
-            </div>
+            <button type="button" aria-label="Đóng chi tiết quà" className="w-12 flex items-center justify-center border rounded-lg" onClick={close}>
+              <ChevronLeftIcon className="w-5 h-5" aria-hidden="true" />
+            </button>
             <Button
-              onClick={onChange}
+              onClick={() => setConfirmVisible(true)}
               fullWidth
               className="!rounded-lg !bg-app disabled:!text-white disabled:opacity-60 flex-1"
-              disabled={disabled || changeMutation.isLoading}
+              disabled={unavailable || insufficient || changeMutation.isLoading}
               loading={changeMutation.isLoading}
             >
-              {disabled ? "Không đủ điểm" : "Đổi Quà"}
+              {insufficient ? `Không đủ ${unit}` : "Đổi quà"}
             </Button>
           </div>
         </div>
       </Sheet>,
+      document.body,
+    )}
+    {confirmVisible && createPortal(
+      <Modal
+        visible
+        zIndex={1100}
+        maskStyle={{ zIndex: 1099 }}
+        title="Xác nhận đổi quà"
+        description={`Bạn muốn đổi voucher “${data.Title}” với ${data.Point} ${unit}?`}
+        onClose={() => {
+          if (!submitting.current) setConfirmVisible(false);
+        }}
+        actions={[
+          { text: "Hủy", close: true, disabled: changeMutation.isLoading },
+          { text: "Đổi quà", highLight: true, onClick: onChange, loading: changeMutation.isLoading, disabled: unavailable || insufficient || changeMutation.isLoading },
+        ]}
+      />,
       document.body,
     )}
   </>
@@ -207,55 +238,100 @@ const PickerViewPoint = ({ children, data, disabled }) => {
 const CustomerPointsChange = () => {
   const navigate = useNavigate();
   const { Auth, AccessToken } = useLayout();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isStars = searchParams.get("Sao") === "1";
+  const unit = isStars ? "sao" : "điểm";
+  const [redeemed, setRedeemed] = useState(false);
+  const isRedeeming = useIsMutating({ mutationKey: ["RedeemReward"] }) > 0;
+  const MemberID = Auth?.ID;
+  const enabled = Number(MemberID) > 0 && !!AccessToken;
 
-  const elRoot = useRef();
-
-  const { data, fetchNextPage, isLoading, hasNextPage, isFetching, refetch } =
+  const { data, fetchNextPage, isLoading, isError, hasNextPage, isFetching, refetch } =
     useInfiniteQuery({
-      queryKey: ["PointsVoucher", { AccessToken }],
+      queryKey: ["PointsVoucher", MemberID, AccessToken, isStars],
       queryFn: async ({ pageParam = 1 }) => {
         const { data } = await AuthAPI.getPointsVoucher({
           Token: AccessToken,
           Pi: pageParam,
           Ps: 20,
+          Type: isStars ? "1" : "",
         });
-
-        return data || [];
+        if (data?.error) throw new Error(data.error);
+        return data ?? {};
       },
-      getNextPageParam: (lastPage) => {
-        return lastPage.pi === lastPage.pcount || !lastPage.pcount
-          ? undefined
-          : lastPage.pi + 1;
+      getNextPageParam: (lastPage, pages) => {
+        const page = Number(lastPage.pi) || pages.length;
+        const count = lastPage.pcount ?? Math.ceil(Number(lastPage.total) / 20);
+        return page < count ? page + 1 : undefined;
       },
-      enabled: Number(Auth?.ID) > -1,
+      enabled,
     });
 
-  const List = formatArray.useInfiniteQuery(data?.pages, "items");
+  const points = useQuery({
+    queryKey: ["RewardPointBalance", MemberID, AccessToken],
+    queryFn: () => getPointHistory({ MemberID, Token: AccessToken }),
+    select: (data) => data.TotalPoint ?? null,
+    enabled: enabled && !isStars,
+  });
+  const stars = useStarExchange({ MemberID, Token: AccessToken, enabled: enabled && isStars });
+  const balance = isStars ? stars : {
+    total: points.data,
+    isLoading: points.isLoading,
+    isError: points.isError,
+    refetch: points.refetch,
+  };
+  const total = balance.total;
+  const refresh = () => Promise.all([refetch(), balance.refetch()]);
+  const items = data?.pages.flatMap((page) => page.items ?? []) ?? [];
+  const List = [...new Map(items.map((item) => [item.ID, item])).values()];
 
   return (
     <Page className="page !pb-safe-bottom" hideScrollbar>
       <div className="navbar fixed top-0 left-0 min-w-[100vw] max-w-[100vw] z-[999] bg-white border-b">
-        <div className="w-2/3 relative flex items-center h-full pl-10">
-          <div
+        <div className="relative flex items-center h-full pl-10 pr-4">
+          <button
+            type="button"
+            aria-label="Quay lại"
             className="absolute left-0 w-10 h-full flex justify-center items-center cursor-pointer"
             onClick={() => navigate(-1)}
           >
-            <Icon icon="zi-chevron-left-header" className="text-app" />
-          </div>
-          <Text.Title className="text-app">
-            Tích điểm đổi quà
-            {/* {data?.pages && data.pages.length > 0 && data.pages[0].TotalPoint > 0 && (
-              <span className="pl-1">({data.pages && data.pages.length > 0 && data.pages[0].TotalPoint} điểm)</span>
-            )} */}
-          </Text.Title>
+            <ChevronLeftIcon className="w-5 h-5" aria-hidden="true" />
+          </button>
+          <Text.Title className="text-gray-900">Tích điểm đổi quà</Text.Title>
         </div>
       </div>
-      <div className="h-full">
-        <div className="h-[48px] bg-white flex px-4 justify-between items-center border-b">
-          <div>Tổng <span className="text-danger font-semibold">{Auth?.Present?.points}</span> điểm</div>
-          <NavLink className="text-primary" to="/user/customer-points">Xem chi tiết</NavLink>
+      <div className="flex flex-col h-full">
+        <div className="grid grid-cols-2 shrink-0 bg-white border-b" role="group" aria-label="Loại quà">
+          {["điểm", "sao"].map((option) => (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={unit === option}
+              className={`min-h-[44px] px-2 border-b-2 text-sm font-medium ${unit === option ? "border-app text-gray-900" : "border-transparent text-gray-700"}`}
+              onClick={() => setSearchParams((current) => {
+                const next = new URLSearchParams(current);
+                if (option === "sao") next.set("Sao", "1");
+                else next.delete("Sao");
+                return next;
+              }, { replace: true })}
+            >
+              Tích {option} đổi quà
+            </button>
+          ))}
         </div>
-        <div className="h-[calc(100%-48px)]">
+        <div className="min-h-[48px] shrink-0 bg-white flex flex-wrap gap-x-3 px-4 py-2 justify-between items-center border-b">
+          <div aria-live="polite">
+            Tổng <span className="font-semibold tabular-nums">{balance.isLoading ? "…" : total == null ? "—" : rewardNumber.format(total)}</span> {isStars ? <RewardStar /> : unit}
+          </div>
+          <NavLink className="text-blue-700" to={`/user/customer-points${isStars ? "?Sao=1" : ""}`}>Xem lịch sử</NavLink>
+        </div>
+        {balance.isError && (
+          <div className="shrink-0 bg-white px-4 py-2 border-b" role="status">
+            Không tải được số dư.{" "}
+            <button type="button" onClick={balance.refetch} className="text-primary underline">Thử lại</button>
+          </div>
+        )}
+        <div className="min-h-0 flex-1">
           {isLoading && (
             <>
               {Array(4)
@@ -277,9 +353,15 @@ const CustomerPointsChange = () => {
             </>
           )}
           {!isLoading && (
-            <PullToRefresh className="ezs-ptr" onRefresh={refetch}>
-              <div className="h-full overflow-auto no-scrollbar" id="scrollablePoints" ref={elRoot}>
-                {(!List || List.length === 0) && (
+            <PullToRefresh key={unit} className="ezs-ptr" onRefresh={refresh}>
+              <div className="h-full overflow-auto no-scrollbar" id="scrollablePoints">
+                {isError && (
+                  <div className="px-4 py-8 text-center" role="status">
+                    Không tải được danh sách quà.{" "}
+                    <button type="button" className="text-primary underline" onClick={() => refetch()}>Thử lại</button>
+                  </div>
+                )}
+                {!isError && List.length === 0 && (
                   <div className="flex flex-col items-center px-5 py-12">
                     <svg
                       className="w-16 mb-5"
@@ -311,18 +393,20 @@ const CustomerPointsChange = () => {
                       </g>
                     </svg>
                     <div className="font-bold text-lg mb-px">
-                      "Hổng" có dữ liệu nào ?
+                      Chưa có quà để đổi
                     </div>
                     <div className="text-center">
-                      Không tìm thấy dữ liệu tích điểm của bạn ...
+                      Chưa có quà đổi bằng {unit}.
                     </div>
                   </div>
                 )}
                 {List && List.length > 0 && (
                   <InfiniteScroll
                     dataLength={List.length}
-                    next={fetchNextPage}
-                    hasMore={hasNextPage}
+                    next={() => {
+                      if (!isFetching) fetchNextPage();
+                    }}
+                    hasMore={!!hasNextPage && !isError}
                     loader={
                       <div className="px-3 py-3.5 rounded-sm cursor-pointer bg-white border-b">
                         <div className="h-3.5 bg-gray-200 rounded-full w-full animate-pulse"></div>
@@ -330,7 +414,7 @@ const CustomerPointsChange = () => {
                       </div>
                     }
                     scrollableTarget="scrollablePoints"
-                    refreshFunction={refetch}
+                    refreshFunction={refresh}
                     releaseToRefreshContent={
                       <div className="flex items-center justify-center">
                         <div className="lds-ellipsis">
@@ -355,18 +439,18 @@ const CustomerPointsChange = () => {
                     }
                   >
                     <div className="grid grid-cols-2 gap-4 p-4">
-                      {List.map((item, index) => (
+                      {List.map((item) => (
                         <PickerViewPoint
-                          key={index}
+                          key={item.ID}
                           data={item}
-                          disabled={item.Point > Auth?.Present?.points}
-                          refetch={refetch}
+                          unit={unit}
+                          unavailable={total == null || balance.isError || isRedeeming}
+                          insufficient={total != null && Number(item.Point) > Number(total)}
+                          onRedeemed={() => setRedeemed(true)}
                         >
                           {({ open }) => (
                             <div
-                              className="bg-white flex flex-col rounded-lg"
-                              key={index}
-                              onClick={open}
+                              className="relative bg-white flex flex-col rounded-lg"
                             >
                               <div>
                                 <div
@@ -440,7 +524,7 @@ const CustomerPointsChange = () => {
                                     {item.Title}
                                   </div>
                                   <div className="text-danger font-medium mb-1">
-                                    {item.Point} điểm
+                                    {item.Point} {isStars ? <RewardStar /> : unit}
                                   </div>
                                   <div
                                     className="text-muted"
@@ -458,11 +542,14 @@ const CustomerPointsChange = () => {
                                     {item.Desc}
                                   </div>
                                 </div>
-                                <div
-                                  className="bg-primary text-center text-white mt-2.5 py-1 rounded"
+                                <button
+                                  type="button"
+                                  aria-label={`Chi tiết ${item.Title}`}
+                                  onClick={open}
+                                  className="bg-app text-center text-white mt-2.5 min-h-[40px] rounded after:absolute after:inset-0"
                                 >
                                   Chi tiết
-                                </div>
+                                </button>
                               </div>
                             </div>
                           )}
@@ -477,6 +564,24 @@ const CustomerPointsChange = () => {
           )}
         </div>
       </div>
+      {createPortal(<Modal
+        visible={redeemed}
+        zIndex={1100}
+        maskStyle={{ zIndex: 1099 }}
+        title="Đổi quà thành công"
+        onClose={() => setRedeemed(false)}
+        actions={[
+          { text: "Đóng", close: true },
+          {
+            text: "Quản lý Voucher",
+            highLight: true,
+            onClick: () => {
+              setRedeemed(false);
+              navigate("/user/customer-voucher");
+            },
+          },
+        ]}
+      />, document.body)}
     </Page>
   );
 };

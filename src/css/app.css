@@ -1,8 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Be+Vietnam+Pro:wght@100;200;300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 html,
 body {
-  font-family: "Be Vietnam Pro", sans-serif;
+  @apply font-sans;
+}
+
+body .fancybox__container {
+  --f-toolbar-font: theme("fontFamily.sans");
 }
 
 .content-full a {

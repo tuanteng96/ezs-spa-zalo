@@ -19,10 +19,12 @@ const BookingAPI = {
     StatusBook,
     StatusAtHome,
     Tags = "",
-  }) {
-    return http.get(
-      `/api/v3/MBookApp?cmd=getbooks&memberid=${MemberID}&from=${From}&to=${To}&stockid=${StockID}&status=${Status}&UserServiceIDs=${UserServiceIDs}&StatusMember=${StatusMember}&StatusBook=${StatusBook}&StatusAtHome=${StatusAtHome}&Tags=${Tags}`
-    );
+  }, Token) {
+    const url = `/api/v3/MBookApp?cmd=getbooks&memberid=${MemberID}&from=${From}&to=${To}&stockid=${StockID}&status=${Status}&UserServiceIDs=${UserServiceIDs}&StatusMember=${StatusMember}&StatusBook=${StatusBook}&StatusAtHome=${StatusAtHome}&Tags=${Tags}`;
+    // The booking cache uses fetch without forwarding authorization headers.
+    return Token
+      ? http.request({ method: "get", url, headers: { Authorization: `Bearer ${Token}` } })
+      : http.get(url);
   },
   getListStaff(stockid) {
     return http.get(`/api/gl/select2?cmd=user&includeRoles=1&includeSource=1&crstockid=${stockid}&roles=DV`)
