@@ -59,7 +59,8 @@ const SheetRegistration = ({ open, onClose }) => {
             FullName: userInfo?.name || "Khách vãng lai",
             MobilePhone: data?.data?.number ? data?.data?.number?.replace(/^.{2}/g, "0") : "0000000000",
             ByStockID: CurrentStocks?.ID || 0,
-            Gender: -1
+            Gender: -1,
+            Source: "Zalo App"
           },
         };
         result = await MemberAPI.addZalo(addMember);
